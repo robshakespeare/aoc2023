@@ -1,4 +1,4 @@
-#addin nuget:?package=Cake.FileHelpers&version=5.0.0
+#addin nuget:?package=Cake.FileHelpers&version=6.1.3
 
 var target = Argument<string>("target", "CreateAllDays");
 var day = Argument<string>("day", "");
