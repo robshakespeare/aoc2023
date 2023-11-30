@@ -3,16 +3,9 @@ using static Crayon.Output;
 
 namespace AoC;
 
-public class TimingBlock : IDisposable
+public sealed class TimingBlock(string name) : IDisposable
 {
-    private readonly string _name;
-    private readonly Stopwatch _stopwatch;
-
-    public TimingBlock(string name)
-    {
-        _name = name;
-        _stopwatch = Stopwatch.StartNew();
-    }
+    private readonly Stopwatch _stopwatch = Stopwatch.StartNew();
 
     public TimeSpan Stop()
     {
@@ -24,7 +17,7 @@ public class TimingBlock : IDisposable
     {
         Stop();
 
-        Console.WriteLine(Rgb(118, 118, 118).Text($"[{_name}] time taken (seconds): {_stopwatch.Elapsed.TotalSeconds:0.000000}"));
+        Console.WriteLine(Rgb(118, 118, 118).Text($"[{name}] time taken (seconds): {_stopwatch.Elapsed.TotalSeconds:0.000000}"));
         Console.WriteLine();
     }
 }
