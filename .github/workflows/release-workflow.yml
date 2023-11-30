@@ -1,0 +1,32 @@
+name: App releases
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    name: Publish and release
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 8.0.100
+    - name: Publish Windows CLI
+      run: dotnet publish AoC.CLI -c Release -r win-x64 --self-contained -p:PublishSingleFile=true
+    - name: Get most recent day name
+      id: vars
+      run: echo "MostRecentDayTitle=$(dotnet run --project AoC.CLI --most-recent-day-title)" >> $GITHUB_OUTPUT
+    - uses: "marvinpinto/action-automatic-releases@latest"
+      name: Create GitHub release
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "v${{ github.run_number }}"
+        prerelease: false
+        title: "v${{ github.run_number }} (${{ steps.vars.outputs.MostRecentDayTitle }})"
+        files: |
+          AoC.CLI/bin/Release/net8.0/win-x64/publish/AoC.CLI.exe
