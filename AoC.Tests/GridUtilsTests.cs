@@ -11,8 +11,7 @@ public class GridUtilsTests
         [Test]
         public void CenterAndDirectionsIncludingDiagonal_ShouldReturnsExpectedValuesInExpectedOrder()
         {
-            GridUtils.CenterAndDirectionsIncludingDiagonal.Should().BeEquivalentTo(new[]
-            {
+            GridUtils.CenterAndDirectionsIncludingDiagonal.Should().BeEquivalentTo([
                 new Vector2(-1, -1),
                 new Vector2(0, -1),
                 new Vector2(1, -1),
@@ -24,7 +23,7 @@ public class GridUtilsTests
                 new Vector2(-1, 1),
                 new Vector2(0, 1),
                 new Vector2(1, 1)
-            }, WithStrictOrdering);
+            ], WithStrictOrdering);
         }
     }
 
@@ -44,11 +43,10 @@ public class GridUtilsTests
 
             // ASSERT
             result.Should().BeEquivalentTo(
-                new[]
-                {
+                [
                     "31",
                     "42"
-                },
+                ],
                 WithStrictOrdering);
         }
 
@@ -67,12 +65,11 @@ public class GridUtilsTests
 
             // ASSERT
             result.Should().BeEquivalentTo(
-                new[]
-                {
+                [
                     "123",
                     "456",
                     "789"
-                },
+                ],
                 WithStrictOrdering);
         }
 
@@ -91,12 +88,11 @@ public class GridUtilsTests
 
             // ASSERT
             result.Should().BeEquivalentTo(
-                new[]
-                {
+                [
                     "741",
                     "852",
                     "963"
-                },
+                ],
                 WithStrictOrdering);
         }
 
@@ -115,12 +111,11 @@ public class GridUtilsTests
 
             // ASSERT
             result.Should().BeEquivalentTo(
-                new[]
-                {
+                [
                     "987",
                     "654",
                     "321"
-                },
+                ],
                 WithStrictOrdering);
         }
 
@@ -139,12 +134,11 @@ public class GridUtilsTests
 
             // ASSERT
             result.Should().BeEquivalentTo(
-                new[]
-                {
+                [
                     "369",
                     "258",
                     "147"
-                },
+                ],
                 WithStrictOrdering);
         }
 
@@ -164,13 +158,12 @@ public class GridUtilsTests
 
             // ASSERT
             result.Should().BeEquivalentTo(
-                new[]
-                {
+                [
                     "•   ",
                     "••  ",
                     "••• ",
                     "•  •"
-                },
+                ],
                 WithStrictOrdering);
         }
 
@@ -189,8 +182,7 @@ public class GridUtilsTests
 
             // ASSERT
             result.Should().BeEquivalentTo(
-                new[]
-                {
+                [
                     " # ",
                     "#  ",
                     "   ",
@@ -211,7 +203,7 @@ public class GridUtilsTests
                     " # ",
                     " ##",
                     " # "
-                },
+                ],
                 WithStrictOrdering);
         }
     }
@@ -232,11 +224,10 @@ public class GridUtilsTests
 
             // ASSERT
             result.Should().BeEquivalentTo(
-                new[]
-                {
+                [
                     "21",
                     "43"
-                },
+                ],
                 WithStrictOrdering);
         }
 
@@ -254,11 +245,10 @@ public class GridUtilsTests
 
             // ASSERT
             result.Should().BeEquivalentTo(
-                new[]
-                {
+                [
                     "12",
                     "34"
-                },
+                ],
                 WithStrictOrdering);
         }
 
@@ -277,12 +267,11 @@ public class GridUtilsTests
 
             // ASSERT
             result.Should().BeEquivalentTo(
-                new[]
-                {
+                [
                     " #  #  #  #  #  #   ",
                     "#    ##    ##    ###",
                     "                  # "
-                },
+                ],
                 WithStrictOrdering);
         }
 
@@ -301,12 +290,11 @@ public class GridUtilsTests
 
             // ASSERT
             result.Should().BeEquivalentTo(
-                new[]
-                {
+                [
                     " #                  ",
                     "###    ##    ##    #",
                     "   #  #  #  #  #  # "
-                },
+                ],
                 WithStrictOrdering);
         }
 
@@ -325,12 +313,11 @@ public class GridUtilsTests
 
             // ASSERT
             result.Should().BeEquivalentTo(
-                new[]
-                {
+                [
                     "   #  #  #  #  #  # ",
                     "###    ##    ##    #",
                     " #                  "
-                },
+                ],
                 WithStrictOrdering);
         }
     }
@@ -341,22 +328,21 @@ public class GridUtilsTests
         public void ToStringGrid_DoesTranslateGridThatStartsWithNegativeBounds()
         {
             (Vector2 pos, char chr)[] input =
-            {
+            [
                 (new Vector2(-1, -1), 'A'),
                 (new Vector2(1, 1), 'B')
-            };
+            ];
 
             // ACT
             var result = input.ToStringGrid(x => x.pos, x => x.chr, ' ');
 
             // ASSERT
             result.Should().BeEquivalentTo(
-                new[]
-                {
+                [
                     "A  ",
                     "   ",
                     "  B"
-                },
+                ],
                 WithStrictOrdering);
         }
 
@@ -364,22 +350,21 @@ public class GridUtilsTests
         public void ToStringGrid_DoesTranslateGridThatStartsWithPositiveBounds()
         {
             (Vector2 pos, char chr)[] input =
-            {
+            [
                 (new Vector2(10, 10), 'A'),
                 (new Vector2(12, 12), 'B')
-            };
+            ];
 
             // ACT
             var result = input.ToStringGrid(x => x.pos, x => x.chr, ' ');
 
             // ASSERT
             result.Should().BeEquivalentTo(
-                new[]
-                {
+                [
                     "A  ",
                     "   ",
                     "  B"
-                },
+                ],
                 WithStrictOrdering);
         }
 
@@ -387,23 +372,22 @@ public class GridUtilsTests
         public void ToStringGrid_DoesIgnorePreviousDuplicateItemsInTheSamePosition()
         {
             (Vector2 pos, char chr)[] input =
-            {
+            [
                 (new Vector2(-1, -1), 'A'),
                 (new Vector2(1, 1), 'B'),
                 (new Vector2(1, 1), 'C')
-            };
+            ];
 
             // ACT
             var result = input.ToStringGrid(x => x.pos, x => x.chr, ' ');
 
             // ASSERT
             result.Should().BeEquivalentTo(
-                new[]
-                {
+                [
                     "A  ",
                     "   ",
                     "  C"
-                },
+                ],
                 WithStrictOrdering);
         }
 
@@ -411,25 +395,24 @@ public class GridUtilsTests
         public void ToStringGrid_DoesCreateLargeGrid()
         {
             (Vector2 pos, char chr)[] input =
-            {
+            [
                 (new Vector2(1, 1), '0'),
                 (new Vector2(1, 2), '1'),
                 (new Vector2(5, 5), '5')
-            };
+            ];
 
             // ACT
             var result = input.ToStringGrid(x => x.pos, x => x.chr, '-');
 
             // ASSERT
             result.Should().BeEquivalentTo(
-                new[]
-                {
+                [
                     "0----",
                     "1----",
                     "-----",
                     "-----",
                     "----5"
-                },
+                ],
                 WithStrictOrdering);
         }
 
@@ -437,21 +420,20 @@ public class GridUtilsTests
         public void ToStringGrid_DoesCreateRow()
         {
             (Vector2 pos, char chr)[] input =
-            {
+            [
                 (new Vector2(0, 0), '0'),
                 (new Vector2(1, 0), '1'),
                 (new Vector2(5, 0), '5')
-            };
+            ];
 
             // ACT
             var result = input.ToStringGrid(x => x.pos, x => x.chr, '-');
 
             // ASSERT
             result.Should().BeEquivalentTo(
-                new[]
-                {
+                [
                     "01---5"
-                },
+                ],
                 WithStrictOrdering);
         }
 
@@ -459,26 +441,25 @@ public class GridUtilsTests
         public void ToStringGrid_DoesCreateColumn()
         {
             (Vector2 pos, char chr)[] input =
-            {
+            [
                 (new Vector2(0, 0), 'a'),
                 (new Vector2(0, 1), 'b'),
                 (new Vector2(0, 5), 'c')
-            };
+            ];
 
             // ACT
             var result = input.ToStringGrid(x => x.pos, x => x.chr, '#');
 
             // ASSERT
             result.Should().BeEquivalentTo(
-                new[]
-                {
+                [
                     "a",
                     "b",
                     "#",
                     "#",
                     "#",
                     "c"
-                },
+                ],
                 WithStrictOrdering);
         }
     }
@@ -500,10 +481,10 @@ public class GridUtilsTests
 
             // ASSERT
             result.Should().BeEquivalentTo(
-                new[]
+                new Cell[][]
                 {
-                    new Cell[] {new('a', new(0, 0)), new('b', new(1, 0)), new('c', new(2, 0))},
-                    new Cell[] {new('x', new(0, 1)), new('y', new(1, 1)), new('z', new(2, 1))}
+                    [new('a', new(0, 0)), new('b', new(1, 0)), new('c', new(2, 0))],
+                    [new('x', new(0, 1)), new('y', new(1, 1)), new('z', new(2, 1))]
                 },
                 opts => opts.WithStrictOrdering());
         }

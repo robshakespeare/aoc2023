@@ -47,7 +47,7 @@ public partial class SolverFactory : ISolverFactory
 
     public static ISolverFactory Instance => LazyInstance.Value;
 
-    private readonly Dictionary<string, Type> _solvers = new();
+    private readonly Dictionary<string, Type> _solvers = [];
 
     internal static int GetDefaultDay(DateTime date) =>
         date.Month switch

@@ -26,7 +26,7 @@ public class AStarSearch<TNode> where TNode : IAStarSearchNode, IEquatable<TNode
 
         public Path Append(TNode node) => new(Nodes.Append(node), node, TotalCost + node.Cost);
 
-        public static Path Begin(TNode begin) => new(new[] {begin}, begin, 0);
+        public static Path Begin(TNode begin) => new([begin], begin, 0);
     }
 
     public delegate long Heuristic(TNode child);
@@ -53,7 +53,7 @@ public class AStarSearch<TNode> where TNode : IAStarSearchNode, IEquatable<TNode
     /// <summary>
     /// Finds the shortest path between a start point and a goal.
     /// </summary>
-    public Path FindShortestPath(TNode start, TNode goal) => FindShortestPath(new[] {start}, goal);
+    public Path FindShortestPath(TNode start, TNode goal) => FindShortestPath([start], goal);
 
     /// <summary>
     /// Finds the shortest path between any number of start points and a goal.

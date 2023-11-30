@@ -42,8 +42,8 @@ public interface IVisualize : ISolverBase
 
 public static class SolverBaseExtensions
 {
-    private static readonly Dictionary<Type, int> DayNumberCache = new();
-    private static readonly Dictionary<Type, InputLoader> InputLoaderCache = new();
+    private static readonly Dictionary<Type, int> DayNumberCache = [];
+    private static readonly Dictionary<Type, InputLoader> InputLoaderCache = [];
 
     public static int GetDayNumber(this ISolverBase solver) =>
         DayNumberCache.GetOrAdd(solver.GetType(), () => SolverFactory.GetDayNumber(solver));

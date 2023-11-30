@@ -25,7 +25,7 @@ PrintTitle();
 
 bool resume;
 var defaultDay = SolverFactory.Instance.DefaultDay;
-var cliDays = new Queue<string>(args.Length > 0 ? args : new[] { "" });
+var cliDays = new Queue<string>(args.Length > 0 ? args : [""]);
 do
 {
     Console.WriteLine(Green($"Type day number, or blank for {defaultDay}, or 'list', or 'x' to exit"));

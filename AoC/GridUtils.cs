@@ -26,7 +26,7 @@ public static class GridUtils
     /// All directions in a 2D plane, including diagonal.
     /// </summary>
     public static readonly Vector2[] DirectionsIncludingDiagonal =
-    {
+    [
         new(-1, -1),
         North,
         new(1, -1),
@@ -37,18 +37,18 @@ public static class GridUtils
         new(-1, 1),
         South,
         new(1, 1)
-    };
+    ];
 
     /// <summary>
     /// None diagonal directions in a 2D plane (i.e. North, West, East, South).
     /// </summary>
-    public static readonly Vector2[] DirectionsExcludingDiagonal = {North, West, East, South};
+    public static readonly Vector2[] DirectionsExcludingDiagonal = [North, West, East, South];
 
     /// <summary>
     /// The center spot, i.e. (0, 0), and all directions in a 2D plane, including diagonal.
     /// </summary>
     public static readonly Vector2[] CenterAndDirectionsIncludingDiagonal =
-    {
+    [
         new(-1, -1),
         North,
         new(1, -1),
@@ -60,7 +60,7 @@ public static class GridUtils
         new(-1, 1),
         South,
         new(1, 1)
-    };
+    ];
 
     /// <summary>
     /// Rotates the specified grid around its middle point.
