@@ -5,19 +5,19 @@ namespace AoC;
 internal class InputLoader
 {
     private readonly Type _solverType;
-    private readonly Lazy<PuzzleInput> _part1;
-    private readonly Lazy<PuzzleInput> _part2;
+    private readonly Lazy<string> _part1;
+    private readonly Lazy<string> _part2;
 
-    public PuzzleInput PuzzleInputPart1 => _part1.Value;
+    public string PuzzleInputPart1 => _part1.Value;
 
-    public PuzzleInput PuzzleInputPart2 => _part2.Value;
+    public string PuzzleInputPart2 => _part2.Value;
 
     internal InputLoader(ISolverBase solver)
     {
         _solverType = solver.GetType();
         var dayNumber = solver.GetDayNumber();
-        _part1 = new Lazy<PuzzleInput>(() => LoadInput(GetInputResourceName($"input-day{dayNumber}.txt")));
-        _part2 = new Lazy<PuzzleInput>(() =>
+        _part1 = new Lazy<string>(() => LoadInput(GetInputResourceName($"input-day{dayNumber}.txt")));
+        _part2 = new Lazy<string>(() =>
         {
             var part2ResourceName = GetInputResourceName($"input-day{dayNumber}-part-2.txt");
 

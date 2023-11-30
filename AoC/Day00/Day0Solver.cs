@@ -16,7 +16,7 @@ public class Day0Solver : ISolver<long, string>
         }
     }
 
-    public long SolvePart1(PuzzleInput input)
+    public long SolvePart1(string input)
     {
         SimulateLongRunning(800); // Simulate a short-ish task, to test wait handling / spinners
 
@@ -25,7 +25,7 @@ public class Day0Solver : ISolver<long, string>
         return MathUtils.LeastCommonMultiple(numbers[0], numbers[1]);
     }
 
-    public string SolvePart2(PuzzleInput input)
+    public string SolvePart2(string input)
     {
         SimulateLongRunning(1700); // Simulate a long-ish task, to test wait handling / spinners
 

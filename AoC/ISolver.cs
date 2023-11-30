@@ -7,9 +7,9 @@ public interface ISolverBase
 {
     public string DayName { get; }
 
-    public object? SolvePart1AsObject(PuzzleInput input);
+    public object? SolvePart1AsObject(string input);
 
-    public object? SolvePart2AsObject(PuzzleInput input);
+    public object? SolvePart2AsObject(string input);
 }
 
 public interface ISolver : ISolver<long?, long?>
@@ -18,24 +18,24 @@ public interface ISolver : ISolver<long?, long?>
 
 public interface ISolvePart1<out TOutputPart1> : ISolverBase
 {
-    public TOutputPart1? SolvePart1(PuzzleInput input);
+    public TOutputPart1? SolvePart1(string input);
 }
 
 public interface ISolvePart2<out TOutputPart2> : ISolverBase
 {
-    public TOutputPart2? SolvePart2(PuzzleInput input);
+    public TOutputPart2? SolvePart2(string input);
 }
 
 public interface ISolver<out TOutputPart1, out TOutputPart2> : ISolvePart1<TOutputPart1>, ISolvePart2<TOutputPart2>
 {
-    object? ISolverBase.SolvePart1AsObject(PuzzleInput input) => SolvePart1(input);
+    object? ISolverBase.SolvePart1AsObject(string input) => SolvePart1(input);
 
-    object? ISolverBase.SolvePart2AsObject(PuzzleInput input) => SolvePart2(input);
+    object? ISolverBase.SolvePart2AsObject(string input) => SolvePart2(input);
 }
 
 public interface IVisualize : ISolverBase
 {
-    public IAsyncEnumerable<string> GetVisualizationAsync(PuzzleInput input);
+    public IAsyncEnumerable<string> GetVisualizationAsync(string input);
 
     public IAsyncEnumerable<string> GetVisualizationAsync() => GetVisualizationAsync(this.GetInputLoader().PuzzleInputPart2);
 }
@@ -90,7 +90,7 @@ public static class SolverBaseExtensions
         out Result result) =>
         SolvePartTimed(2, solver.GetInputLoader().PuzzleInputPart2, solver.SolvePart2AsObject, out result);
 
-    private static object? SolvePartTimed(int partNum, PuzzleInput input, Func<PuzzleInput, object?> solve, out Result result)
+    private static object? SolvePartTimed(int partNum, string input, Func<string, object?> solve, out Result result)
     {
         using var timer = new TimingBlock($"Part {partNum}");
         var solution = solve(input);
