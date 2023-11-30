@@ -1,7 +1,8 @@
+using System.Text;
 using AoC;
 using static Crayon.Output;
 
-Console.OutputEncoding = System.Text.Encoding.Unicode;
+Console.OutputEncoding = OperatingSystem.IsWindows() ? Encoding.Unicode : Encoding.UTF8;
 
 switch (args.ElementAtOrDefault(0))
 {
