@@ -5,32 +5,31 @@ public partial class SolverFactory : ISolverFactory
     private SolverFactory()
     {
         AddSolver<Day00.Day0Solver>();
-        // rs-todo:
-        // AddSolver<Day01.Day1Solver>();
-        // AddSolver<Day02.Day2Solver>();
-        // AddSolver<Day03.Day3Solver>();
-        // AddSolver<Day04.Day4Solver>();
-        // AddSolver<Day05.Day5Solver>();
-        // AddSolver<Day06.Day6Solver>();
-        // AddSolver<Day07.Day7Solver>();
-        // AddSolver<Day08.Day8Solver>();
-        // AddSolver<Day09.Day9Solver>();
-        // AddSolver<Day10.Day10Solver>();
-        // AddSolver<Day11.Day11Solver>();
-        // AddSolver<Day12.Day12Solver>();
-        // AddSolver<Day13.Day13Solver>();
-        // AddSolver<Day14.Day14Solver>();
-        // AddSolver<Day15.Day15Solver>();
-        // AddSolver<Day16.Day16Solver>();
-        // AddSolver<Day17.Day17Solver>();
-        // AddSolver<Day18.Day18Solver>();
-        // AddSolver<Day19.Day19Solver>();
-        // AddSolver<Day20.Day20Solver>();
-        // AddSolver<Day21.Day21Solver>();
-        // AddSolver<Day22.Day22Solver>();
-        // AddSolver<Day23.Day23Solver>();
-        // AddSolver<Day24.Day24Solver>();
-        // AddSolver<Day25.Day25Solver>();
+        AddSolver<Day01.Day1Solver>();
+        AddSolver<Day02.Day2Solver>();
+        AddSolver<Day03.Day3Solver>();
+        AddSolver<Day04.Day4Solver>();
+        AddSolver<Day05.Day5Solver>();
+        AddSolver<Day06.Day6Solver>();
+        AddSolver<Day07.Day7Solver>();
+        AddSolver<Day08.Day8Solver>();
+        AddSolver<Day09.Day9Solver>();
+        AddSolver<Day10.Day10Solver>();
+        AddSolver<Day11.Day11Solver>();
+        AddSolver<Day12.Day12Solver>();
+        AddSolver<Day13.Day13Solver>();
+        AddSolver<Day14.Day14Solver>();
+        AddSolver<Day15.Day15Solver>();
+        AddSolver<Day16.Day16Solver>();
+        AddSolver<Day17.Day17Solver>();
+        AddSolver<Day18.Day18Solver>();
+        AddSolver<Day19.Day19Solver>();
+        AddSolver<Day20.Day20Solver>();
+        AddSolver<Day21.Day21Solver>();
+        AddSolver<Day22.Day22Solver>();
+        AddSolver<Day23.Day23Solver>();
+        AddSolver<Day24.Day24Solver>();
+        AddSolver<Day25.Day25Solver>();
 
         Solvers = _solvers
             .Select(solver => solver.Key)
