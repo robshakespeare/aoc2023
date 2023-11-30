@@ -16,6 +16,8 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 8.0.100
+    - name: Publish Linux CLI
+      run: dotnet publish AoC.CLI -c Release -r linux-x64 --self-contained -p:PublishSingleFile=true
     - name: Publish Windows CLI
       run: dotnet publish AoC.CLI -c Release -r win-x64 --self-contained -p:PublishSingleFile=true
     - name: Get most recent day name
@@ -29,4 +31,5 @@ jobs:
         prerelease: false
         title: "v${{ github.run_number }} (${{ steps.vars.outputs.MostRecentDayTitle }})"
         files: |
+          AoC.CLI/bin/Release/net8.0/linux-x64/publish/AoC.CLI
           AoC.CLI/bin/Release/net8.0/win-x64/publish/AoC.CLI.exe

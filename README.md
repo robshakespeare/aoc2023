@@ -7,6 +7,7 @@ Rob Shakespeare's solutions to the Advent of Code 2023 challenges at https://adv
 
 
 ### Shakey's AoC 2023 Releases
+* [Linux CLI download](https://github.com/robshakespeare/aoc2023/releases/latest/download/AoC.CLI)
 * [Windows CLI download](https://github.com/robshakespeare/aoc2023/releases/latest/download/AoC.CLI.exe)
 
 
