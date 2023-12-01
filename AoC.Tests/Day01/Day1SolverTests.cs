@@ -58,6 +58,6 @@ public class Day1SolverTests
         // ASSERT
         part2Result.Should().BeGreaterThan(55330);
         part2Result.Should().BeLessThan(55345);
-        part2Result.Should().Be(null);
+        part2Result.Should().Be(55343);
     }
 }
