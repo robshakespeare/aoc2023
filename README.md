@@ -25,7 +25,7 @@ To run the console application:
 dotnet run --project AoC.CLI
 ```
 
-To pull the puzzle input (requires access to the key vault):
+To pull the puzzle input (requires access to the key vault containing valid AoC session token):
 
 ```
 dotnet run --project AoC.CLI --pull
