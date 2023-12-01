@@ -5,7 +5,7 @@ public static class MathUtils
     /// <summary>
     /// Finds the greatest common divisor (GCD) of the two specified numbers.
     /// </summary>
-    public static long GreatestCommonDivisor(long a, long b) => (long) BigInteger.GreatestCommonDivisor(a, b);
+    public static long GreatestCommonDivisor(long a, long b) => (long)BigInteger.GreatestCommonDivisor(a, b);
 
     /// <summary>
     /// Returns the least common multiple (LCM) of the two specified numbers.
@@ -59,7 +59,7 @@ public static class MathUtils
     /// <summary>
     /// Rounds the floating-point value to the nearest integer value, rounding midpoint values away from zero.
     /// </summary>
-    public static long Round(this float f) => (long) MathF.Round(f, MidpointRounding.AwayFromZero);
+    public static long Round(this float f) => (long)MathF.Round(f, MidpointRounding.AwayFromZero);
 
     /// <summary>
     /// Rounds the specified Vector2's X and Y components to the nearest integer value, rounding midpoint values away from zero.

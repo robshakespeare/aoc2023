@@ -157,7 +157,6 @@ public class Day0SolverTests
         // Assert time taken flow
         actualResults[0].Part1Result.Elapsed.Should().Be(null);
         actualResults[0].Part2Result.Elapsed.Should().Be(null);
-        
 
         actualResults[1].Part1Result.Elapsed.Should().BeGreaterThan(TimeSpan.Zero);
         actualResults[1].Part2Result.Elapsed.Should().Be(null);
