@@ -6,16 +6,19 @@ public class Day1SolverTests
 {
     private readonly Day1Solver _sut = new();
 
-    private const string ExampleInput = @"";
-
     [Test]
     public void Part1Example()
     {
         // ACT
-        var part1ExampleResult = _sut.SolvePart1(ExampleInput);
+        var part1ExampleResult = _sut.SolvePart1("""
+            1abc2
+            pqr3stu8vwx
+            a1b2c3d4e5f
+            treb7uchet
+            """);
 
         // ASSERT
-        part1ExampleResult.Should().Be(null);
+        part1ExampleResult.Should().Be(142);
     }
 
     [Test]
@@ -32,10 +35,18 @@ public class Day1SolverTests
     public void Part2Example()
     {
         // ACT
-        var part2ExampleResult = _sut.SolvePart2(ExampleInput);
+        var part2ExampleResult = _sut.SolvePart2("""
+            two1nine
+            eightwothree
+            abcone2threexyz
+            xtwone3four
+            4nineeightseven2
+            zoneight234
+            7pqrstsixteen
+            """);
 
         // ASSERT
-        part2ExampleResult.Should().Be(null);
+        part2ExampleResult.Should().Be(281);
     }
 
     [Test]
