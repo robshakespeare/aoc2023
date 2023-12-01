@@ -89,7 +89,8 @@ internal static class PullPuzzleInputCommand
             .WithCookie("session", sessionToken)
             .WithHeader("User-Agent", "Rob Shakespeare's AoC CLI https://github.com/robshakespeare")
             .GetStringAsync())
-            .ReplaceLineEndings();
+            .ReplaceLineEndings()
+            .TrimEnd();
 
         Console.WriteLine($"Puzzle input retrieved, length: {Green(puzzleInput.Length.ToString())}");
         return puzzleInput;
