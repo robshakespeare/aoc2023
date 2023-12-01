@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 namespace AoC.Day01;
 
 public class Day1Solver : ISolver
@@ -23,33 +25,25 @@ public class Day1Solver : ISolver
     //        var x => throw new InvalidOperationException("Unexpected token: " + x)
     //    });
 
-    public long? SolvePart1(string input) =>
-        input.ReadLines()
+    public long? SolvePart1(string input)
+    {
+        return input.ReadLines()
             .Select(line => long.Parse($"{GetDigit(line)}{GetDigit(line.Reverse())}"))
             .Sum();
 
-    public long? SolvePart2(string input) => SolvePart1(Normalize(input));
+        static long GetDigit(IEnumerable<char> line) => long.Parse($"{line.SkipWhile(c => !char.IsDigit(c)).First()}");
+    }
 
-    static long GetDigit(IEnumerable<char> line) => long.Parse($"{line.SkipWhile(c => !char.IsDigit(c)).First()}");
-
-    static string Normalize(string input)
+    public long? SolvePart2(string input)
     {
-        var numbersAsWords = "one|two|three|four|five|six|seven|eight|nine";
-        var numbersAsWordsRegex = new Regex(numbersAsWords, RegexOptions.Compiled);
-        var numbersAsWordsRevRegex = new Regex(Reverse(numbersAsWords), RegexOptions.Compiled);
+        var firstDigitRegex = new Regex("[0-9]|one|two|three|four|five|six|seven|eight|nine", RegexOptions.Compiled);
+        var lastDigitRegex = new Regex("[0-9]|one|two|three|four|five|six|seven|eight|nine", RegexOptions.Compiled | RegexOptions.RightToLeft);
 
-        return string.Join(Environment.NewLine, input.ReadLines().Select(NormalizeLine));
+        return input.ReadLines()
+            .Select(line => long.Parse($"{DigitMatchToString(firstDigitRegex.Match(line))}{DigitMatchToString(lastDigitRegex.Match(line))}"))
+            .Sum();
 
-        string NormalizeLine(string line)
-        {
-            line = numbersAsWordsRegex.Replace(line, match => Replacement(match.Value), 1);
-            line = Reverse(numbersAsWordsRevRegex.Replace(Reverse(line), match => Replacement(Reverse(match.Value)), 1));
-            return line;
-        }
-
-        static string Reverse(string value) => string.Concat(value.Reverse());
-
-        static string Replacement(string value) => value switch
+        static string DigitMatchToString(Match match) => match.Value switch
         {
             "one" => "1",
             "two" => "2",
@@ -60,7 +54,7 @@ public class Day1Solver : ISolver
             "seven" => "7",
             "eight" => "8",
             "nine" => "9",
-            var x => throw new InvalidOperationException("Unexpected token: " + x)
+            var digit => digit
         };
     }
 }
