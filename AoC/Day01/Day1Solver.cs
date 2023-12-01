@@ -4,19 +4,12 @@ public partial class Day1Solver : ISolver
 {
     public string DayName => "Trebuchet?!";
 
-    public long? SolvePart1(string input)
-    {
-        return input.ReadLines()
-            .Select(line => long.Parse($"{GetDigit(line)}{GetDigit(line.Reverse())}"))
-            .Sum();
-
-        static string GetDigit(IEnumerable<char> line) => $"{line.SkipWhile(c => !char.IsDigit(c)).First()}";
-    }
+    public long? SolvePart1(string input) => input.ReadLines().Select(line => long.Parse($"{line.First(char.IsDigit)}{line.Reverse().First(char.IsDigit)}")).Sum();
 
     public long? SolvePart2(string input)
     {
         return input.ReadLines()
-            .Select(line => long.Parse($"{GetDigit(line, FirstDigitRegex())}{GetDigit(line, LastDigitRegex())}"))
+            .Select(line => long.Parse(GetDigit(line, FirstDigitRegex()) + GetDigit(line, LastDigitRegex())))
             .Sum();
 
         static string GetDigit(string line, Regex digitRegex) => digitRegex.Match(line).Value switch
@@ -36,9 +29,9 @@ public partial class Day1Solver : ISolver
 
     const string DigitRegex = "[0-9]|one|two|three|four|five|six|seven|eight|nine";
 
-    [GeneratedRegex(DigitRegex, RegexOptions.Compiled)]
+    [GeneratedRegex(DigitRegex)]
     private static partial Regex FirstDigitRegex();
 
-    [GeneratedRegex(DigitRegex, RegexOptions.Compiled | RegexOptions.RightToLeft)]
+    [GeneratedRegex(DigitRegex, RegexOptions.RightToLeft)]
     private static partial Regex LastDigitRegex();
 }
