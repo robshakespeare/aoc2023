@@ -37,27 +37,27 @@ do
     switch (resume)
     {
         case true when dayNumber == "list":
-        {
-            PrintTitle();
-            Console.WriteLine(string.Join(
-                Environment.NewLine,
-                SolverFactory.Instance.Solvers.Where(x => !string.IsNullOrEmpty(x.DayName)).Select(x => $"Day {x.DayNumber}: {x.DayName}")));
-            break;
-        }
+            {
+                PrintTitle();
+                Console.WriteLine(string.Join(
+                    Environment.NewLine,
+                    SolverFactory.Instance.Solvers.Where(x => !string.IsNullOrEmpty(x.DayName)).Select(x => $"Day {x.DayNumber}: {x.DayName}")));
+                break;
+            }
         case true:
-        {
-            PrintTitle();
-            var solver = SolverFactory.Instance.TryCreateSolver(dayNumber);
-            if (solver != null)
             {
-                await solver.RunAsync();
-            }
-            else
-            {
-                Console.WriteLine(Red($"No solver for day '{Bright.Cyan(dayNumber)}'."));
-            }
+                PrintTitle();
+                var solver = SolverFactory.Instance.TryCreateSolver(dayNumber);
+                if (solver != null)
+                {
+                    await solver.RunAsync();
+                }
+                else
+                {
+                    Console.WriteLine(Red($"No solver for day '{Bright.Cyan(dayNumber)}'."));
+                }
 
-            break;
-        }
+                break;
+            }
     }
 } while (resume);

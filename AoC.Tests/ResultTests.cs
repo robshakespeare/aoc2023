@@ -11,8 +11,8 @@ public class ResultTests
         // ASSERT
         sut.Should().BeEquivalentTo(new
         {
-            Value = (object?) null,
-            Elapsed = (TimeSpan?) null,
+            Value = (object?)null,
+            Elapsed = (TimeSpan?)null,
             IsStarted = false,
             IsCompleted = false,
             IsRunning = false,
@@ -72,7 +72,7 @@ public class ResultTests
         // ASSERT
         sut.Should().BeEquivalentTo(new
         {
-            Value = (object?) null,
+            Value = (object?)null,
             Elapsed = TimeSpan.FromMilliseconds(18),
             IsStarted = true,
             IsCompleted = true,

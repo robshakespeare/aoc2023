@@ -205,12 +205,12 @@ public static class GridUtils
     /// </summary>
     public static T? SafeGet<T>(this IReadOnlyList<IReadOnlyList<T>> grid, Vector2 position) where T : class
     {
-        var y = (int) position.Y;
+        var y = (int)position.Y;
 
         if (y < 0 || y >= grid.Count)
             return null;
 
-        var x = (int) position.X;
+        var x = (int)position.X;
         var line = grid[y];
         return x < 0 || x >= line.Count ? null : line[x];
     }
@@ -220,21 +220,21 @@ public static class GridUtils
     /// NOTE: Throws exception if the position is out of the bounds of the grid, use <see cref="SafeGet{T}"/> if the position is not yet checked.
     /// </summary>
     /// <exception cref="IndexOutOfRangeException" />
-    public static T Get<T>(this IReadOnlyList<IReadOnlyList<T>> grid, Vector2 position) => grid[(int) position.Y][(int) position.X];
+    public static T Get<T>(this IReadOnlyList<IReadOnlyList<T>> grid, Vector2 position) => grid[(int)position.Y][(int)position.X];
 
     /// <summary>
     /// Gets the character from the string grid at the specified position.
     /// NOTE: Throws exception if the position is out of the bounds of the grid, use <see cref="TryGet"/> if the position is not yet checked.
     /// </summary>
     /// <exception cref="IndexOutOfRangeException" />
-    public static char Get(this IReadOnlyList<string> grid, Vector2 position) => grid[(int) position.Y][(int) position.X];
+    public static char Get(this IReadOnlyList<string> grid, Vector2 position) => grid[(int)position.Y][(int)position.X];
 
     /// <summary>
     /// Gets the character from the grid at the specified position and returns `true`, or returns `false` if that position is out of the bounds of the grid.
     /// </summary>
     public static bool TryGet(this IReadOnlyList<string> grid, Vector2 position, out char chr)
     {
-        var y = (int) position.Y;
+        var y = (int)position.Y;
 
         if (y < 0 || y >= grid.Count)
         {
@@ -242,7 +242,7 @@ public static class GridUtils
             return false;
         }
 
-        var x = (int) position.X;
+        var x = (int)position.X;
         var line = grid[y];
 
         if (x < 0 || x >= line.Length)
@@ -306,9 +306,9 @@ public static class GridUtils
         {
             var viewPosition = worldPosition + translateWorldToView;
             if (viewPosition.Y >= 0 && viewPosition.Y < grid.Length &&
-                viewPosition.X >= 0 && viewPosition.X < grid[(int) viewPosition.Y].Length)
+                viewPosition.X >= 0 && viewPosition.X < grid[(int)viewPosition.Y].Length)
             {
-                grid[(int) viewPosition.Y][(int) viewPosition.X] = chr;
+                grid[(int)viewPosition.Y][(int)viewPosition.X] = chr;
             }
         }
 

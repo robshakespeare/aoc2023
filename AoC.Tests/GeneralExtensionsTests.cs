@@ -6,7 +6,7 @@ public class GeneralExtensionsTests
     public void ToEnumerable_Test()
     {
         (5..10).ToEnumerable().Should().BeEquivalentTo(
-            new[] {5, 6, 7, 8, 9},
+            [5, 6, 7, 8, 9],
             opts => opts.WithStrictOrdering());
     }
 
@@ -14,7 +14,7 @@ public class GeneralExtensionsTests
     public void ToArray_Test()
     {
         (0..4).ToArray().Should().BeEquivalentTo(
-            new[] {0, 1, 2, 3},
+            [0, 1, 2, 3],
             opts => opts.WithStrictOrdering());
     }
 
@@ -26,8 +26,7 @@ public class GeneralExtensionsTests
 
         // ASSERT
         result.Should().BeEquivalentTo(
-            new[]
-            {
+            [
                 "hello",
                 "world",
                 "",
@@ -35,29 +34,30 @@ public class GeneralExtensionsTests
                 "is",
                 "a",
                 "test"
-            },
+            ],
             opts => opts.WithStrictOrdering());
     }
 
     [Test]
     public void ReadLinesAsLongs_Does_ReadAndReturnsCollectionOfLongs_AsExpected()
     {
-        const string input = @"1234
-3147483647
-4375734798348934
-87654";
+        const string input = """
+                             1234
+                             3147483647
+                             4375734798348934
+                             87654
+                             """;
 
         // ACT
         var result = input.ReadLinesAsLongs().ToArray();
 
         // ASSERT
-        result.Should().BeEquivalentTo(new[]
-        {
+        result.Should().BeEquivalentTo([
             1234,
             3147483647,
             4375734798348934,
             87654
-        }, opts => opts.WithStrictOrdering());
+        ], opts => opts.WithStrictOrdering());
     }
 
     /// <summary>

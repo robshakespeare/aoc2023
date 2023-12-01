@@ -57,7 +57,7 @@ public partial class SolverFactory : ISolverFactory
         };
 
     public ISolverBase? TryCreateSolver(string? dayNumber) => _solvers.TryGetValue(dayNumber ?? "", out var solverType)
-        ? (ISolverBase?) Activator.CreateInstance(solverType)
+        ? (ISolverBase?)Activator.CreateInstance(solverType)
         : null;
 
     public ISolverBase CreateSolver(string? dayNumber) => TryCreateSolver(dayNumber) ?? throw new InvalidOperationException($"No solver for day {dayNumber}.");
