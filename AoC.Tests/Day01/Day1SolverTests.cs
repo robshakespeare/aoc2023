@@ -28,7 +28,7 @@ public class Day1SolverTests
         var part1Result = _sut.SolvePart1();
 
         // ASSERT
-        part1Result.Should().Be(null);
+        part1Result.Should().Be(54239);
     }
 
     [Test]
@@ -56,6 +56,8 @@ public class Day1SolverTests
         var part2Result = _sut.SolvePart2();
 
         // ASSERT
+        part2Result.Should().BeGreaterThan(55330);
+        part2Result.Should().BeLessThan(55345);
         part2Result.Should().Be(null);
     }
 }
