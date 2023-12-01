@@ -19,10 +19,10 @@ public class MathUtilsTests
         [Test]
         public void LeastCommonMultiple_WithNArguments_ReturnsExpectedResult()
         {
-            MathUtils.LeastCommonMultiple(new long[] {12, 15, 18}).Should().Be(180);
-            MathUtils.LeastCommonMultiple(new long[] {2, 3, 7}).Should().Be(42);
-            MathUtils.LeastCommonMultiple(new long[] {3, 4, 6, 12, 24}).Should().Be(24);
-            MathUtils.LeastCommonMultiple(new long[] {3, 21, 18, 30}).Should().Be(630);
+            MathUtils.LeastCommonMultiple([12, 15, 18]).Should().Be(180);
+            MathUtils.LeastCommonMultiple([2, 3, 7]).Should().Be(42);
+            MathUtils.LeastCommonMultiple([3, 4, 6, 12, 24]).Should().Be(24);
+            MathUtils.LeastCommonMultiple([3, 21, 18, 30]).Should().Be(630);
         }
     }
 
