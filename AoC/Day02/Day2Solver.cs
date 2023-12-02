@@ -28,15 +28,14 @@ public partial class Day2Solver : ISolver
 
     record CubeCount(string Color, int Count)
     {
-        public bool IsPossible { get; } = Count <= MaxCountPerColor[Color];
+        public bool IsPossible { get; } = Count <= Color switch
+        {
+            "red" => 12,
+            "green" => 13,
+            "blue" => 14,
+            _ => throw new InvalidOperationException("Invalid color: " + Color),
+        };
     }
-
-    static readonly Dictionary<string, int> MaxCountPerColor = new()
-    {
-        { "red", 12 },
-        { "green", 13 },
-        { "blue", 14 },
-    };
 
     Game[] ParseInput(string input) => ParseGamesRegex().Matches(input).Select(match => new Game(
         GameId: int.Parse(match.Groups["gameId"].Value),
