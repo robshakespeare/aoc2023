@@ -6,18 +6,7 @@ public partial class Day2Solver : ISolver
 
     public long? SolvePart1(string input) => ParseInput(input).Where(game => game.IsPossible).Sum(game => game.GameId);
 
-    public long? SolvePart2(string input)
-    {
-        Console.WriteLine(ParseInput(input).Dump());
-
-        return ParseInput(input).Sum(game => game.MinSetOfCubes.Power);
-    }
-
-    //record Game(long GameId, Dictionary<string, int>[] SetsOfCubes)
-    //{
-    //    public bool IsPossible { get; } = SetsOfCubes.All(set =>
-    //        set.All(cube => cube.));
-    //}
+    public long? SolvePart2(string input) => ParseInput(input).Sum(game => game.MinSetOfCubes.Power);
 
     record Game(long GameId, SetOfCubes[] SetsOfCubes)
     {
@@ -48,24 +37,6 @@ public partial class Day2Solver : ISolver
         { "green", 13 },
         { "blue", 14 },
     };
-
-    //Game[] ParseInput(string input)
-    //{
-    //    return ParseGamesRegex().Matches(input).Select(match =>
-    //    {
-    //        var gameId = int.Parse(match.Groups["gameId"].Value);
-
-    //        var setsOfCubes = match.Groups["setsOfCubes"].Value.Split("; ").Select(
-    //            set => set.Split(", ").Select(cubes =>
-    //            {
-    //                var pair = cubes.Split(" ");
-    //                return new { count = int.Parse(pair[0]), color = pair[1] };
-    //            }).ToDictionary(x => x.color, x => x.count))
-    //        .ToArray();
-
-    //        return new Game(gameId, setsOfCubes);
-    //    }).ToArray();
-    //}
 
     Game[] ParseInput(string input)
     {
