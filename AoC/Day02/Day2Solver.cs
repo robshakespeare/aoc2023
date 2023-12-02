@@ -38,23 +38,11 @@ public partial class Day2Solver : ISolver
         { "blue", 14 },
     };
 
-    Game[] ParseInput(string input)
-    {
-        return ParseGamesRegex().Matches(input).Select(match =>
-        {
-            var gameId = int.Parse(match.Groups["gameId"].Value);
-
-            var setsOfCubes = match.Groups["setsOfCubes"].Value.Split("; ").Select(
-                set => new SetOfCubes(set.Split(", ").Select(cubes =>
-                {
-                    var pair = cubes.Split(" ");
-                    return new CubeCount(Count: int.Parse(pair[0]), Color: pair[1].Trim());
-                }).ToArray()))
-            .ToArray();
-
-            return new Game(gameId, setsOfCubes);
-        }).ToArray();
-    }
+    Game[] ParseInput(string input) => ParseGamesRegex().Matches(input).Select(match => new Game(
+        GameId: int.Parse(match.Groups["gameId"].Value),
+        SetsOfCubes: match.Groups["setsOfCubes"].Value.Split("; ")
+            .Select(set => new SetOfCubes(set.Split(", ").Select(cubes => cubes.Split(" "))
+                .Select(pair => new CubeCount(Count: int.Parse(pair[0]), Color: pair[1].Trim())).ToArray())).ToArray())).ToArray();
 
     [GeneratedRegex(@"Game (?<gameId>\d+): (?<setsOfCubes>.+)")]
     private static partial Regex ParseGamesRegex();
