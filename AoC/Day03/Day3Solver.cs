@@ -8,9 +8,11 @@ public partial class Day3Solver : ISolver
 
     public long? SolvePart1(string input)
     {
-        var (numbers, _, adjacencyMap) = ParseInput(input);
+        var (numbers, symbols) = ParseInput(input);
 
-        return numbers.Where(num => num.IsPartNumber(adjacencyMap)).Sum(num => num.Value);
+        var symbolAdjacencyMap = symbols.SelectMany(x => x.AdjacentPositions).ToHashSet().ToFrozenSet();
+
+        return numbers.Where(num => num.IsPartNumber(symbolAdjacencyMap)).Sum(num => num.Value);
     }
 
     public long? SolvePart2(string input)
@@ -22,7 +24,7 @@ public partial class Day3Solver : ISolver
     {
         public Vector2[] Positions { get; } = Enumerable.Range(0, Length).Select(x => TopLeft + new Vector2(x, 0)).ToArray();
 
-        public bool IsPartNumber(ISet<Vector2> AdjacencyMap) => Positions.Any(AdjacencyMap.Contains);
+        public bool IsPartNumber(ISet<Vector2> symbolAdjacencyMap) => Positions.Any(symbolAdjacencyMap.Contains);
     }
 
     record Symbol(char Char, Vector2 Position)
@@ -30,7 +32,7 @@ public partial class Day3Solver : ISolver
         public Vector2[] AdjacentPositions { get; } = GridUtils.DirectionsIncludingDiagonal.Select(dir => Position + dir).ToArray();
     }
 
-    static (Number[] Numbers, Symbol[] Symbols, FrozenSet<Vector2> AdjacencyMap) ParseInput(string input)
+    static (Number[] Numbers, Symbol[] Symbols) ParseInput(string input)
     {
         var numbers = new List<Number>();
         var symbols = new List<Symbol>();
@@ -52,9 +54,7 @@ public partial class Day3Solver : ISolver
             }
         }
 
-        var symbolAdjacentPositions = symbols.SelectMany(x => x.AdjacentPositions).ToHashSet().ToFrozenSet();
-
-        return (numbers.ToArray(), symbols.ToArray(), symbolAdjacentPositions);
+        return (numbers.ToArray(), symbols.ToArray());
     }
 
     [GeneratedRegex(@"(?<number>\d+)|[^.]", RegexOptions.Compiled)]
