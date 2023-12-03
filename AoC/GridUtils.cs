@@ -203,7 +203,7 @@ public static class GridUtils
     /// <summary>
     /// Gets the item from the grid at the specified position, or null if that position is out of the bounds of the grid.
     /// </summary>
-    public static T? SafeGet<T>(this IReadOnlyList<IReadOnlyList<T>> grid, Vector2 position) where T : class
+    public static T? SafeGet<T>(this IReadOnlyList<IReadOnlyList<T?>> grid, Vector2 position) where T : class
     {
         var y = (int)position.Y;
 

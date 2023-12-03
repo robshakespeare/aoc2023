@@ -70,12 +70,12 @@ internal static partial class PullPuzzleInputCommand
         var dayName = ParseDayNameRegex().Match(puzzleText).Groups["dayName"].Value;
 
         // Format the name name to escape any characters ready for embedding in to C#
-        dayName = Microsoft.CodeAnalysis.CSharp.SymbolDisplay.FormatLiteral(dayName, true);
+        var dayNameFormatted = Microsoft.CodeAnalysis.CSharp.SymbolDisplay.FormatLiteral(dayName, true);
 
         // Save puzzle name
         var solverFilePath = Path.Combine(repoRootPath, "AoC", $"Day{day.PadLeft(2, '0')}", $"Day{day}Solver.cs");
         var solverFileContents = await File.ReadAllTextAsync(solverFilePath);
-        solverFileContents = solverFileContents.Replace("""public string DayName => "";""", $"""public string DayName => {dayName};""");
+        solverFileContents = solverFileContents.Replace("""public string DayName => "";""", $"""public string DayName => {dayNameFormatted};""");
 
         await File.WriteAllTextAsync(solverFilePath, solverFileContents);
 
