@@ -24,21 +24,6 @@ public partial class Day3Solver : ISolver
             .ToDictionary(x => x.position, x => x.number)
             .ToFrozenDictionary();
 
-        //Console.WriteLine(string.Join(Environment.NewLine,
-        //    symbols
-        //    .Where(x => x.IsGear)
-        //    .Select(gear => new
-        //    {
-        //        gear,
-        //        adjacentNumbers = gear.AdjacentPositions
-        //            .Select(pos => numberPositionMap.TryGetValue(pos, out var number) ? number : null)
-        //            .Where(number => number != null)
-        //            .Select(number => number!)
-        //            .Distinct()
-        //            .ToArray()
-        //    })
-        //    .Select(x => $"Gear: {x.gear.Position} - adj: {x.adjacentNumbers.Length}")));
-
         return symbols
             .Where(x => x.IsGear)
             .Select(gear => new
@@ -61,11 +46,6 @@ public partial class Day3Solver : ISolver
         public Vector2[] Positions { get; } = Enumerable.Range(0, Length).Select(x => TopLeft + new Vector2(x, 0)).ToArray();
 
         public bool IsPartNumber(ISet<Vector2> symbolAdjacencyMap) => Positions.Any(symbolAdjacencyMap.Contains);
-
-        //public override string ToString()
-        //{
-        //    return $"Number: {Value}, Pos: {TopLeft.X},{TopLeft.Y}";
-        //}
     }
 
     record Symbol(char Char, Vector2 Position)
