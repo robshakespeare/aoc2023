@@ -4,7 +4,7 @@ namespace AoC.Day03;
 
 public partial class Day3Solver : ISolver
 {
-    public string DayName => "";
+    public string DayName => "Gear Ratios";
 
     public long? SolvePart1(string input)
     {

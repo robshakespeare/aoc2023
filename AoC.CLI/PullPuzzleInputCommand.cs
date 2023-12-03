@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Azure.Identity;
 using Flurl.Http;
 using Microsoft.Extensions.Configuration;
@@ -5,8 +6,10 @@ using static Crayon.Output;
 
 namespace AoC.CLI;
 
-internal static class PullPuzzleInputCommand
+internal static partial class PullPuzzleInputCommand
 {
+    private const string UserAgentName = "Rob Shakespeare's AoC CLI https://github.com/robshakespeare";
+
     public static async Task DoAsync(string[] args)
     {
         try
@@ -18,20 +21,14 @@ internal static class PullPuzzleInputCommand
             var year = args.ElementAtOrDefault(2) ?? DateTime.Now.Year.ToString();
             var keyVaultUri = args.ElementAtOrDefault(3) ?? "https://rws-aoc.vault.azure.net/";
 
-            Console.Clear();
-            Console.WriteLine(Bright.Yellow($"Pulling Puzzle Input for Day {Green(day)}"));
-            Console.WriteLine(Bright.Black($"Key Vault: {keyVaultUri}{Environment.NewLine}"));
+            var dayName = "";
 
-            // Get session token
-            var sessionToken = GetSessionToken(keyVaultUri);
+            Task.WaitAll([
+                Task.Run(async () => await PullAndSavePuzzleInputAsync(repoRootPath, day, year, keyVaultUri)),
+                Task.Run(async () => dayName = await PullAndSavePuzzleNameAsync(repoRootPath, day, year))
+            ]);
 
-            // Get puzzle input
-            var puzzleInput = await GetPuzzleInputAsync(day, year, sessionToken);
-
-            // Save puzzle input
-            var outputPath = Path.Combine(repoRootPath, "AoC", $"Day{day.PadLeft(2, '0')}", $"input-day{day}.txt");
-            await File.WriteAllTextAsync(outputPath, puzzleInput);
-            Console.WriteLine($"Puzzle input saved to: {Cyan(outputPath)}");
+            Console.WriteLine($"Day Name is: {Cyan(dayName)}");
 
             Console.WriteLine(Bright.Green("✔️ Success"));
         }
@@ -40,6 +37,46 @@ internal static class PullPuzzleInputCommand
             await Console.Error.WriteLineAsync(Red("Pull command failed: " + e.Message));
             Environment.Exit(1);
         }
+    }
+
+    private static async Task PullAndSavePuzzleInputAsync(string repoRootPath, string day, string year, string keyVaultUri)
+    {
+        Console.Clear();
+        Console.WriteLine(Bright.Yellow($"Pulling Puzzle Input for Day {Green(day)}"));
+        Console.WriteLine(Bright.Black($"Key Vault: {keyVaultUri}{Environment.NewLine}"));
+
+        // Get session token
+        var sessionToken = GetSessionToken(keyVaultUri);
+
+        // Get puzzle input
+        var puzzleInput = await GetPuzzleInputAsync(day, year, sessionToken);
+
+        // Save puzzle input
+        var outputPath = Path.Combine(repoRootPath, "AoC", $"Day{day.PadLeft(2, '0')}", $"input-day{day}.txt");
+        await File.WriteAllTextAsync(outputPath, puzzleInput);
+        Console.WriteLine($"Puzzle input saved to: {Cyan(outputPath)}");
+    }
+
+    [GeneratedRegex(@"--- Day \d+: (?<dayName>.+) ---", RegexOptions.Compiled)]
+    private static partial Regex ParseDayNameRegex();
+
+    private static async Task<string> PullAndSavePuzzleNameAsync(string repoRootPath, string day, string year)
+    {
+        // Get the day name
+        var puzzleText = await $"https://adventofcode.com/{year}/day/{day}"
+            .WithHeader("User-Agent", UserAgentName)
+            .GetStringAsync();
+
+        var dayName = ParseDayNameRegex().Match(puzzleText).Groups["dayName"].Value;
+
+        // Save puzzle name
+        var solverFilePath = Path.Combine(repoRootPath, "AoC", $"Day{day.PadLeft(2, '0')}", $"Day{day}Solver.cs");
+        var solverFileContents = await File.ReadAllTextAsync(solverFilePath);
+        solverFileContents = solverFileContents.Replace("""public string DayName => "";""", $"""public string DayName => "{dayName}";""");
+
+        await File.WriteAllTextAsync(solverFilePath, solverFileContents);
+
+        return dayName;
     }
 
     private static string? FindRepoRootPath(string? dirPath)
@@ -87,7 +124,7 @@ internal static class PullPuzzleInputCommand
 
         var puzzleInput = (await $"https://adventofcode.com/{year}/day/{day}/input"
             .WithCookie("session", sessionToken)
-            .WithHeader("User-Agent", "Rob Shakespeare's AoC CLI https://github.com/robshakespeare")
+            .WithHeader("User-Agent", UserAgentName)
             .GetStringAsync())
             .ReplaceLineEndings()
             .TrimEnd();
