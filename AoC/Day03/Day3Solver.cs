@@ -25,19 +25,14 @@ public partial class Day3Solver : ISolver
             .ToFrozenDictionary();
 
         return symbols
-            .Where(x => x.IsGear)
-            .Select(gear => new
-            {
-                gear,
-                adjacentNumbers = gear.AdjacentPositions
-                    .Select(pos => numberPositionMap.TryGetValue(pos, out var number) ? number : null)
-                    .Where(number => number != null)
-                    .Select(number => number!)
-                    .Distinct()
-                    .ToArray()
-            })
-            .Where(x => x.adjacentNumbers.Length == 2)
-            .Select(x => x.adjacentNumbers[0].Value * x.adjacentNumbers[1].Value)
+            .Where(symbol => symbol.Char == '*')
+            .Select(candidateGear => candidateGear.AdjacentPositions
+                .Select(pos => numberPositionMap.TryGetValue(pos, out var number) ? number : null)
+                .OfType<Number>()
+                .Distinct()
+                .ToArray())
+            .Where(adjacentNumbers => adjacentNumbers.Length == 2)
+            .Select(adjacentNumbers => adjacentNumbers[0].Value * adjacentNumbers[1].Value)
             .Sum();
     }
 
@@ -51,8 +46,6 @@ public partial class Day3Solver : ISolver
     record Symbol(char Char, Vector2 Position)
     {
         public Vector2[] AdjacentPositions { get; } = GridUtils.DirectionsIncludingDiagonal.Select(dir => Position + dir).ToArray();
-
-        public bool IsGear => Char == '*';
     }
 
     static (Number[] Numbers, Symbol[] Symbols) ParseInput(string input)
