@@ -6,7 +6,18 @@ public class Day3SolverTests
 {
     private readonly Day3Solver _sut = new();
 
-    private const string ExampleInput = @"";
+    private const string ExampleInput = """
+        467..114..
+        ...*......
+        ..35..633.
+        ......#...
+        617*......
+        .....+.58.
+        ..592.....
+        ......755.
+        ...$.*....
+        .664.598..
+        """;
 
     [Test]
     public void Part1Example()
@@ -15,7 +26,7 @@ public class Day3SolverTests
         var part1ExampleResult = _sut.SolvePart1(ExampleInput);
 
         // ASSERT
-        part1ExampleResult.Should().Be(null);
+        part1ExampleResult.Should().Be(4361);
     }
 
     [Test]
