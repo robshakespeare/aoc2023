@@ -8,7 +8,7 @@ public partial class Day3Solver : ISolver
 
     public long? SolvePart1(string input)
     {
-        var (numbers, symbols, adjacencyMap) = ParseInput(input);
+        var (numbers, _, adjacencyMap) = ParseInput(input);
 
         return numbers.Where(num => num.IsPartNumber(adjacencyMap)).Sum(num => num.Value);
     }
