@@ -46,7 +46,7 @@ public class Day3SolverTests
         var part2ExampleResult = _sut.SolvePart2(ExampleInput);
 
         // ASSERT
-        part2ExampleResult.Should().Be(null);
+        part2ExampleResult.Should().Be(467835);
     }
 
     [Test]
@@ -56,6 +56,7 @@ public class Day3SolverTests
         var part2Result = _sut.SolvePart2();
 
         // ASSERT
-        part2Result.Should().Be(null);
+        part2Result.Should().BeGreaterThan(33238755);
+        part2Result.Should().Be(75741499);
     }
 }

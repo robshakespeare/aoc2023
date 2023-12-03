@@ -10,14 +10,50 @@ public partial class Day3Solver : ISolver
     {
         var (numbers, symbols) = ParseInput(input);
 
-        var symbolAdjacencyMap = symbols.SelectMany(x => x.AdjacentPositions).ToHashSet().ToFrozenSet();
+        var symbolAdjacencyMap = symbols.SelectMany(symbol => symbol.AdjacentPositions).ToHashSet().ToFrozenSet();
 
-        return numbers.Where(num => num.IsPartNumber(symbolAdjacencyMap)).Sum(num => num.Value);
+        return numbers.Where(number => number.IsPartNumber(symbolAdjacencyMap)).Sum(number => number.Value);
     }
 
     public long? SolvePart2(string input)
     {
-        return null;
+        var (numbers, symbols) = ParseInput(input);
+
+        var numberPositionMap = numbers
+            .SelectMany(number => number.Positions.Select(position => new { position, number }))
+            .ToDictionary(x => x.position, x => x.number)
+            .ToFrozenDictionary();
+
+        //Console.WriteLine(string.Join(Environment.NewLine,
+        //    symbols
+        //    .Where(x => x.IsGear)
+        //    .Select(gear => new
+        //    {
+        //        gear,
+        //        adjacentNumbers = gear.AdjacentPositions
+        //            .Select(pos => numberPositionMap.TryGetValue(pos, out var number) ? number : null)
+        //            .Where(number => number != null)
+        //            .Select(number => number!)
+        //            .Distinct()
+        //            .ToArray()
+        //    })
+        //    .Select(x => $"Gear: {x.gear.Position} - adj: {x.adjacentNumbers.Length}")));
+
+        return symbols
+            .Where(x => x.IsGear)
+            .Select(gear => new
+            {
+                gear,
+                adjacentNumbers = gear.AdjacentPositions
+                    .Select(pos => numberPositionMap.TryGetValue(pos, out var number) ? number : null)
+                    .Where(number => number != null)
+                    .Select(number => number!)
+                    .Distinct()
+                    .ToArray()
+            })
+            .Where(x => x.adjacentNumbers.Length == 2)
+            .Select(x => x.adjacentNumbers[0].Value * x.adjacentNumbers[1].Value)
+            .Sum();
     }
 
     record Number(long Value, Vector2 TopLeft, int Length)
@@ -25,11 +61,18 @@ public partial class Day3Solver : ISolver
         public Vector2[] Positions { get; } = Enumerable.Range(0, Length).Select(x => TopLeft + new Vector2(x, 0)).ToArray();
 
         public bool IsPartNumber(ISet<Vector2> symbolAdjacencyMap) => Positions.Any(symbolAdjacencyMap.Contains);
+
+        //public override string ToString()
+        //{
+        //    return $"Number: {Value}, Pos: {TopLeft.X},{TopLeft.Y}";
+        //}
     }
 
     record Symbol(char Char, Vector2 Position)
     {
         public Vector2[] AdjacentPositions { get; } = GridUtils.DirectionsIncludingDiagonal.Select(dir => Position + dir).ToArray();
+
+        public bool IsGear => Char == '*';
     }
 
     static (Number[] Numbers, Symbol[] Symbols) ParseInput(string input)
