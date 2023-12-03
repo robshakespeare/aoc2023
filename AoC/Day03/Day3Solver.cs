@@ -8,7 +8,7 @@ public partial class Day3Solver : ISolver
 
     public long? SolvePart1(string input)
     {
-        var (numbers, symbols) = ParseInput(input);
+        var (numbers, symbols, _) = ParseInput(input);
 
         var symbolAdjacencyMap = symbols.SelectMany(symbol => symbol.AdjacentPositions).ToHashSet().ToFrozenSet();
 
@@ -17,50 +17,64 @@ public partial class Day3Solver : ISolver
 
     public long? SolvePart2(string input)
     {
-        var (numbers, symbols) = ParseInput(input);
+        var map = ParseInput(input);
 
-        var numberPositionMap = numbers
-            .SelectMany(number => number.Positions.Select(position => new { position, number }))
-            .ToDictionary(x => x.position, x => x.number)
-            .ToFrozenDictionary();
+        //var numberPositionMap = map.Numbers
+        //    .SelectMany(number => number.Positions.Select(position => new { position, number }))
+        //    .ToDictionary(x => x.position, x => x.number)
+        //    .ToFrozenDictionary();
 
-        return symbols
-            .Where(x => x.IsGear)
-            .Select(gear => new
+        return map.Symbols
+            .Where(symbol => symbol.Char == '*')
+            .Select(candidateGear => new
             {
-                gear,
-                adjacentNumbers = gear.AdjacentPositions
-                    .Select(pos => numberPositionMap.TryGetValue(pos, out var number) ? number : null)
-                    .Where(number => number != null)
-                    .Select(number => number!)
-                    .Distinct()
-                    .ToArray()
+                candidateGear,
+                adjacentNumbers = map.GetNumbers(candidateGear.AdjacentPositions).ToArray(),
+                //adjacentNumbers = candidateGear.AdjacentPositions
+                //    .Select(pos => numberPositionMap.TryGetValue(pos, out var number) ? number : null)
+                //    .Where(number => number != null)
+                //    .Select(number => number!)
+                //    .Distinct()
+                //    .ToArray()
             })
             .Where(x => x.adjacentNumbers.Length == 2)
             .Select(x => x.adjacentNumbers[0].Value * x.adjacentNumbers[1].Value)
             .Sum();
     }
 
-    record Number(long Value, Vector2 TopLeft, int Length)
+    record Number(long Value, Vector2 TopLeft, int Length) /*: Element(Position)*/
     {
         public Vector2[] Positions { get; } = Enumerable.Range(0, Length).Select(x => TopLeft + new Vector2(x, 0)).ToArray();
 
         public bool IsPartNumber(ISet<Vector2> symbolAdjacencyMap) => Positions.Any(symbolAdjacencyMap.Contains);
     }
 
-    record Symbol(char Char, Vector2 Position)
+    record Symbol(char Char, Vector2 Position) /*: Element(Position)*/
     {
         public Vector2[] AdjacentPositions { get; } = GridUtils.DirectionsIncludingDiagonal.Select(dir => Position + dir).ToArray();
 
-        public bool IsGear => Char == '*';
+        //public bool IsGear => Char == '*';
     }
 
-    static (Number[] Numbers, Symbol[] Symbols) ParseInput(string input)
+    record Map(Number[] Numbers, Symbol[] Symbols, Number?[][] Grid)
     {
+        //public IEnumerable<TElement> GetElementsOfType<TElement>(IEnumerable<Vector2> positions) where TElement : Element =>
+        //    positions.Select(Grid.SafeGet).OfType<TElement>().Distinct();
+
+        public IEnumerable<Number> GetNumbers(IEnumerable<Vector2> positions) =>
+            positions.Select(Grid.SafeGet).OfType<Number>().Distinct();
+    }
+
+    static Map ParseInput(string input)
+    {
+        var lines = input.ReadLines().ToArray();
+        var width = lines.First().Length;
+        var grid = Enumerable.Range(0, lines.Length).Select(y => new Number?[width]).ToArray();
+
         var numbers = new List<Number>();
         var symbols = new List<Symbol>();
 
-        foreach (var (line, y) in input.ReadLines().Select((line, y) => (line, y)))
+        foreach (var (line, y) in lines.Select((line, y) => (line, y)))
         {
             foreach (Match match in ParseLineRegex().Matches(line))
             {
@@ -68,7 +82,9 @@ public partial class Day3Solver : ISolver
 
                 if (match.Groups["number"].Success)
                 {
-                    numbers.Add(new Number(long.Parse(match.Value), position, match.Length));
+                    var number = new Number(long.Parse(match.Value), position, match.Length);
+                    numbers.Add(number);
+                    number.Positions.ToList().ForEach(pos => grid[(int)pos.Y][(int)pos.X] = number);
                 }
                 else
                 {
@@ -77,7 +93,9 @@ public partial class Day3Solver : ISolver
             }
         }
 
-        return (numbers.ToArray(), symbols.ToArray());
+        //numbers.ForEach(number => number.Positions.ToList().ForEach(pos => grid[(int)pos.Y][(int)pos.X] = number));
+
+        return new Map([.. numbers], [.. symbols], grid);
     }
 
     [GeneratedRegex(@"(?<number>\d+)|[^.]", RegexOptions.Compiled)]
