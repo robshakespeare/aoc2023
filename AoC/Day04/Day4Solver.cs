@@ -9,7 +9,6 @@ public partial class Day4Solver : ISolver
     public long? SolvePart2(string input)
     {
         var cards = ParseInput(input);
-
         var numberOfInstancesPerCard = cards.ToDictionary(card => card.CardId, _ => 1L);
 
         foreach (var card in cards)
@@ -17,9 +16,7 @@ public partial class Day4Solver : ISolver
             var numberOfInstances = numberOfInstancesPerCard[card.CardId];
 
             foreach (var winningCardId in card.GetNextWinningCardIds())
-            {
                 numberOfInstancesPerCard[winningCardId] += numberOfInstances;
-            }
         }
 
         return numberOfInstancesPerCard.Sum(x => x.Value);
