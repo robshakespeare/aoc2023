@@ -1,3 +1,4 @@
+using TextCopy;
 using static System.Environment;
 using static Crayon.Output;
 
@@ -102,6 +103,10 @@ public static class SolverBaseExtensions
         if (solution == null)
         {
             Console.WriteLine(Bright.Magenta($"Part {partNum} returned null / is not yet implemented"));
+        }
+        else if (OperatingSystem.IsWindows() || OperatingSystem.IsLinux())
+        {
+            ClipboardService.SetText(solution.ToString() ?? "");
         }
 
         result = Result.Completed(solution, elapsed);
