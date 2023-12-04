@@ -42,7 +42,7 @@ public class Day4SolverTests
         var part2ExampleResult = _sut.SolvePart2(ExampleInput);
 
         // ASSERT
-        part2ExampleResult.Should().Be(null);
+        part2ExampleResult.Should().Be(30);
     }
 
     [Test]
@@ -52,6 +52,6 @@ public class Day4SolverTests
         var part2Result = _sut.SolvePart2();
 
         // ASSERT
-        part2Result.Should().Be(null);
+        part2Result.Should().Be(5489600);
     }
 }

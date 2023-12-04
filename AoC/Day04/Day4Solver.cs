@@ -8,7 +8,25 @@ public partial class Day4Solver : ISolver
 
     public long? SolvePart2(string input)
     {
-        return null;
+        var cards = ParseInput(input);
+        //Console.WriteLine(cards.Skip(cards.Length - 2).Dump());
+
+        var numberOfInstancesPerCard = cards.ToDictionary(card => card.CardId, _ => 1L); // new Dictionary<int, long>();
+
+        foreach (var card in cards)
+        {
+            var numberOfInstances = numberOfInstancesPerCard[card.CardId];
+
+            foreach (var winningCardId in card.GetNextWinningCardIds())
+            {
+                numberOfInstancesPerCard[winningCardId] += numberOfInstances;
+                //var numberOfWinningInstances = 
+            }
+        }
+
+        //cards[1].GetNextWinningCardIds().Dump();
+
+        return numberOfInstancesPerCard.Sum(x => x.Value);
     }
 
     record Scratchcard(int CardId, int[] WinningsNumbers, int[] OurNumbers)
@@ -16,6 +34,8 @@ public partial class Day4Solver : ISolver
         public int[] MatchingNumbers { get; } = WinningsNumbers.Intersect(OurNumbers).ToArray();
 
         public long GetValue() => (long)Math.Pow(2, MatchingNumbers.Length - 1);
+
+        public IEnumerable<int> GetNextWinningCardIds() => MatchingNumbers.Select((_, i) => CardId + i + 1);
     }
 
     [GeneratedRegex(@"^Card +(?<cardId>\d+):(?<winningNumbers>[^|]+)\|(?<ourNumbers>[^|]+)$", RegexOptions.Multiline)]
