@@ -104,7 +104,7 @@ public static class SolverBaseExtensions
         {
             Console.WriteLine(Bright.Magenta($"Part {partNum} returned null / is not yet implemented"));
         }
-        else if (OperatingSystem.IsWindows() || OperatingSystem.IsLinux())
+        else if (OperatingSystem.IsWindows())
         {
             ClipboardService.SetText(solution.ToString() ?? "");
         }
