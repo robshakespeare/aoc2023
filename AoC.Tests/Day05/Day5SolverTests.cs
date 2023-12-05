@@ -4,7 +4,10 @@ namespace AoC.Tests.Day05;
 
 public class Day5SolverTests
 {
-    private readonly Day5Solver _sut = new();
+    private readonly Day5Solver _sut = new()
+    {
+        Logger = TestContext.Progress.WriteLine
+    };
 
     private const string ExampleInput = """
         seeds: 79 14 55 13
@@ -79,6 +82,6 @@ public class Day5SolverTests
         var part2Result = _sut.SolvePart2();
 
         // ASSERT
-        part2Result.Should().Be(null);
+        part2Result.Should().Be(7873084);
     }
 }
