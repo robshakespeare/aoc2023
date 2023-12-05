@@ -49,9 +49,9 @@ public class Day5Solver : ISolver
         }
     }
 
-    record Pipeline(Mapper[] mappers)
+    record Pipeline(Mapper[] Mappers)
     {
-        public long ConvertSeedToLocation(long seed) => mappers.Aggregate(seed, (acc, mapper) => mapper.Map(acc));
+        public long ConvertSeedToLocation(long seed) => Mappers.Aggregate(seed, (acc, mapper) => mapper.Map(acc));
     }
 
     static (long[] Seeds, Pipeline) ParseInput(string input)
