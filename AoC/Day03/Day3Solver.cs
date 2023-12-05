@@ -11,8 +11,9 @@ public partial class Day3Solver : ISolver
         var (numbers, symbols) = ParseInput(input);
 
         var symbolAdjacencyMap = symbols.SelectMany(symbol => symbol.AdjacentPositions).ToHashSet().ToFrozenSet();
+        bool IsPartNumber(Number number) => number.Positions.Any(symbolAdjacencyMap.Contains);
 
-        return numbers.Where(number => number.IsPartNumber(symbolAdjacencyMap)).Sum(number => number.Value);
+        return numbers.Where(IsPartNumber).Sum(number => number.Value);
     }
 
     public long? SolvePart2(string input)
@@ -39,8 +40,6 @@ public partial class Day3Solver : ISolver
     record Number(long Value, Vector2 TopLeft, int Length)
     {
         public Vector2[] Positions { get; } = Enumerable.Range(0, Length).Select(x => TopLeft + new Vector2(x, 0)).ToArray();
-
-        public bool IsPartNumber(ISet<Vector2> symbolAdjacencyMap) => Positions.Any(symbolAdjacencyMap.Contains);
     }
 
     record Symbol(char Char, Vector2 Position)

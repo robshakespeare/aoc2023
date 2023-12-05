@@ -1,3 +1,4 @@
+using TextCopy;
 using static System.Environment;
 using static Crayon.Output;
 
@@ -58,8 +59,6 @@ public static class SolverBaseExtensions
         this ISolverBase solver,
         Func<Results, Task>? onUpdated = null)
     {
-        Console.WriteLine(Yellow(solver.GetTitle() + NewLine));
-
         var results = new Result[2];
         results.Initialize();
 
@@ -83,15 +82,20 @@ public static class SolverBaseExtensions
     public static object? SolvePart1(
         this ISolverBase solver,
         out Result result) =>
-        SolvePartTimed(1, solver.GetInputLoader().PuzzleInputPart1, solver.SolvePart1AsObject, out result);
+        solver.SolvePartTimed(1, solver.GetInputLoader().PuzzleInputPart1, solver.SolvePart1AsObject, out result);
 
     public static object? SolvePart2(
         this ISolverBase solver,
         out Result result) =>
-        SolvePartTimed(2, solver.GetInputLoader().PuzzleInputPart2, solver.SolvePart2AsObject, out result);
+        solver.SolvePartTimed(2, solver.GetInputLoader().PuzzleInputPart2, solver.SolvePart2AsObject, out result);
 
-    private static object? SolvePartTimed(int partNum, string input, Func<string, object?> solve, out Result result)
+    private static object? SolvePartTimed(this ISolverBase solver, int partNum, string input, Func<string, object?> solve, out Result result)
     {
+        if (partNum == 1)
+        {
+            Console.WriteLine(Yellow(solver.GetTitle() + NewLine));
+        }
+
         using var timer = new TimingBlock($"Part {partNum}");
         var solution = solve(input);
         var elapsed = timer.Stop();
@@ -99,6 +103,10 @@ public static class SolverBaseExtensions
         if (solution == null)
         {
             Console.WriteLine(Bright.Magenta($"Part {partNum} returned null / is not yet implemented"));
+        }
+        else if (OperatingSystem.IsWindows())
+        {
+            ClipboardService.SetText(solution.ToString() ?? "");
         }
 
         result = Result.Completed(solution, elapsed);
