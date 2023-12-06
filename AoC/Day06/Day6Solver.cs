@@ -4,16 +4,7 @@ public class Day6Solver : ISolver
 {
     public string DayName => "Wait For It";
 
-    public long? SolvePart1(string input)
-    {
-        var races = ParseInput(input);
-
-        //Console.WriteLine();
-
-        return ParseInput(input).Select(x => x.GetWaysToWin().Length).Aggregate((agg, cur) => agg * cur);
-
-        return null;
-    }
+    public long? SolvePart1(string input) => ParseInput(input).Select(x => x.GetWaysToWin().Length).Aggregate((agg, cur) => agg * cur);
 
     public long? SolvePart2(string input)
     {
@@ -23,12 +14,12 @@ public class Day6Solver : ISolver
     record Race(int RaceDuration, int RecordDistance)
     {
         public RaceResult[] GetWaysToWin() => new Range(1, RaceDuration).ToEnumerable()
-            .Select(speed => new RaceResult(speed, RaceDuration - speed)) //, this))
+            .Select(speed => new RaceResult(speed, RaceDuration - speed))
             .Where(result => result.DistanceTravelled > RecordDistance)
             .ToArray();
     }
 
-    record RaceResult(int Speed, int RemainingDuration) //, Race Race)
+    record RaceResult(int Speed, int RemainingDuration)
     {
         public long DistanceTravelled { get; } = (long)Speed * RemainingDuration;
     }
