@@ -16,9 +16,12 @@ public class Day6SolverTests
     {
         // ACT
         var part1ExampleResult = _sut.SolvePart1(ExampleInput);
+        var part1ExampleResultNotOptimised = _sut.SolvePart1NotOptimised(ExampleInput);
 
         // ASSERT
-        part1ExampleResult.Should().Be(288);
+        const int expectedResult = 288;
+        part1ExampleResult.Should().Be(expectedResult);
+        part1ExampleResultNotOptimised.Should().Be(expectedResult);
     }
 
     [Test]
@@ -26,9 +29,12 @@ public class Day6SolverTests
     {
         // ACT
         var part1Result = _sut.SolvePart1();
+        var part1ResultNotOptimised = _sut.SolvePart1NotOptimised(_sut.GetInputLoader().PuzzleInputPart1);
 
         // ASSERT
-        part1Result.Should().Be(275724);
+        const int expectedResult = 275724;
+        part1Result.Should().Be(expectedResult);
+        part1ResultNotOptimised.Should().Be(expectedResult);
     }
 
     [Test]

@@ -4,167 +4,57 @@ public partial class Day6Solver : ISolver
 {
     public string DayName => "Wait For It";
 
-    public long? SolvePart1(string input) => ParseInput(input).Select(x => x.CountGetWaysToWinOptimised()).Aggregate((agg, cur) => agg * cur);
+    public long? SolvePart1(string input) => ParseInput(input).Select(race => race.CalculateNumOfWaysToWin()).Aggregate((agg, cur) => agg * cur);
+
+    public long? SolvePart1NotOptimised(string input) => ParseInput(input).Select(race => race.EnumerateWaysToWin().Count()).Aggregate((agg, cur) => agg * cur);
 
     public long? SolvePart2(string input)
     {
-        //{
-        //    var races = ParseInput(input);
-
-        //    foreach (var race2 in races)
-        //    {
-        //        Console.WriteLine(race2);
-        //        Console.WriteLine(Race.FindLowest(race2));
-        //        //Console.WriteLine(Race.FindHighest(race2));
-        //        Console.WriteLine(string.Join(Environment.NewLine, race2.GetWaysToWin().Select(x => x.ToString())));
-        //    }
-        //}
-
         input = FixKerningRegex().Replace(input, match => match.Groups["keep"].Value);
-
         var race = ParseInput(input).Single();
-
-        //Console.WriteLine(race);
-        ////Console.WriteLine(Race.FindLowest(race));
-
-        //// So, thinking can use binary search again!!
-
-        //var (raceDuration, recordDistance) = race;
-
-        //var minSpeed = 1L;
-        //var maxSpeed = raceDuration - 1;
-
-        //// Find the lowest
-        ////{
-        ////    var start = minSpeed;
-        ////    var end = maxSpeed;
-
-        ////    while (something)
-        ////    {
-        ////        var midSpeed = (minSpeed + maxSpeed) / 2;
-
-        ////        // DistanceTravelled = Speed * (RaceDuration - Speed)
-        ////        var distance = midSpeed * (raceDuration - midSpeed);
-
-        ////        if (distance <= recordDistance)
-        ////        {
-        ////            // our distance doesn't beat record, so we need more speed
-        ////            start = midSpeed;
-        ////        }
-        ////        else if (distance > recordDistance)
-        ////        {
-        ////            // our distance beats record, but can we go lower?
-        ////            end = midSpeed;
-        ////        }
-        ////    }
-        ////}
-
-        //// Find the highest
-
-        return race.CountGetWaysToWinOptimised();
+        return race.CalculateNumOfWaysToWin();
     }
 
     record Race(long RaceDuration, long RecordDistance)
     {
-        public IEnumerable<RaceResult> GetWaysToWin() => Range()
+        public IEnumerable<RaceResult> EnumerateWaysToWin() => SpeedRange()
             .Select(speed => new RaceResult(speed, RaceDuration - speed))
             .Where(result => result.DistanceTravelled > RecordDistance);
 
-        public long CountGetWaysToWin() => Range()
-            .Select(speed => speed * (RaceDuration - speed))
-            .LongCount(distanceTravelled => distanceTravelled > RecordDistance);
-
-        public long CountGetWaysToWinOptimised()
+        private IEnumerable<long> SpeedRange()
         {
-            var lowest = FindLowest(this);
-            var highest = RaceDuration - lowest;
-
-            var numOfWins = highest - lowest + 1;
-
-            return numOfWins;
+            for (long speed = 1; speed < RaceDuration; speed++)
+                yield return speed;
         }
 
-        private IEnumerable<long> Range()
+        public long CalculateNumOfWaysToWin()
         {
-            long value = FindLowest(this);
-
-            while (value < RaceDuration)
-            {
-                yield return value;
-                value++;
-            }
+            var minSpeed = FindLowestSpeedToBeatRecord();
+            var maxSpeed = RaceDuration - minSpeed;
+            return maxSpeed - minSpeed + 1;
         }
 
-        public static long FindLowest(Race race)
+        public long FindLowestSpeedToBeatRecord()
         {
-            //var minSpeed = 1L;
-            //var maxSpeed = RaceDuration - 1;
+            var startSpeed = 1L;
+            var endSpeed = RaceDuration - 1;
 
-            var (raceDuration, recordDistance) = race;
-
-            var start = 1L;
-            var end = raceDuration - 1;
-
-            while (start != end) // && start < end)
+            while (startSpeed != endSpeed)
             {
-                var midSpeed = (start + end) / 2;
+                var midSpeed = (startSpeed + endSpeed) / 2;
+                var distance = midSpeed * (RaceDuration - midSpeed);
 
-                // DistanceTravelled = Speed * (RaceDuration - Speed)
-                var distance = midSpeed * (raceDuration - midSpeed);
-
-                if (distance <= recordDistance)
+                if (distance <= RecordDistance)
                 {
-                    // our distance doesn't beat record, so we need more speed
-                    start = midSpeed + 1;
+                    startSpeed = midSpeed + 1; // our distance doesn't beat record, so we need more speed
                 }
-                else if (distance > recordDistance)
+                else if (distance > RecordDistance)
                 {
-                    // our distance beats record, but can we go lower?
-                    end = midSpeed;
+                    endSpeed = midSpeed; // our distance beats record, but can we go lower?
                 }
             }
 
-            return start;
-        }
-
-        public static long FindHighest(Race race)
-        {
-            //var minSpeed = 1L;
-            //var maxSpeed = RaceDuration - 1;
-
-            var (raceDuration, _) = race;
-
-            var currentBestDistance = race.RecordDistance;
-            long? currentBestSpeed = null;
-
-            var start = 1L;
-            var end = raceDuration - 1;
-
-            while (start != end) // && start < end)
-            {
-                var midSpeed = (start + end) / 2;
-
-                // DistanceTravelled = Speed * (RaceDuration - Speed)
-                var distance = midSpeed * (raceDuration - midSpeed);
-
-                if (distance <= currentBestDistance)
-                {
-                    // our distance doesn't beat record, so we need more speed
-                    start = midSpeed + 1;
-                }
-                else if (distance > currentBestDistance)
-                {
-                    currentBestSpeed = midSpeed;
-                    currentBestDistance = distance;
-
-                    // our distance beats record, but can we go higher?
-                    start = midSpeed + 1;
-
-                    //if ()
-                }
-            }
-
-            return currentBestSpeed ?? -1;
+            return startSpeed;
         }
     }
 
