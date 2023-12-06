@@ -6,7 +6,10 @@ public class Day6SolverTests
 {
     private readonly Day6Solver _sut = new();
 
-    private const string ExampleInput = @"";
+    private const string ExampleInput = """
+        Time:      7  15   30
+        Distance:  9  40  200
+        """;
 
     [Test]
     public void Part1Example()
@@ -15,7 +18,7 @@ public class Day6SolverTests
         var part1ExampleResult = _sut.SolvePart1(ExampleInput);
 
         // ASSERT
-        part1ExampleResult.Should().Be(null);
+        part1ExampleResult.Should().Be(288);
     }
 
     [Test]
