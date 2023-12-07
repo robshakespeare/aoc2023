@@ -10,9 +10,6 @@ public class Day7Solver : ISolver
 
     public long? SolvePart2(string input) => CalcTotalWinnings(input.Replace('J', Joker)); // Replace 'J' with 'X' (where 'X' is our Joker card indicator)
 
-    /// <summary>
-    /// Parse, then rank, then calculate total winnings.
-    /// </summary>
     static long CalcTotalWinnings(string input) => ParseInput(input)
         .OrderBy(x => x.Hand, new HandComparer())
         .Select((x, i) => new { x.Hand, x.Bid, Rank = i + 1 })
@@ -36,7 +33,7 @@ public class Day7Solver : ISolver
             };
         }
 
-        public static string UpgradeHand(string cards)
+        static string UpgradeHand(string cards)
         {
             var commonCard = cards.Where(c => c != Joker)
                 .GroupBy(c => c)
