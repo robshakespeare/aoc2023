@@ -8,13 +8,13 @@ public class Day7Solver : ISolver
     {
         var handAndBids = ParseInput(input);
 
-        var ordered = handAndBids.OrderByDescending(x => x.Hand, new HandComparer()).ToArray();
+        //var ordered = handAndBids.OrderByDescending(x => x.Hand, new HandComparer()).ToArray();
 
-        Console.WriteLine(
-            handAndBids
-                .OrderBy(x => x.Hand, new HandComparer())
-                .Select((x, i) => new { hand = x.Hand, bid = x.Bid, rank = i + 1 })
-                .Dump());
+        //Console.WriteLine(
+        //    handAndBids
+        //        .OrderBy(x => x.Hand, new HandComparer())
+        //        .Select((x, i) => new { hand = x.Hand, bid = x.Bid, rank = i + 1 })
+        //        .Dump());
 
         return handAndBids
             .OrderBy(x => x.Hand, new HandComparer())
@@ -24,15 +24,31 @@ public class Day7Solver : ISolver
 
     public long? SolvePart2(string input)
     {
-        return null;
+        input = input.Replace('J', 'X'); // Replace 'J' with 'X' (where 'X' is our Joker card indicator)
+
+        var handAndBids = ParseInput(input);
+
+        //var ordered = handAndBids.OrderByDescending(x => x.Hand, new HandComparer()).ToArray();
+
+        Console.WriteLine(
+            handAndBids
+                .OrderBy(x => x.Hand, new HandComparer())
+                .Select((x, i) => new { hand = x.Hand, handX = Hand.UpgradeHand(x.Hand.Cards), bid = x.Bid, rank = i + 1 })
+                .Dump());
+
+        return handAndBids
+            .OrderBy(x => x.Hand, new HandComparer())
+            .Select((x, i) => x.Bid * (i + 1))
+            .Sum();
     }
 
-    public record Hand(string Cards)
+    record Hand(string Cards)
     {
-        public HandType Type { get; } = DetermineType(Cards);
+        public HandType Type { get; } = DetermineType(UpgradeHand(Cards));
 
-        public static HandType DetermineType(string cards)
+        static HandType DetermineType(string cards)
         {
+            cards = UpgradeHand(cards);
             var groups = cards.GroupBy(c => c).OrderByDescending(g => g.Count()).ToArray();
             return groups.Length switch
             {
@@ -44,37 +60,48 @@ public class Day7Solver : ISolver
                 _ => throw new Exception("Invalid hand: " + cards)
             };
         }
+
+        public static string UpgradeHand(string cards)
+        {
+            try
+            {
+                if (cards.Contains('X'))
+                {
+                    var commonCard = cards.Where(c => c != 'X').GroupBy(c => c)
+                        .OrderByDescending(g => g.Count())
+                        .ThenByDescending(g => CardStrength(g.Key))
+                        //.Select(c => new Nullable(c))
+                        .FirstOrDefault()?.Key ?? 'A';
+                    return cards.Replace('X', commonCard);
+                }
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Failed to upgrade: " + cards, e);
+            }
+
+            return cards;
+        }
     }
 
     class HandComparer : IComparer<Hand>
     {
         public int Compare(Hand? x, Hand? y)
         {
-            /*
-                x is less than y => Less than zero
-                x equals y => Zero
-                x is greater than y => Greater than zero
-             */
+            if (x == null || y == null) throw new NotSupportedException();
 
-            if (x == null || y == null)
-            {
-                throw new NotSupportedException();
-            }
-
-            // Compare cards if hand type is the same
+            // Compare cards if hand type is the same; Otherwise compare Type
             if (x.Type == y.Type)
             {
                 foreach (var (cX, cY) in x.Cards.Select(CardStrength).Zip(y.Cards.Select(CardStrength)))
                 {
-                    if (cX == cY)
+                    if (cX != cY)
                     {
-                        continue;
+                        return cX - cY;
                     }
-                    return cX - cY;
                 }
             }
 
-            // Otherwise compare Type
             return x.Type - y.Type;
         }
     }
@@ -94,11 +121,12 @@ public class Day7Solver : ISolver
         '4' => 4,
         '3' => 3,
         '2' => 2,
-        //var x when int.TryParse(x, out var r) => r,
+        'X' => 1, // Our Joker card indicator
+        //var x when int.TryParse(x, out var r) => r, // rs-todo!
         _ => throw new Exception("Invalid card: " + Card)
     };
 
-    public enum HandType
+    enum HandType
     {
         HighCard,
         OnePair,
