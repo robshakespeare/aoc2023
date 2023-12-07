@@ -23,7 +23,6 @@ public class Day7Solver : ISolver
 
         static HandType DetermineType(string cards)
         {
-            cards = UpgradeHand(cards);
             var groups = cards.GroupBy(c => c).OrderByDescending(g => g.Count()).ToArray();
             return groups.Length switch
             {
@@ -38,21 +37,14 @@ public class Day7Solver : ISolver
 
         public static string UpgradeHand(string cards)
         {
-            try
+            if (cards.Contains('X'))
             {
-                if (cards.Contains('X'))
-                {
-                    var commonCard = cards
-                        .Where(c => c != 'X')
-                        .GroupBy(c => c)
-                        .OrderByDescending(g => g.Count())
-                        .FirstOrDefault()?.Key ?? 'A';
-                    return cards.Replace('X', commonCard);
-                }
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Failed to upgrade: " + cards, e);
+                var commonCard = cards
+                    .Where(c => c != 'X')
+                    .GroupBy(c => c)
+                    .OrderByDescending(g => g.Count())
+                    .FirstOrDefault()?.Key ?? 'A';
+                return cards.Replace('X', commonCard);
             }
 
             return cards;
@@ -88,16 +80,8 @@ public class Day7Solver : ISolver
         'Q' => 12,
         'J' => 11,
         'T' => 10,
-        '9' => 9,
-        '8' => 8,
-        '7' => 7,
-        '6' => 6,
-        '5' => 5,
-        '4' => 4,
-        '3' => 3,
-        '2' => 2,
         'X' => 1, // Our Joker card indicator
-        //var x when int.TryParse(x, out var r) => r, // rs-todo!
+        var c when int.TryParse($"{c}", out var n) => n,
         _ => throw new Exception("Invalid card: " + Card)
     };
 
