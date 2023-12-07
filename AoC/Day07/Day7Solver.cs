@@ -4,6 +4,8 @@ public class Day7Solver : ISolver
 {
     const char Joker = 'X';
 
+    const string CardStrengthOrdinals = "X23456789TJQKA";
+
     public string DayName => "Camel Cards";
 
     public long? SolvePart1(string input) => CalcTotalWinnings(input);
@@ -48,16 +50,7 @@ public class Day7Solver : ISolver
             return cards.Replace(Joker, commonCard);
         }
 
-        static char CardStrengthOrdinal(char Card) => Card switch
-        {
-            'A' => 'E',
-            'K' => 'D',
-            'Q' => 'C',
-            'J' => 'B',
-            'T' => 'A',
-            Joker => '1',
-            _ => Card
-        };
+        static char CardStrengthOrdinal(char Card) => (char)('A' + CardStrengthOrdinals.IndexOf(Card));
     }
 
     enum HandType
