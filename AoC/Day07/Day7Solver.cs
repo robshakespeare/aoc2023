@@ -32,8 +32,7 @@ public class Day7Solver : ISolver
                 2 => groups[0].Count() == 4 ? HandType.FourOfAKind : HandType.FullHouse,
                 3 => groups[0].Count() == 3 ? HandType.ThreeOfAKind : HandType.TwoPair,
                 4 => HandType.OnePair,
-                5 => HandType.HighCard,
-                _ => throw new Exception("Invalid hand: " + cards)
+                _ => HandType.HighCard
             };
         }
 
@@ -71,8 +70,7 @@ public class Day7Solver : ISolver
         'J' => 11,
         'T' => 10,
         Joker => 1,
-        var c when int.TryParse($"{c}", out var n) => n,
-        _ => throw new Exception("Invalid card: " + Card)
+        _ => int.Parse($"{Card}")
     };
 
     enum HandType
