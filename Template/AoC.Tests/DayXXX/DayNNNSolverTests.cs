@@ -6,7 +6,9 @@ public class DayNNNSolverTests
 {
     private readonly DayNNNSolver _sut = new();
 
-    private const string ExampleInput = @"";
+    private const string ExampleInput = """
+
+        """;
 
     [Test]
     public void Part1Example()
