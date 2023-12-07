@@ -4,43 +4,18 @@ public class Day7Solver : ISolver
 {
     public string DayName => "Camel Cards";
 
-    public long? SolvePart1(string input)
-    {
-        var handAndBids = ParseInput(input);
+    public long? SolvePart1(string input) => CalcTotalWinnings(input);
 
-        //var ordered = handAndBids.OrderByDescending(x => x.Hand, new HandComparer()).ToArray();
+    public long? SolvePart2(string input) => CalcTotalWinnings(input.Replace('J', 'X')); // Replace 'J' with 'X' (where 'X' is our Joker card indicator)
 
-        //Console.WriteLine(
-        //    handAndBids
-        //        .OrderBy(x => x.Hand, new HandComparer())
-        //        .Select((x, i) => new { hand = x.Hand, bid = x.Bid, rank = i + 1 })
-        //        .Dump());
-
-        return handAndBids
-            .OrderBy(x => x.Hand, new HandComparer())
-            .Select((x, i) => x.Bid * (i + 1))
-            .Sum();
-    }
-
-    public long? SolvePart2(string input)
-    {
-        input = input.Replace('J', 'X'); // Replace 'J' with 'X' (where 'X' is our Joker card indicator)
-
-        var handAndBids = ParseInput(input);
-
-        //var ordered = handAndBids.OrderByDescending(x => x.Hand, new HandComparer()).ToArray();
-
-        Console.WriteLine(
-            handAndBids
-                .OrderBy(x => x.Hand, new HandComparer())
-                .Select((x, i) => new { hand = x.Hand, handX = Hand.UpgradeHand(x.Hand.Cards), bid = x.Bid, rank = i + 1 })
-                .Dump());
-
-        return handAndBids
-            .OrderBy(x => x.Hand, new HandComparer())
-            .Select((x, i) => x.Bid * (i + 1))
-            .Sum();
-    }
+    /// <summary>
+    /// Parse, then rank, then calculate total winnings.
+    /// </summary>
+    static long CalcTotalWinnings(string input) => ParseInput(input)
+        .OrderBy(x => x.Hand, new HandComparer())
+        .Select((x, i) => new { x.Hand, x.Bid, Rank = i + 1 })
+        .Select(x => x.Bid * x.Rank)
+        .Sum();
 
     record Hand(string Cards)
     {
@@ -67,10 +42,10 @@ public class Day7Solver : ISolver
             {
                 if (cards.Contains('X'))
                 {
-                    var commonCard = cards.Where(c => c != 'X').GroupBy(c => c)
+                    var commonCard = cards
+                        .Where(c => c != 'X')
+                        .GroupBy(c => c)
                         .OrderByDescending(g => g.Count())
-                        .ThenByDescending(g => CardStrength(g.Key))
-                        //.Select(c => new Nullable(c))
                         .FirstOrDefault()?.Key ?? 'A';
                     return cards.Replace('X', commonCard);
                 }
