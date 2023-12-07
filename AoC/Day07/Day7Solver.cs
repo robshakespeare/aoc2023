@@ -11,18 +11,22 @@ public class Day7Solver : ISolver
     public long? SolvePart2(string input) => CalcTotalWinnings(input.Replace('J', Joker)); // Replace 'J' with 'X' (where 'X' is our Joker card indicator)
 
     static long CalcTotalWinnings(string input) => ParseInput(input)
-        .OrderBy(x => x.Hand, new HandComparer())
+        .OrderBy(x => x.Hand.OrdinalScore)
         .Select((x, i) => new { x.Hand, x.Bid, Rank = i + 1 })
         .Select(x => x.Bid * x.Rank)
         .Sum();
 
-    record Hand(string Cards)
+    record Hand(string Cards, HandType Type, string OrdinalScore)
     {
-        public HandType Type { get; } = DetermineType(UpgradeHand(Cards));
+        public static Hand Create(string cards)
+        {
+            var type = DetermineType(cards);
+            return new Hand(cards, type, $"{type:D}{string.Concat(cards.Select(CardStrengthOrdinal))}");
+        }
 
         static HandType DetermineType(string cards)
         {
-            var groups = cards.GroupBy(c => c).OrderByDescending(g => g.Count()).ToArray();
+            var groups = UpgradeHand(cards).GroupBy(c => c).OrderByDescending(g => g.Count()).ToArray();
             return groups.Length switch
             {
                 1 => HandType.FiveOfAKind,
@@ -41,34 +45,18 @@ public class Day7Solver : ISolver
                 .FirstOrDefault()?.Key ?? 'A';
             return cards.Replace(Joker, commonCard);
         }
-    }
 
-    class HandComparer : IComparer<Hand>
-    {
-        public int Compare(Hand? x, Hand? y)
+        static char CardStrengthOrdinal(char Card) => Card switch
         {
-            if (x == null || y == null) throw new NotSupportedException();
-
-            // Compare cards if hand type is the same; Otherwise compare Type
-            if (x.Type == y.Type)
-                foreach (var (cX, cY) in x.Cards.Select(CardStrength).Zip(y.Cards.Select(CardStrength)))
-                    if (cX != cY)
-                        return cX - cY;
-
-            return x.Type - y.Type;
-        }
+            'A' => 'E',
+            'K' => 'D',
+            'Q' => 'C',
+            'J' => 'B',
+            'T' => 'A',
+            Joker => '1',
+            _ => Card
+        };
     }
-
-    static int CardStrength(char Card) => Card switch
-    {
-        'A' => 14,
-        'K' => 13,
-        'Q' => 12,
-        'J' => 11,
-        'T' => 10,
-        Joker => 1,
-        _ => int.Parse($"{Card}")
-    };
 
     enum HandType
     {
@@ -83,6 +71,6 @@ public class Day7Solver : ISolver
 
     static (Hand Hand, long Bid)[] ParseInput(string input) => input.ReadLines()
         .Select(line => line.Split(" "))
-        .Select(parts => (new Hand(parts[0]), long.Parse(parts[1])))
+        .Select(parts => (Hand.Create(parts[0]), long.Parse(parts[1])))
         .ToArray();
 }
