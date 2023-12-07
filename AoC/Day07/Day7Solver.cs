@@ -2,11 +2,13 @@ namespace AoC.Day07;
 
 public class Day7Solver : ISolver
 {
+    const char Joker = 'X';
+
     public string DayName => "Camel Cards";
 
     public long? SolvePart1(string input) => CalcTotalWinnings(input);
 
-    public long? SolvePart2(string input) => CalcTotalWinnings(input.Replace('J', 'X')); // Replace 'J' with 'X' (where 'X' is our Joker card indicator)
+    public long? SolvePart2(string input) => CalcTotalWinnings(input.Replace('J', Joker)); // Replace 'J' with 'X' (where 'X' is our Joker card indicator)
 
     /// <summary>
     /// Parse, then rank, then calculate total winnings.
@@ -37,14 +39,13 @@ public class Day7Solver : ISolver
 
         public static string UpgradeHand(string cards)
         {
-            if (cards.Contains('X'))
+            if (cards.Contains(Joker))
             {
-                var commonCard = cards
-                    .Where(c => c != 'X')
+                var commonCard = cards.Where(c => c != Joker)
                     .GroupBy(c => c)
                     .OrderByDescending(g => g.Count())
                     .FirstOrDefault()?.Key ?? 'A';
-                return cards.Replace('X', commonCard);
+                return cards.Replace(Joker, commonCard);
             }
 
             return cards;
@@ -59,15 +60,9 @@ public class Day7Solver : ISolver
 
             // Compare cards if hand type is the same; Otherwise compare Type
             if (x.Type == y.Type)
-            {
                 foreach (var (cX, cY) in x.Cards.Select(CardStrength).Zip(y.Cards.Select(CardStrength)))
-                {
                     if (cX != cY)
-                    {
                         return cX - cY;
-                    }
-                }
-            }
 
             return x.Type - y.Type;
         }
@@ -80,7 +75,7 @@ public class Day7Solver : ISolver
         'Q' => 12,
         'J' => 11,
         'T' => 10,
-        'X' => 1, // Our Joker card indicator
+        Joker => 1,
         var c when int.TryParse($"{c}", out var n) => n,
         _ => throw new Exception("Invalid card: " + Card)
     };
