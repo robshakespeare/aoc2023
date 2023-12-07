@@ -6,7 +6,9 @@ public class Day14SolverTests
 {
     private readonly Day14Solver _sut = new();
 
-    private const string ExampleInput = @"";
+    private const string ExampleInput = """
+
+        """;
 
     [Test]
     public void Part1Example()
