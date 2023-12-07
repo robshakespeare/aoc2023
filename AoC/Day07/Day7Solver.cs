@@ -39,16 +39,11 @@ public class Day7Solver : ISolver
 
         public static string UpgradeHand(string cards)
         {
-            if (cards.Contains(Joker))
-            {
-                var commonCard = cards.Where(c => c != Joker)
-                    .GroupBy(c => c)
-                    .OrderByDescending(g => g.Count())
-                    .FirstOrDefault()?.Key ?? 'A';
-                return cards.Replace(Joker, commonCard);
-            }
-
-            return cards;
+            var commonCard = cards.Where(c => c != Joker)
+                .GroupBy(c => c)
+                .OrderByDescending(g => g.Count())
+                .FirstOrDefault()?.Key ?? 'A';
+            return cards.Replace(Joker, commonCard);
         }
     }
 
