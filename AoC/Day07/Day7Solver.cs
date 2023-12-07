@@ -26,13 +26,15 @@ public class Day7Solver : ISolver
 
         static HandType DetermineType(string cards)
         {
-            var groups = UpgradeHand(cards).GroupBy(c => c).OrderByDescending(g => g.Count()).ToArray();
-            return groups.Length switch
+            var counts = UpgradeHand(cards).GroupBy(c => c).Select(g => g.Count()).OrderByDescending(x => x).ToArray();
+            return counts switch
             {
-                1 => HandType.FiveOfAKind,
-                2 => groups[0].Count() == 4 ? HandType.FourOfAKind : HandType.FullHouse,
-                3 => groups[0].Count() == 3 ? HandType.ThreeOfAKind : HandType.TwoPair,
-                4 => HandType.OnePair,
+                [5] => HandType.FiveOfAKind,
+                [4, 1] => HandType.FourOfAKind,
+                [3, 2] => HandType.FullHouse,
+                [3, ..] => HandType.ThreeOfAKind,
+                [2, 2, ..] => HandType.TwoPair,
+                [2, ..] => HandType.OnePair,
                 _ => HandType.HighCard
             };
         }
