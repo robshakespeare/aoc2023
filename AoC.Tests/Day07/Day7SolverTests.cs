@@ -6,7 +6,13 @@ public class Day7SolverTests
 {
     private readonly Day7Solver _sut = new();
 
-    private const string ExampleInput = @"";
+    private const string ExampleInput = """
+        32T3K 765
+        T55J5 684
+        KK677 28
+        KTJJT 220
+        QQQJA 483
+        """;
 
     [Test]
     public void Part1Example()
@@ -15,7 +21,7 @@ public class Day7SolverTests
         var part1ExampleResult = _sut.SolvePart1(ExampleInput);
 
         // ASSERT
-        part1ExampleResult.Should().Be(null);
+        part1ExampleResult.Should().Be(6440);
     }
 
     [Test]
@@ -25,7 +31,7 @@ public class Day7SolverTests
         var part1Result = _sut.SolvePart1();
 
         // ASSERT
-        part1Result.Should().Be(null);
+        part1Result.Should().Be(248217452);
     }
 
     [Test]
