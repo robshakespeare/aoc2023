@@ -22,8 +22,6 @@ public partial class Day8Solver : ISolver
             currentNode = isLeft ? network[currentNode].Left : network[currentNode].Right;
         }
 
-        //elementsMap.g
-
         return numOfSteps;
     }
 
