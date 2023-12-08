@@ -12,7 +12,7 @@ public partial class Day8Solver : ISolver
         return GetNumOfSteps(
             document: ParseInput(input),
             startNode: "AAA",
-            isEnd: currentNode => currentNode != "ZZZ");
+            isEnd: currentNode => currentNode == "ZZZ");
 
         //var currentNode = "AAA";
         //var instructionPointer = 0;
@@ -31,29 +31,40 @@ public partial class Day8Solver : ISolver
 
     public long? SolvePart2(string input)
     {
-        var (instructions, network) = ParseInput(input);
+        var document = ParseInput(input);
+        var startNodes = document.Network.Keys.Where(key => key.EndsWith('A')).ToArray();
+        var isEnd = (string currentNode) => currentNode[^1] == 'Z';
 
-        var currentNodes = network.Keys.Where(key => key.EndsWith('A')).ToArray();
+        var numOfSteps = startNodes.Select(startNode => GetNumOfSteps(document, startNode, isEnd)).ToArray();
 
-        var instructionPointer = 0;
-        var numOfSteps = 0;
+        Console.WriteLine($"numOfSteps: {string.Join(", ", numOfSteps)}");
 
-        while (currentNodes.Any(node => node[^1] != 'Z'))
-        {
-            var pair = instructions[instructionPointer] == 'L' ? 0 : 1;
-            instructionPointer = ++instructionPointer % instructions.Length;
-            numOfSteps++;
-            currentNodes = currentNodes.Select(currentNode => network[currentNode][pair]).ToArray();
+        return MathUtils.LeastCommonMultiple(numOfSteps);
 
-            var anyEnd = currentNodes.Where(node => node[^1] == 'Z').ToArray();
 
-            if (anyEnd.Any())
-            {
-                Console.WriteLine($"step: {numOfSteps}, anyEnd: {string.Join(", ", anyEnd)}");
-            }
-        }
+        //var (instructions, network) = ParseInput(input);
 
-        return numOfSteps;
+        //var currentNodes = network.Keys.Where(key => key.EndsWith('A')).ToArray();
+
+        //var instructionPointer = 0;
+        //var numOfSteps = 0;
+
+        //while (currentNodes.Any(node => node[^1] != 'Z'))
+        //{
+        //    var pair = instructions[instructionPointer] == 'L' ? 0 : 1;
+        //    instructionPointer = ++instructionPointer % instructions.Length;
+        //    numOfSteps++;
+        //    currentNodes = currentNodes.Select(currentNode => network[currentNode][pair]).ToArray();
+
+        //    var anyEnd = currentNodes.Where(node => node[^1] == 'Z').ToArray();
+
+        //    if (anyEnd.Any())
+        //    {
+        //        Console.WriteLine($"step: {numOfSteps}, anyEnd: {string.Join(", ", anyEnd)}");
+        //    }
+        //}
+
+        //return numOfSteps;
     }
 
     static long GetNumOfSteps(Document document, string startNode, Func<string, bool> isEnd)
@@ -63,7 +74,7 @@ public partial class Day8Solver : ISolver
         var instructionPointer = 0;
         var numOfSteps = 0L;
 
-        while (isEnd(currentNode))
+        while (!isEnd(currentNode))
         {
             var pair = instructions[instructionPointer] == 'L' ? 0 : 1;
             instructionPointer = ++instructionPointer % instructions.Length;

@@ -80,6 +80,6 @@ public class Day8SolverTests
         var part2Result = _sut.SolvePart2();
 
         // ASSERT
-        part2Result.Should().Be(null);
+        part2Result.Should().Be(17972669116327);
     }
 }
