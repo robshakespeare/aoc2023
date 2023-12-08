@@ -16,10 +16,10 @@ public partial class Day8Solver : ISolver
 
         while (currentNode != "ZZZ")
         {
-            var isLeft = instructions[instructionPointer] == 'L';
+            var pair = instructions[instructionPointer] == 'L' ? 0 : 1;
             instructionPointer = ++instructionPointer % instructions.Length;
             numOfSteps++;
-            currentNode = isLeft ? network[currentNode].Left : network[currentNode].Right;
+            currentNode = network[currentNode][pair];
         }
 
         return numOfSteps;
@@ -27,10 +27,25 @@ public partial class Day8Solver : ISolver
 
     public long? SolvePart2(string input)
     {
-        return null;
+        var (instructions, network) = ParseInput(input);
+
+        var currentNodes = network.Keys.Where(key => key.EndsWith('A')).ToArray();
+
+        var instructionPointer = 0;
+        var numOfSteps = 0;
+
+        while (currentNodes.Any(node => node[^1] != 'Z'))
+        {
+            var pair = instructions[instructionPointer] == 'L' ? 0 : 1;
+            instructionPointer = ++instructionPointer % instructions.Length;
+            numOfSteps++;
+            currentNodes = currentNodes.Select(currentNode => network[currentNode][pair]).ToArray();
+        }
+
+        return numOfSteps;
     }
 
-    record Document(string Instructions, IDictionary<string, (string Left, string Right)> Network);
+    record Document(string Instructions, IDictionary<string, string[]> Network);
 
     static Document ParseInput(string input)
     {
@@ -38,12 +53,12 @@ public partial class Day8Solver : ISolver
         var instructions = lines[0];
         var network = lines.Skip(2)
             .Select(line => ParseLine().Match(line))
-            .ToDictionary(match => match.Groups["key"].Value, match => (match.Groups["left"].Value, match.Groups["right"].Value))
+            .ToDictionary(match => match.Groups["key"].Value, match => match.Groups["pair"].Value.Split(", "))
             .ToFrozenDictionary();
 
         return new Document(instructions, network);
     }
 
-    [GeneratedRegex(@"(?<key>\w+) = \((?<left>\w+), (?<right>\w+)\)")]
+    [GeneratedRegex(@"(?<key>\w+) = \((?<pair>[^)]+)\)")]
     private static partial Regex ParseLine();
 }
