@@ -52,7 +52,7 @@ public class Day7SolverTests
 
         // ASSERT
         part2Result.Should().BeGreaterThan(245147007);
-        part2Result.Should().BeGreaterThan(245406987);        
+        part2Result.Should().BeGreaterThan(245406987);
         part2Result.Should().Be(245576185);
     }
 }
