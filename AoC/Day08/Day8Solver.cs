@@ -18,19 +18,11 @@ public partial class Day8Solver : ISolver
         var numOfSteps = startNodes.Select(startNode => GetNumOfSteps(document, startNode, IsEnd)).ToArray();
 
         Console.WriteLine($"numOfSteps: {string.Join(", ", numOfSteps)}");
-        numOfSteps.Dump();
-        document.Instructions.Dump();
+        numOfSteps.Dump("numOfSteps");
+        document.Instructions.Dump("document.Instructions");
         new { test = true, name = "Test", values = (int[])[1, 2, 3, 4] }.Dump();
         new TestObject("testObj", 12, true).Dump();
         (Test1: true, Test2: "Hello world").Dump();
-
-        Console.WriteLine(numOfSteps.Dump(new DumpOptions {
-            DumpStyle = DumpStyle.Console,
-        }));
-        Console.WriteLine((Test1: true, Test2: "Hello world").Dump(new DumpOptions
-        {
-            DumpStyle = DumpStyle.Console,
-        }));
 
         return MathUtils.LeastCommonMultiple(numOfSteps);
     }
