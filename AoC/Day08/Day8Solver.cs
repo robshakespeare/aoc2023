@@ -13,7 +13,7 @@ public partial class Day8Solver : ISolver
     {
         var document = ParseInput(input);
         var startNodes = document.Network.Keys.Where(key => key.EndsWith('A')).ToArray();
-        static bool IsEnd(string currentNode) => currentNode[^1] == 'Z';
+        static bool IsEnd(string currentNode) => currentNode.EndsWith('Z');
 
         var numOfSteps = startNodes.Select(startNode => GetNumOfSteps(document, startNode, IsEnd)).ToArray();
 
