@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 namespace AoC;
 
 public static class GeneralExtensions
@@ -58,4 +60,15 @@ public static class GeneralExtensions
     /// </summary>
     public static TValue GetOrAdd<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key, Func<TValue> buildValue)
         where TKey : notnull => dictionary.TryGetValue(key, out var value) ? value : dictionary[key] = buildValue();
+
+    public static void Dump(this object obj)
+    {
+        JsonSerializerOptions options = new()
+        {
+            WriteIndented = true,
+            IncludeFields = true,
+        };
+
+        Console.WriteLine(JsonSerializer.Serialize(obj, options));
+    }
 }
