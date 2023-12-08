@@ -30,7 +30,7 @@ public class Day5Solver : ISolver
 
             if (!rangesSeen.Contains(range))
             {
-                if (range.LocationStart == range.LocationMid && range.LocationStart == range.LocationEnd) 
+                if (range.LocationStart == range.LocationMid && range.LocationStart == range.LocationEnd)
                 {
                     currentMinLocation = Math.Min(currentMinLocation, range.MinLocation);
                 }
