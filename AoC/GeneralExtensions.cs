@@ -1,5 +1,3 @@
-using System.Text.Json;
-
 namespace AoC;
 
 public static class GeneralExtensions

@@ -18,16 +18,9 @@ public partial class Day8Solver : ISolver
         var numOfSteps = startNodes.Select(startNode => GetNumOfSteps(document, startNode, IsEnd)).ToArray();
 
         Console.WriteLine($"numOfSteps: {string.Join(", ", numOfSteps)}");
-        numOfSteps.Dump("numOfSteps");
-        document.Instructions.Dump("document.Instructions");
-        new { test = true, name = "Test", values = (int[])[1, 2, 3, 4] }.Dump();
-        new TestObject("testObj", 12, true).Dump();
-        (Test1: true, Test2: "Hello world").Dump();
 
         return MathUtils.LeastCommonMultiple(numOfSteps);
     }
-
-    record TestObject(string Id, int Age, bool IsTest);
 
     static long GetNumOfSteps(Document document, string startNode, Func<string, bool> isEnd)
     {
@@ -42,11 +35,6 @@ public partial class Day8Solver : ISolver
             instructionPointer = ++instructionPointer % instructions.Length;
             numOfSteps++;
             currentNode = network[currentNode][pair];
-
-            if (currentNode.EndsWith('Z'))
-            {
-                currentNode.Dump();
-            }
         }
 
         return numOfSteps;
