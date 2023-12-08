@@ -1,5 +1,3 @@
-using System.Collections.Frozen;
-
 namespace AoC.Day03;
 
 public partial class Day3Solver : ISolver
