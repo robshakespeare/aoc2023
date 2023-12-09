@@ -10,7 +10,7 @@ internal partial class PullPuzzleInputCommand(IInputCrypto inputCrypto)
 {
     private const string UserAgentName = "Rob Shakespeare's AoC CLI https://github.com/robshakespeare";
 
-    public static PullPuzzleInputCommand Instance = new PullPuzzleInputCommand(IInputCrypto.Instance);
+    public static PullPuzzleInputCommand Instance = new(PuzzleInputCrypto.Instance);
 
     public async Task DoAsync(string[] args)
     {
@@ -57,6 +57,10 @@ internal partial class PullPuzzleInputCommand(IInputCrypto inputCrypto)
         var outputPath = Path.Combine(repoRootPath, "AoC", $"Day{day.PadLeft(2, '0')}", $"input-day{day}.txt");
         await File.WriteAllTextAsync(outputPath, puzzleInput);
         Console.WriteLine($"Puzzle input saved to: {Cyan(outputPath)}");
+
+        // Save puzzle input encrypted
+        outputPath = Path.ChangeExtension(outputPath, ".encrypted.txt");
+        await File.WriteAllTextAsync(outputPath, inputCrypto.Encrypt(puzzleInput));
     }
 
     private async Task<string> GetPuzzleInputAsync(string day, string year, string sessionToken)
@@ -72,7 +76,7 @@ internal partial class PullPuzzleInputCommand(IInputCrypto inputCrypto)
             .TrimEnd();
 
         Console.WriteLine($"Puzzle input retrieved, length: {Green(puzzleInput.Length.ToString())}");
-        return inputCrypto.Encrypt(puzzleInput);
+        return puzzleInput;
     }
 
     [GeneratedRegex(@"--- Day \d+: (?<dayName>.+) ---", RegexOptions.Compiled)]

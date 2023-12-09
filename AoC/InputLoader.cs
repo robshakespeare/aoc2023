@@ -1,5 +1,4 @@
 using System.Security.Cryptography;
-using Microsoft.Extensions.Configuration;
 using static Crayon.Output;
 
 namespace AoC;
@@ -55,15 +54,13 @@ public interface IInputCrypto : IDisposable
 {
     string Decrypt(string plainText);
     string Encrypt(string cipherText);
-
-    public static IInputCrypto Instance { get; } = InputCrypto.Create();
 }
 
-internal class InputCrypto : IInputCrypto
+public sealed class InputCrypto : IInputCrypto
 {
     private readonly Aes aes;
 
-    private InputCrypto(byte[] key)
+    public InputCrypto(byte[] key)
     {
         aes = Aes.Create();
         aes.IV = Encoding.UTF8.GetBytes("AdventOfCode2023");
@@ -94,22 +91,5 @@ internal class InputCrypto : IInputCrypto
         using var cs = new CryptoStream(ms, de, CryptoStreamMode.Read);
         using var sr = new StreamReader(cs);
         return sr.ReadToEnd();
-    }
-
-    public static IInputCrypto Create()
-    {
-        var config = new ConfigurationBuilder()
-            .AddEnvironmentVariables()
-            .AddUserSecrets<InputCrypto>()
-            .Build();
-
-        const string keyName = "AocPuzzleInputCryptoKey";
-        var key = config[keyName];
-        if (string.IsNullOrWhiteSpace(key))
-        {
-            throw new Exception($"Missing config: {keyName}");
-        }
-
-        return new InputCrypto(Encoding.UTF8.GetBytes(key));
     }
 }
