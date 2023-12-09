@@ -36,8 +36,14 @@ internal class InputLoader
 
     private string LoadInput(string resourceName)
     {
-        using var resourceStream = _solverType.Assembly.GetManifestResourceStream(resourceName)
-                                   ?? throw new InvalidOperationException($"Input file `{resourceName}` not found.");
+        using var resourceStream = _solverType.Assembly.GetManifestResourceStream(resourceName);
+
+        if (resourceStream == null)
+        {
+            Console.WriteLine(Bright.Red($"[WARNING] Input file `{Bright.Cyan(resourceName)}` does not exist"));
+            return "";
+        }
+
         using var streamReader = new StreamReader(resourceStream);
         var input = streamReader.ReadToEnd();
 
