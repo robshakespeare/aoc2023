@@ -13,17 +13,28 @@ public class Day9Solver : ISolver
 
     public long? SolvePart2(string input)
     {
-        return null;
+        var analyzedHistories = ParseInput(input).Select(AnalyzeHistory);
+
+        analyzedHistories.Dump();
+
+        return analyzedHistories.Sum(x => x.PreappendedValue);
     }
 
     record AnalyzedHistory(long[][] Sequences)
     {
         public long ExtrapolatedValue { get; } = GetExtrapolatedValue(Sequences);
 
+        public long PreappendedValue { get; } = GetPreappendedValue(Sequences);
+
         static long GetExtrapolatedValue(long[][] sequences, int pointer = 0) =>
             pointer >= sequences.Length
                 ? 0
                 : sequences[pointer][^1] + GetExtrapolatedValue(sequences, pointer + 1);
+
+        static long GetPreappendedValue(long[][] sequences, int pointer = 0) =>
+            pointer >= sequences.Length
+                ? 0
+                : sequences[pointer][0] - GetPreappendedValue(sequences, pointer + 1);
     }
 
     static AnalyzedHistory AnalyzeHistory(long[] history)
