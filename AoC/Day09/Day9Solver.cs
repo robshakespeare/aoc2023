@@ -8,8 +8,6 @@ public class Day9Solver : ISolver
     {
         var analyzedHistories = ParseInput(input).Select(AnalyzeHistory);
 
-        //analyzedHistories.Dump();
-
         return analyzedHistories.Sum(x => x.ExtrapolatedValue);
     }
 
@@ -22,16 +20,10 @@ public class Day9Solver : ISolver
     {
         public long ExtrapolatedValue { get; } = GetExtrapolatedValue(Sequences);
 
-        static long GetExtrapolatedValue(long[][] sequences, int pointer = 0)
-        {
-            if (pointer >= sequences.Length)
-            {
-                return 0;
-            }
-
-            //var next = pointer + 1;
-            return sequences[pointer][^1] + GetExtrapolatedValue(sequences, pointer + 1);
-        }
+        static long GetExtrapolatedValue(long[][] sequences, int pointer = 0) =>
+            pointer >= sequences.Length
+                ? 0
+                : sequences[pointer][^1] + GetExtrapolatedValue(sequences, pointer + 1);
     }
 
     static AnalyzedHistory AnalyzeHistory(long[] history)
@@ -39,6 +31,7 @@ public class Day9Solver : ISolver
         var results = new List<long[]>();
         var current = history;
 
+        // rs-todo: tidy?
         while (current != null)
         {
             results.Add(current);
@@ -60,7 +53,7 @@ public class Day9Solver : ISolver
         for (var i = 1; i < sequence.Length; i++)
         {
             results[i - 1] = sequence[i] - sequence[i - 1];
-            //yield return sequence[i] - sequence[i - 1];
+            //yield return sequence[i] - sequence[i - 1]; // rs-todo: tidy?
         }
 
         return results;
