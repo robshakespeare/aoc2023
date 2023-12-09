@@ -30,7 +30,6 @@ public class Day9Solver : ISolver
         var results = new List<long[]>();
         var current = history;
 
-        // rs-todo: tidy?
         while (current != null)
         {
             results.Add(current);
@@ -48,11 +47,9 @@ public class Day9Solver : ISolver
         }
 
         var results = new long[sequence.Length - 1];
-
         for (var i = 1; i < sequence.Length; i++)
         {
             results[i - 1] = sequence[i] - sequence[i - 1];
-            //yield return sequence[i] - sequence[i - 1]; // rs-todo: tidy?
         }
 
         return results;
