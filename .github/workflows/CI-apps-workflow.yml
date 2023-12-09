@@ -10,9 +10,6 @@ on:
       - "AoC/**"
       - "AoC.Tests/**"
 
-env:
-  AocPuzzleInputCryptoKey: ${{ secrets.AOC_PUZZLE_INPUT_CRYPTO_KEY }}
-
 jobs:
   build-and-test:
     runs-on: ubuntu-latest

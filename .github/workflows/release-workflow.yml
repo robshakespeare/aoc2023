@@ -5,9 +5,6 @@ on:
     branches:
       - main
 
-env:
-  AocPuzzleInputCryptoKey: ${{ secrets.AOC_PUZZLE_INPUT_CRYPTO_KEY }}
-
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
@@ -19,6 +16,10 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 8.0.100
+    - name: Decrypt the puzzle inputs
+      run: dotnet run --project AoC.CLI --decrypt
+      env:
+        AocPuzzleInputCryptoKey: ${{ secrets.AOC_PUZZLE_INPUT_CRYPTO_KEY }}
     - name: Publish Linux CLI
       run: dotnet publish AoC.CLI -c Release -r linux-x64 --self-contained -p:PublishSingleFile=true
     - name: Publish Windows CLI
