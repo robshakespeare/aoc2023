@@ -6,11 +6,13 @@ using static Crayon.Output;
 
 namespace AoC.CLI;
 
-internal static partial class PullPuzzleInputCommand
+internal partial class PullPuzzleInputCommand(IInputCrypto inputCrypto)
 {
     private const string UserAgentName = "Rob Shakespeare's AoC CLI https://github.com/robshakespeare";
 
-    public static async Task DoAsync(string[] args)
+    public static PullPuzzleInputCommand Instance = new PullPuzzleInputCommand(IInputCrypto.Instance);
+
+    public async Task DoAsync(string[] args)
     {
         try
         {
@@ -39,7 +41,7 @@ internal static partial class PullPuzzleInputCommand
         }
     }
 
-    private static async Task PullAndSavePuzzleInputAsync(string repoRootPath, string day, string year, string keyVaultUri)
+    private async Task PullAndSavePuzzleInputAsync(string repoRootPath, string day, string year, string keyVaultUri)
     {
         Console.Clear();
         Console.WriteLine(Bright.Yellow($"Pulling Puzzle Input for Day {Green(day)}"));
@@ -55,6 +57,22 @@ internal static partial class PullPuzzleInputCommand
         var outputPath = Path.Combine(repoRootPath, "AoC", $"Day{day.PadLeft(2, '0')}", $"input-day{day}.txt");
         await File.WriteAllTextAsync(outputPath, puzzleInput);
         Console.WriteLine($"Puzzle input saved to: {Cyan(outputPath)}");
+    }
+
+    private async Task<string> GetPuzzleInputAsync(string day, string year, string sessionToken)
+    {
+        using var timing = new TimingBlock("Get Puzzle Input");
+        Console.WriteLine(Bright.Black("Getting puzzle input..."));
+
+        var puzzleInput = (await $"https://adventofcode.com/{year}/day/{day}/input"
+            .WithCookie("session", sessionToken)
+            .WithHeader("User-Agent", UserAgentName)
+            .GetStringAsync())
+            .ReplaceLineEndings()
+            .TrimEnd();
+
+        Console.WriteLine($"Puzzle input retrieved, length: {Green(puzzleInput.Length.ToString())}");
+        return inputCrypto.Encrypt(puzzleInput);
     }
 
     [GeneratedRegex(@"--- Day \d+: (?<dayName>.+) ---", RegexOptions.Compiled)]
@@ -118,21 +136,5 @@ internal static partial class PullPuzzleInputCommand
         }
 
         return sessionToken;
-    }
-
-    private static async Task<string> GetPuzzleInputAsync(string day, string year, string sessionToken)
-    {
-        using var timing = new TimingBlock("Get Puzzle Input");
-        Console.WriteLine(Bright.Black("Getting puzzle input..."));
-
-        var puzzleInput = (await $"https://adventofcode.com/{year}/day/{day}/input"
-            .WithCookie("session", sessionToken)
-            .WithHeader("User-Agent", UserAgentName)
-            .GetStringAsync())
-            .ReplaceLineEndings()
-            .TrimEnd();
-
-        Console.WriteLine($"Puzzle input retrieved, length: {Green(puzzleInput.Length.ToString())}");
-        return puzzleInput;
     }
 }

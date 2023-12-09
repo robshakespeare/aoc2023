@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using Microsoft.Extensions.Configuration;
 using static Crayon.Output;
 
 namespace AoC;
@@ -46,5 +48,68 @@ internal class InputLoader
         }
 
         return input;
+    }
+}
+
+public interface IInputCrypto : IDisposable
+{
+    string Decrypt(string plainText);
+    string Encrypt(string cipherText);
+
+    public static IInputCrypto Instance { get; } = InputCrypto.Create();
+}
+
+internal class InputCrypto : IInputCrypto
+{
+    private readonly Aes aes;
+
+    private InputCrypto(byte[] key)
+    {
+        aes = Aes.Create();
+        aes.IV = Encoding.UTF8.GetBytes("AdventOfCode2023");
+        aes.Key = key;
+    }
+
+    public void Dispose() => aes.Dispose();
+
+    public string Encrypt(string plainText)
+    {
+        using var en = aes.CreateEncryptor();
+        using var ms = new MemoryStream();
+        using var cs = new CryptoStream(ms, en, CryptoStreamMode.Write);
+
+        using (var sw = new StreamWriter(cs))
+        {
+            sw.Write(plainText);
+        }
+
+        var cipherBytes = ms.ToArray();
+        return Convert.ToBase64String(cipherBytes);
+    }
+
+    public string Decrypt(string cipherText)
+    {
+        using var de = aes.CreateDecryptor();
+        using var ms = new MemoryStream(Convert.FromBase64String(cipherText));
+        using var cs = new CryptoStream(ms, de, CryptoStreamMode.Read);
+        using var sr = new StreamReader(cs);
+        return sr.ReadToEnd();
+    }
+
+    public static IInputCrypto Create()
+    {
+        var config = new ConfigurationBuilder()
+            .AddEnvironmentVariables()
+            .AddUserSecrets<InputCrypto>()
+            .Build();
+
+        const string keyName = "AocPuzzleInputCryptoKey";
+        var key = config[keyName];
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            throw new Exception($"Missing config: {keyName}");
+        }
+
+        return new InputCrypto(Encoding.UTF8.GetBytes(key));
     }
 }
