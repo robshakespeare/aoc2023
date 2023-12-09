@@ -3,24 +3,24 @@ using Azure.Identity;
 using Flurl.Http;
 using Microsoft.Extensions.Configuration;
 using static Crayon.Output;
+using static AoC.CLI.Utils;
 
 namespace AoC.CLI;
 
-internal partial class PullPuzzleInputCommand(IInputCrypto inputCrypto)
+internal partial class PullPuzzleInputCommand(IInputCrypto crypto)
 {
     private const string UserAgentName = "Rob Shakespeare's AoC CLI https://github.com/robshakespeare";
 
-    public static PullPuzzleInputCommand Instance = new(PuzzleInputCrypto.Instance);
+    public static PullPuzzleInputCommand Instance = new(CryptoInstance);
 
     public async Task DoAsync(string[] args)
     {
+        Console.Clear();
         try
         {
-            var repoRootPath = FindRepoRootPath(AppContext.BaseDirectory)
-                               ?? throw new InvalidOperationException("Could not find repo root");
-
+            var repoRootPath = FindRepoRootPath(AppContext.BaseDirectory);
             var day = args.ElementAtOrDefault(1) ?? SolverFactory.Instance.DefaultDay;
-            var year = args.ElementAtOrDefault(2) ?? DateTime.Now.Year.ToString();
+            var year = Year.ToString();
             var keyVaultUri = args.ElementAtOrDefault(3) ?? "https://rws-aoc.vault.azure.net/";
 
             var dayName = "";
@@ -43,7 +43,6 @@ internal partial class PullPuzzleInputCommand(IInputCrypto inputCrypto)
 
     private async Task PullAndSavePuzzleInputAsync(string repoRootPath, string day, string year, string keyVaultUri)
     {
-        Console.Clear();
         Console.WriteLine(Bright.Yellow($"Pulling Puzzle Input for Day {Green(day)}"));
         Console.WriteLine(Bright.Black($"Key Vault: {keyVaultUri}{Environment.NewLine}"));
 
@@ -60,7 +59,7 @@ internal partial class PullPuzzleInputCommand(IInputCrypto inputCrypto)
 
         // Save puzzle input encrypted
         outputPath = Path.ChangeExtension(outputPath, ".encrypted.txt");
-        await File.WriteAllTextAsync(outputPath, inputCrypto.Encrypt(puzzleInput));
+        await File.WriteAllTextAsync(outputPath, crypto.Encrypt(puzzleInput));
     }
 
     private async Task<string> GetPuzzleInputAsync(string day, string year, string sessionToken)
@@ -102,22 +101,6 @@ internal partial class PullPuzzleInputCommand(IInputCrypto inputCrypto)
         await File.WriteAllTextAsync(solverFilePath, solverFileContents);
 
         return dayName;
-    }
-
-    private static string? FindRepoRootPath(string? dirPath)
-    {
-        if (dirPath == null)
-        {
-            return null;
-        }
-
-        if (Directory.Exists(Path.Combine(dirPath, ".git")))
-        {
-            return dirPath;
-        }
-
-        var parent = Directory.GetParent(dirPath);
-        return parent != null ? FindRepoRootPath(parent.FullName) : null;
     }
 
     private static string GetSessionToken(string keyVaultUri)

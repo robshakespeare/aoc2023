@@ -63,7 +63,7 @@ public sealed class InputCrypto : IInputCrypto
     public InputCrypto(byte[] key)
     {
         aes = Aes.Create();
-        aes.IV = Encoding.UTF8.GetBytes("AdventOfCode2023");
+        aes.IV = Encoding.UTF8.GetBytes("@Advent-Of-Code#");
         aes.Key = key;
     }
 
