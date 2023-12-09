@@ -4,25 +4,24 @@ public class Day9Solver : ISolver
 {
     public string DayName => "Mirage Maintenance";
 
-    public long? SolvePart1(string input) => ParseInput(input).Sum(x => x.ExtrapolatedValue);
+    public long? SolvePart1(string input) => Solve(input);
 
-    public long? SolvePart2(string input) => ParseInput(input).Sum(x => x.PrependedValue);
+    public long? SolvePart2(string input) => Solve(input, reverse: true);
+
+    static long Solve(string input, bool reverse = false) => input.ReadLines()
+        .Select(line => line.Split(" ").Select(long.Parse))
+        .Select(v => (reverse ? v.Reverse() : v).ToArray())
+        .Select(AnalyzeHistory)
+        .Sum(x => x.ExtrapolatedValue);
 
     record AnalyzedHistory(long[][] Sequences)
     {
         public long ExtrapolatedValue { get; } = GetExtrapolatedValue(Sequences);
 
-        public long PrependedValue { get; } = GetPrependedValue(Sequences);
-
         static long GetExtrapolatedValue(long[][] sequences, int pointer = 0) =>
             pointer >= sequences.Length
                 ? 0
                 : sequences[pointer][^1] + GetExtrapolatedValue(sequences, pointer + 1);
-
-        static long GetPrependedValue(long[][] sequences, int pointer = 0) =>
-            pointer >= sequences.Length
-                ? 0
-                : sequences[pointer][0] - GetPrependedValue(sequences, pointer + 1);
     }
 
     static AnalyzedHistory AnalyzeHistory(long[] history)
@@ -54,7 +53,4 @@ public class Day9Solver : ISolver
 
         return results;
     }
-
-    static IEnumerable<AnalyzedHistory> ParseInput(string input) =>
-        input.ReadLines().Select(line => line.Split(" ").Select(long.Parse).ToArray()).Select(AnalyzeHistory);
 }
