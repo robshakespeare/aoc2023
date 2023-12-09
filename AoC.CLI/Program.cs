@@ -1,5 +1,6 @@
 using System.Text;
 using AoC;
+using AoC.CLI;
 using static Crayon.Output;
 
 Console.OutputEncoding = OperatingSystem.IsWindows() ? Encoding.Unicode : Encoding.UTF8;
@@ -12,14 +13,18 @@ switch (args.ElementAtOrDefault(0))
         return;
 
     case "--pull":
-        await AoC.CLI.PullPuzzleInputCommand.DoAsync(args);
+        await PullPuzzleInputCommand.Instance.DoAsync(args);
+        return;
+
+    case "--decrypt":
+        await DecryptPuzzleInputsCommand.Instance.DoAsync(args);
         return;
 }
 
 static void PrintTitle()
 {
     Console.Clear();
-    Console.WriteLine("🎄 Shakey's AoC 2023 🌟");
+    Console.WriteLine($"🎄 Shakey's AoC {Utils.Year} 🌟");
 }
 
 PrintTitle();

@@ -3,22 +3,24 @@ using Azure.Identity;
 using Flurl.Http;
 using Microsoft.Extensions.Configuration;
 using static Crayon.Output;
+using static AoC.CLI.Utils;
 
 namespace AoC.CLI;
 
-internal static partial class PullPuzzleInputCommand
+internal partial class PullPuzzleInputCommand(IInputCrypto crypto)
 {
     private const string UserAgentName = "Rob Shakespeare's AoC CLI https://github.com/robshakespeare";
 
-    public static async Task DoAsync(string[] args)
+    public static PullPuzzleInputCommand Instance = new(CryptoInstance);
+
+    public async Task DoAsync(string[] args)
     {
+        Console.Clear();
         try
         {
-            var repoRootPath = FindRepoRootPath(AppContext.BaseDirectory)
-                               ?? throw new InvalidOperationException("Could not find repo root");
-
+            var repoRootPath = FindRepoRootPath(AppContext.BaseDirectory);
             var day = args.ElementAtOrDefault(1) ?? SolverFactory.Instance.DefaultDay;
-            var year = args.ElementAtOrDefault(2) ?? DateTime.Now.Year.ToString();
+            var year = Year.ToString();
             var keyVaultUri = args.ElementAtOrDefault(3) ?? "https://rws-aoc.vault.azure.net/";
 
             var dayName = "";
@@ -39,9 +41,8 @@ internal static partial class PullPuzzleInputCommand
         }
     }
 
-    private static async Task PullAndSavePuzzleInputAsync(string repoRootPath, string day, string year, string keyVaultUri)
+    private async Task PullAndSavePuzzleInputAsync(string repoRootPath, string day, string year, string keyVaultUri)
     {
-        Console.Clear();
         Console.WriteLine(Bright.Yellow($"Pulling Puzzle Input for Day {Green(day)}"));
         Console.WriteLine(Bright.Black($"Key Vault: {keyVaultUri}{Environment.NewLine}"));
 
@@ -55,6 +56,26 @@ internal static partial class PullPuzzleInputCommand
         var outputPath = Path.Combine(repoRootPath, "AoC", $"Day{day.PadLeft(2, '0')}", $"input-day{day}.txt");
         await File.WriteAllTextAsync(outputPath, puzzleInput);
         Console.WriteLine($"Puzzle input saved to: {Cyan(outputPath)}");
+
+        // Save puzzle input encrypted
+        outputPath = Path.ChangeExtension(outputPath, ".encrypted.txt");
+        await File.WriteAllTextAsync(outputPath, crypto.Encrypt(puzzleInput));
+    }
+
+    private async Task<string> GetPuzzleInputAsync(string day, string year, string sessionToken)
+    {
+        using var timing = new TimingBlock("Get Puzzle Input");
+        Console.WriteLine(Bright.Black("Getting puzzle input..."));
+
+        var puzzleInput = (await $"https://adventofcode.com/{year}/day/{day}/input"
+            .WithCookie("session", sessionToken)
+            .WithHeader("User-Agent", UserAgentName)
+            .GetStringAsync())
+            .ReplaceLineEndings()
+            .TrimEnd();
+
+        Console.WriteLine($"Puzzle input retrieved, length: {Green(puzzleInput.Length.ToString())}");
+        return puzzleInput;
     }
 
     [GeneratedRegex(@"--- Day \d+: (?<dayName>.+) ---", RegexOptions.Compiled)]
@@ -82,22 +103,6 @@ internal static partial class PullPuzzleInputCommand
         return dayName;
     }
 
-    private static string? FindRepoRootPath(string? dirPath)
-    {
-        if (dirPath == null)
-        {
-            return null;
-        }
-
-        if (Directory.Exists(Path.Combine(dirPath, ".git")))
-        {
-            return dirPath;
-        }
-
-        var parent = Directory.GetParent(dirPath);
-        return parent != null ? FindRepoRootPath(parent.FullName) : null;
-    }
-
     private static string GetSessionToken(string keyVaultUri)
     {
         using var timing = new TimingBlock("Get Session Token");
@@ -118,21 +123,5 @@ internal static partial class PullPuzzleInputCommand
         }
 
         return sessionToken;
-    }
-
-    private static async Task<string> GetPuzzleInputAsync(string day, string year, string sessionToken)
-    {
-        using var timing = new TimingBlock("Get Puzzle Input");
-        Console.WriteLine(Bright.Black("Getting puzzle input..."));
-
-        var puzzleInput = (await $"https://adventofcode.com/{year}/day/{day}/input"
-            .WithCookie("session", sessionToken)
-            .WithHeader("User-Agent", UserAgentName)
-            .GetStringAsync())
-            .ReplaceLineEndings()
-            .TrimEnd();
-
-        Console.WriteLine($"Puzzle input retrieved, length: {Green(puzzleInput.Length.ToString())}");
-        return puzzleInput;
     }
 }

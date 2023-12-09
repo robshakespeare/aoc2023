@@ -33,6 +33,7 @@
 
   <ItemGroup>
     <Using Include="System.Numerics" />
+    <Using Include="Dumpify" />
     <Using Include="FluentAssertions" />
     <Using Include="FluentAssertions.Execution" />
     <Using Include="NUnit.Framework" />
