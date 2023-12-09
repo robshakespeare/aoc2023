@@ -52,7 +52,7 @@ internal class InputLoader
             Console.WriteLine(Bright.Red($"[WARNING] Input file `{Bright.Cyan(resourceName)}` is empty"));
         }
 
-        return input;
+        return input.ReplaceLineEndings();
     }
 }
 
