@@ -11,6 +11,7 @@ internal partial class DecryptPuzzleInputsCommand(IInputCrypto crypto)
     public async Task DoAsync(string[] args)
     {
         Console.Clear();
+        using var timing = new TimingBlock("Decrypting puzzle inputs");
         try
         {
             var repoRootPath = FindRepoRootPath(AppContext.BaseDirectory);
