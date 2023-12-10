@@ -6,37 +6,33 @@ public class Day10SolverTests
 {
     private readonly Day10Solver _sut = new();
 
-    private const string ExampleInput = """
-        -L|F7
-        7S-7|
-        L|7||
-        -L-J|
-        L|-JF
-        """;
-
-    private const string ExampleInput2 = """
-        7-F7-
-        .FJ|7
-        SJLL7
-        |F--J
-        LJ.LJ
-        """;
-
     [Test]
-    public void Part1Example()
+    public void Part1Example1()
     {
         // ACT
-        var part1ExampleResult = _sut.SolvePart1(ExampleInput);
+        var part1Example1Result = _sut.SolvePart1("""
+            -L|F7
+            7S-7|
+            L|7||
+            -L-J|
+            L|-JF
+            """);
 
         // ASSERT
-        part1ExampleResult.Should().Be(4);
+        part1Example1Result.Should().Be(4);
     }
 
     [Test]
     public void Part1Example2()
     {
         // ACT
-        var part1Example2Result = _sut.SolvePart1(ExampleInput2);
+        var part1Example2Result = _sut.SolvePart1("""
+            7-F7-
+            .FJ|7
+            SJLL7
+            |F--J
+            LJ.LJ
+            """);
 
         // ASSERT
         part1Example2Result.Should().Be(8);
@@ -56,7 +52,7 @@ public class Day10SolverTests
     public void Part2Example()
     {
         // ACT
-        var part2ExampleResult = _sut.SolvePart2(ExampleInput);
+        var part2ExampleResult = _sut.SolvePart2("rs-todo: ExampleInput");
 
         // ASSERT
         part2ExampleResult.Should().Be(null);
