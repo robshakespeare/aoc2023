@@ -37,13 +37,10 @@ public class Day10Solver : ISolver
 
     static List<Tile> Explore(Explorer explorer)
     {
-        //long numOfSteps = 0;
-
         var path = new List<Tile>();
 
         do
         {
-            //numOfSteps++;
             path.Add(explorer.CurrentTile);
 
             var nextPos = explorer.CurrentTile.Position + explorer.Direction;
@@ -53,11 +50,8 @@ public class Day10Solver : ISolver
                 throw new Exception("Next tile should always have only 2 connections");
             }
 
-            //var connection = explorer.CurrentTile.Connections.Intersect(nextTile.Connections).Single();
-            var connection = nextTile.Connections.Single(c => c == explorer.NextConnection); // rs-todo: this just checks we did have a connection!
-
+            var connection = nextTile.Connections.Single(c => c == explorer.NextConnection);
             var nextConnection = nextTile.Connections.Single(c => c != connection);
-
             var nextDirection = Vector2.Normalize(nextConnection - nextTile.Position);
 
             explorer = new Explorer(nextTile, nextConnection, nextDirection, explorer.Grid);
@@ -111,37 +105,12 @@ public class Day10Solver : ISolver
         return (start, grid);
     }
 
-    record struct Explorer(Tile CurrentTile, Vector2 NextConnection, Vector2 Direction, Tile[][] Grid)
-    {
-        //public Explorer MoveTo(Tile otherTile)
-        //{
-        //    CurrentTile.Connections.Intersect(otherTile.Connections).Single
-        //}
-    }
+    record struct Explorer(Tile CurrentTile, Vector2 NextConnection, Vector2 Direction, Tile[][] Grid);
 
     record Tile(Vector2 Position, char Char, Vector2[] Connections)
     {
         public static Tile Create(Vector2 position, char chr)
         {
-            /*
-                | is a vertical pipe connecting north and south.
-                - is a horizontal pipe connecting east and west.
-                L is a 90-degree bend connecting north and east.
-                J is a 90-degree bend connecting north and west.
-                7 is a 90-degree bend connecting south and west.
-                F is a 90-degree bend connecting south and east.
-                . is ground; there is no pipe in this tile.
-                S is the starting position of the animal; there is a pipe on this tile, but your sketch doesn't show what shape the pipe has.
-
-                '|' => [north, south]
-                '-' => [east, west]
-                'L' => [north, east]
-                'J' => [north, west]
-                '7' => [south, west]
-                'F' => [south, east]
-
-             */
-
             var (x, y) = (position.X, position.Y);
 
             var north = new Vector2(x, y - 0.5f);
