@@ -126,9 +126,10 @@ public static class GridUtils
         this IEnumerable<T> items,
         Func<T, Vector2> positionSelector,
         Func<T, char> charSelector,
-        char defaultChar)
+        char defaultChar,
+        int padding = 0)
     {
-        return items.ToGrid(positionSelector, charSelector, _ => defaultChar)
+        return items.ToGrid(positionSelector, charSelector, _ => defaultChar, padding)
             .Select(line => string.Concat(line))
             .ToArray();
     }
@@ -140,14 +141,16 @@ public static class GridUtils
         this IEnumerable<TIn> items,
         Func<TIn, Vector2> positionSelector,
         Func<TIn, TOut> resultItemSelector,
-        Func<Vector2, TOut> resultItemFactory)
+        Func<Vector2, TOut> resultItemFactory,
+        int padding = 0)
     {
         items = items.ToArray();
 
         var itemMap = items.GroupBy(positionSelector).ToDictionary(grp => positionSelector(grp.Last()), grp => grp.Last());
 
-        var minBounds = new Vector2(itemMap.Min(i => i.Key.X), itemMap.Min(i => i.Key.Y));
-        var maxBounds = new Vector2(itemMap.Max(i => i.Key.X), itemMap.Max(i => i.Key.Y));
+        var padBounds = new Vector2(padding);
+        var minBounds = new Vector2(itemMap.Min(i => i.Key.X), itemMap.Min(i => i.Key.Y)) - padBounds;
+        var maxBounds = new Vector2(itemMap.Max(i => i.Key.X), itemMap.Max(i => i.Key.Y)) + padBounds;
 
         var grid = new List<IReadOnlyList<TOut>>();
 
