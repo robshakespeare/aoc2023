@@ -1,45 +1,19 @@
-using System.Linq;
-
 namespace AoC.Day10;
 
 public class Day10Solver : ISolver
 {
     public string DayName => "Pipe Maze";
 
-    public long? SolvePart1(string input) => ParseInput(input).PipeStarts.Select(Explore).Select(path => path.Length).Max() / 2;
+    public long? SolvePart1(string input) => ParseInput(input).LoopStarts.Select(Explore).Select(path => path.Length).Max() / 2;
 
     public long? SolvePart2(string input)
     {
-        var (grid, explorers) = ParseInput(input);
+        var (grid, loopStarts) = ParseInput(input);
 
-        var loop = Explore(explorers.First());
+        var loop = Explore(loopStarts.First());
+        var doubleResGrid = BuildDoubleResolutionGrid(loop);
 
-        var positions = loop.Select(x => x.Tile.Position);
-        var padBounds = new Vector2(0.5f);
-        var minBounds = new Vector2(positions.Min(i => i.X), positions.Min(i => i.Y));
-        var maxBounds = new Vector2(positions.Max(i => i.X), positions.Max(i => i.Y));
-        var minBoundsPadded = minBounds - padBounds;
-        var maxBoundsPadded = maxBounds + padBounds;
-
-        var map = new Dictionary<Vector2, char>();
-
-        for (var y = minBoundsPadded.Y; y <= maxBoundsPadded.Y; y += 0.5f)
-        {
-            for (var x = minBoundsPadded.X; x <= maxBoundsPadded.X; x += 0.5f)
-            {
-                map[new Vector2(x, y)] = '.';
-            }
-        }
-
-        foreach (var pipePosition in loop.SelectMany(item => item.Tile.Positions))
-        {
-            map[pipePosition] = '#';
-        }
-
-        var doubleResMap = map.ToStringGrid(x => x.Key * 2, x => x.Value, 'X').RenderGridToConsole(); // rs-todo: remove RenderGridToConsole? use RenderGridToString instead
-
-        var doubleResGrid = doubleResMap.ToGrid((pos, chr) => new { Position = pos, Char = chr });
-
+        // Start in top left, and "fill out". Our remaining dots are the ones contained within the loop.
         var visited = new HashSet<Vector2>();
         var explore = new Queue<Vector2>([doubleResGrid[0][0].Position]);
 
@@ -68,194 +42,89 @@ public class Day10Solver : ISolver
             }
         }
 
-        var doubleResStringGrid = doubleResGrid.SelectMany(x => x)
-            .Concat(visited.Select(pos => new { Position = pos, Char = 'O' }))
-            //.Concat(loop.Select(x => new { pos = x.Tile.Position, chr = ' ' }))
-            .ToStringGrid(x => x.Position, x => x.Char, 'X')
-            .RenderGridToString()
-            .Replace('.', 'I');
-
         var doubleResGridFinal = doubleResGrid.SelectMany(x => x)
-            .Concat(visited.Select(pos => new { Position = pos, Char = 'O' }))
+            .Concat(visited.Select(pos => new BasicTile(pos, 'O')))
             .ToStringGrid(x => x.Position, x => x.Char, 'X');
 
-        var finalGrid = new StringBuilder();
+        var finalGridBuilder = new StringBuilder();
 
         for (int y = 1; y < doubleResGridFinal.Count; y += 2)
         {
             for (int x = 1; x < doubleResGridFinal[y].Length; x += 2)
             {
-                var chr = doubleResGridFinal[y][x];
-                finalGrid.Append(chr == '.' ? 'I' : chr);
+                finalGridBuilder.Append(doubleResGridFinal[y][x]);
             }
 
-            finalGrid.AppendLine();
+            finalGridBuilder.AppendLine();
         }
 
-        //for (int y = 1; y < doubleResGrid.Length; y += 2)
-        //{
-        //    for (int x = 1; x < doubleResGrid[y].Length; x += 2)
-        //    {
-        //        finalGrid.Append(doubleResGrid[y][x].Char);
-        //    }
+        var finalGrid = finalGridBuilder.ToString();
 
-        //    finalGrid.AppendLine();
-        //}
-
-        Console.WriteLine(finalGrid.ToString()); // debug:
+        Console.WriteLine(finalGrid);
         Console.WriteLine();
 
-
-
-        return finalGrid.ToString().Count(c => c == 'I');
-
-        //const int padding = 1;
-        //var loopMap = loop.ToStringGrid(x => x.Tile.Position, x => x.Tile.Char, '.', padding).RenderGridToString();
-
-        //var offset = new Vector2(loop.Min(i => i.Tile.Position.X) - padding, loop.Min(i => i.Tile.Position.Y) - padding);
-        //offset.ToString().Dump("OFFSET"); // debug
-
-        //var loopGrid = loopMap.ToGrid((pos, chr) => new { Position = pos + offset, Char = chr });
-        //    //.SelectMany(line => line)
-        //    //.ToDictionary(x => x.Position);
-
-        //// debug:
-        ////loop.ToStringGrid(x => x.Tile.Position, x => x.Tile.Char, '.', padding).RenderGridToConsole();
-        //loopGrid.SelectMany(x => x).ToStringGrid(x => x.Position, x => x.Char, '.').RenderGridToConsole(); // debug
-
-        //// Start in top left, and "fill out", squeezing down any gaps
-        //// Our remaining dots are the ones contained within the loop
-
-        //var visited = new HashSet<Vector2>();
-
-        //var explore = new Queue<Vector2>([loopGrid[0][0].Position]);
-
-        //var pipeTileLookup = loop.ToFrozenDictionary(x => x.Tile.Position);
-
-        ////bool InBounds(Vector2 position) => loopGrid.SafeGet(position) != null;
-
-        //var edgeNudges = GridUtils.DirectionsExcludingDiagonal.Select(x => x * 0.5f).ToArray();
-
-        //edgeNudges.Select(x => x.ToString()).Dump("edgeNudges"); // Debug
-
-        //while (explore.Count > 0)
-        //{
-        //    var currentPosition = explore.Dequeue();
-        //    //visited.Add(currentPos);
-
-        //    var candidateLocations = GridUtils.DirectionsIncludingDiagonal.Select(dir => currentPosition + dir /*- offset*/)
-        //        .Where(candidatePosition => !visited.Contains(candidatePosition))
-        //        //.Where(InBounds)
-        //        .Select(candidatePosition => loopGrid.SafeGet(candidatePosition - offset)) // Note -offset to go from world to grid space
-        //        .Where(candidateLocation => candidateLocation != null)
-        //        .Select(candidateLocation => candidateLocation!);
-
-        //    foreach (var candidateLocation in candidateLocations)
-        //    {
-        //        var candidatePosition = candidateLocation.Position;
-        //        var visit = false;
-
-        //        if (candidateLocation.Char == '.')
-        //        {
-        //            visit = true;
-        //        }
-        //        // else its a pipe, so we might be able to squeeze through
-        //        else
-        //        {
-        //            var pipeTile = pipeTileLookup[candidatePosition];
-
-        //            // We can squeeze through either of the pipe tile's 2 edges that join with our shared edge
-        //            // As long as the way through isn't blocked by a connection
-        //            var sharedEdge = edgeNudges.Select(x => (Vector2?)currentPosition + x)
-        //                .Intersect(edgeNudges.Select(x => (Vector2?)pipeTile.Tile.Position + x))
-        //                .Cast<Vector2?>()
-        //                .SingleOrDefault();
-
-        //            if (sharedEdge != null)
-        //            {
-        //                var ourDir = Vector2.Normalize(sharedEdge.Value - currentPosition);
-        //                var sharedEdgeDir = new Vector2(ourDir.Y, -ourDir.X);
-
-        //                var candidateEdges = new[] { 0.5f, -0.5f }.Select(nudge => currentPosition + (sharedEdgeDir * nudge) + ourDir);
-
-        //                var test = candidateEdges.Except(pipeTile.Tile.Connections);
-
-        //                if (test.Any())
-        //                {
-        //                }
-        //            }
-        //            //else
-        //            //{
-        //            //}
-
-        //            //var keh1 = edgeNudges.Select(x => currentPosition + x).ToArray();
-        //            //var keh2 = edgeNudges.Select(x => pipeTile.Tile.Position + x).ToArray();
-
-        //            //if (true)
-        //            //{
-        //            //}
-
-        //            //var sharedEdge = edgeNudges.Select(x => (Vector2?)currentPosition + x)
-        //            //    .Intersect(edgeNudges.Select(x => (Vector2?)pipeTile.Tile.Position + x))
-
-        //            //if (sharedEdge.Length > 1)
-        //            //{
-        //            //}
-
-        //            //var pipeTileCorners = GridUtils.DirectionsExcludingDiagonal;
-        //        }
-
-        //        if (visit)
-        //        {
-
-
-        //            if (!visited.Contains(candidatePosition))
-        //            {
-        //                explore.Enqueue(candidatePosition);
-        //                visited.Add(candidatePosition);
-        //            }
-        //        }
-        //    }
-        //}
-
-        //var finalGrid = visited.Select(pos => new { pos, chr = 'O' })
-        //    .Concat(loop.Select(x => new { pos = x.Tile.Position, chr = ' ' }))
-        //    .ToStringGrid(x => x.pos, x => x.chr, 'I')
-        //    .RenderGridToString();
-
-        //Console.WriteLine(finalGrid); // debug:
-        //Console.WriteLine();
-
-        //return finalGrid.Count(c => c == 'I');
+        return finalGrid.ToString().Count(c => c == '.');
     }
 
-    static PipeTile[] Explore(PipeTile pipeTile)
+    static BasicTile[][] BuildDoubleResolutionGrid(LoopTile[] loop)
     {
-        var path = new List<PipeTile>();
+        var positions = loop.Select(x => x.Tile.Position);
+        var padBounds = new Vector2(0.5f);
+        var minBounds = new Vector2(positions.Min(i => i.X), positions.Min(i => i.Y));
+        var maxBounds = new Vector2(positions.Max(i => i.X), positions.Max(i => i.Y));
+        var minBoundsPadded = minBounds - padBounds;
+        var maxBoundsPadded = maxBounds + padBounds;
+
+        var map = new Dictionary<Vector2, char>();
+
+        for (var y = minBoundsPadded.Y; y <= maxBoundsPadded.Y; y += 0.5f)
+        {
+            for (var x = minBoundsPadded.X; x <= maxBoundsPadded.X; x += 0.5f)
+            {
+                map[new Vector2(x, y)] = '.';
+            }
+        }
+
+        foreach (var pipePosition in loop.SelectMany(item => item.Tile.Positions))
+        {
+            map[pipePosition] = '#';
+        }
+
+        var doubleResMap = map.ToStringGrid(x => x.Key * 2, x => x.Value, 'X').RenderGridToString();
+        var doubleResGrid = doubleResMap.ToGrid((pos, chr) => new BasicTile(pos, chr));
+
+        return doubleResGrid;
+    }
+
+    record BasicTile(Vector2 Position, char Char);
+
+    static LoopTile[] Explore(LoopTile loopTile)
+    {
+        var path = new List<LoopTile>();
 
         do
         {
-            path.Add(pipeTile);
+            path.Add(loopTile);
 
-            var nextPos = pipeTile.Tile.Position + pipeTile.Direction;
-            var nextTile = pipeTile.Grid.Get(nextPos);
+            var nextPos = loopTile.Tile.Position + loopTile.Direction;
+            var nextTile = loopTile.Grid.Get(nextPos);
             if (nextTile.Connections.Length != 2)
             {
                 throw new Exception("Next tile should always have only 2 connections");
             }
 
-            var connection = nextTile.Connections.Single(c => c == pipeTile.Connection);
+            var connection = nextTile.Connections.Single(c => c == loopTile.Connection);
             var nextConnection = nextTile.Connections.Single(c => c != connection);
             var nextDirection = Vector2.Normalize(nextConnection - nextTile.Position);
 
-            pipeTile = new PipeTile(nextTile, nextConnection, nextDirection, pipeTile.Grid);
+            loopTile = new LoopTile(nextTile, nextConnection, nextDirection, loopTile.Grid);
         }
-        while (pipeTile.Tile.Char != 'S');
+        while (loopTile.Tile.Char != 'S');
 
         return [.. path];
     }
 
-    static (Tile[][] Grid, PipeTile[] PipeStarts) ParseInput(string input)
+    static (Tile[][] Grid, LoopTile[] LoopStarts) ParseInput(string input)
     {
         Tile? start = null;
 
@@ -292,12 +161,12 @@ public class Day10Solver : ISolver
         grid[(int)start.Position.Y][(int)start.Position.X] = start;
 
         // Get the pipe connections of the start tile
-        var pipeStarts = start.Connections.Select(c => new PipeTile(start, c, Vector2.Normalize(c - start.Position), grid)).ToArray();
+        var loopStarts = start.Connections.Select(connection => new LoopTile(start, connection, Vector2.Normalize(connection - start.Position), grid)).ToArray();
 
-        return (grid, pipeStarts);
+        return (grid, loopStarts);
     }
 
-    record struct PipeTile(Tile Tile, Vector2 Connection, Vector2 Direction, Tile[][] Grid); // rs-todo: rename to LoopTile!
+    record struct LoopTile(Tile Tile, Vector2 Connection, Vector2 Direction, Tile[][] Grid);
 
     record Tile(Vector2 Position, char Char, Vector2[] Connections)
     {
