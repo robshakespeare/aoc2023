@@ -1,38 +1,14 @@
-using System.Linq;
-
 namespace AoC.Day10;
 
 public class Day10Solver : ISolver
 {
     public string DayName => "Pipe Maze";
 
-    public long? SolvePart1(string input)
+    public long? SolvePart1(string input) => ParseInput(input).Explorers.Select(Explore).Select(path => path.Count).Max() / 2;
+
+    public long? SolvePart2(string input)
     {
-        var (start, grid) = ParseInput(input);
-
-        //Console.WriteLine("grid:");
-        //grid.SelectMany(x => x).ToStringGrid(x => x.Position, x => x.Char, '.').RenderGridToConsole(); // rs-todo: need an extension for this
-
-        Console.WriteLine("start:");
-        Console.WriteLine(start); // rs-todo: do need my own dump method! One for the todo list
-
-        //start.Position.ToString().Dump();
-        Console.WriteLine("start cons:");
-        start.Connections.ElementAt(0).ToString().Dump();
-        start.Connections.ElementAt(1).ToString().Dump();
-
-        // Explore!
-        //var directions = start.Connections.Select(c => Vector2.Normalize(c - start.Position)).ToArray();
-        //var explorers = directions.Select(dir => new Explorer(start, dir, grid));
-
-        var explorers = start.Connections.Select(c => new Explorer(start, c, Vector2.Normalize(c - start.Position), grid)).ToArray();
-        var directions = explorers.Select(x => x.Direction).ToArray();
-
-        Console.WriteLine("start dirs:");
-        directions[0].ToString().Dump();
-        directions[1].ToString().Dump();
-
-        return explorers.Select(Explore).Select(path => path.Count).Max() / 2;
+        return null;
     }
 
     static List<Tile> Explore(Explorer explorer)
@@ -61,12 +37,7 @@ public class Day10Solver : ISolver
         return path;
     }
 
-    public long? SolvePart2(string input)
-    {
-        return null;
-    }
-
-    static (Tile Start, Tile[][] Grid) ParseInput(string input)
+    static (Tile Start, Tile[][] Grid, Explorer[] Explorers) ParseInput(string input)
     {
         Tile? start = null;
 
@@ -102,7 +73,10 @@ public class Day10Solver : ISolver
         start = start with { Connections = startConnections };
         grid[(int)start.Position.Y][(int)start.Position.X] = start;
 
-        return (start, grid);
+        // Get our explorers
+        var explorers = start.Connections.Select(c => new Explorer(start, c, Vector2.Normalize(c - start.Position), grid)).ToArray();
+
+        return (start, grid, explorers);
     }
 
     record struct Explorer(Tile CurrentTile, Vector2 NextConnection, Vector2 Direction, Tile[][] Grid);
