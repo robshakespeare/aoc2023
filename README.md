@@ -31,6 +31,12 @@ To pull the puzzle input (requires access to the key vault containing valid AoC 
 dotnet run --project AoC.CLI --pull
 ```
 
+To decrypt the puzzle inputs in this repository (requires `AocPuzzleInputCryptoKey` config value):
+
+```
+dotnet run --project AoC.CLI --decrypt
+```
+
 
 ### Test
 
