@@ -4,14 +4,18 @@ public class Day10Solver : ISolver
 {
     public string DayName => "Pipe Maze";
 
-    public long? SolvePart1(string input) => ParseInput(input).Explorers.Select(Explore).Select(path => path.Count).Max() / 2;
+    public long? SolvePart1(string input) => ParseInput(input).Explorers.Select(Explore).Select(path => path.Length).Max() / 2;
 
     public long? SolvePart2(string input)
     {
+        var (_, grid, explorers) = ParseInput(input);
+
+        var loop = Explore(explorers.First());
+
         return null;
     }
 
-    static List<Tile> Explore(Explorer explorer)
+    static Tile[] Explore(Explorer explorer)
     {
         var path = new List<Tile>();
 
@@ -34,7 +38,7 @@ public class Day10Solver : ISolver
         }
         while (explorer.CurrentTile.Char != 'S');
 
-        return path;
+        return path.ToArray();
     }
 
     static (Tile Start, Tile[][] Grid, Explorer[] Explorers) ParseInput(string input)
