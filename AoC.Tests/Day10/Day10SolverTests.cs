@@ -7,7 +7,19 @@ public class Day10SolverTests
     private readonly Day10Solver _sut = new();
 
     private const string ExampleInput = """
+        -L|F7
+        7S-7|
+        L|7||
+        -L-J|
+        L|-JF
+        """;
 
+    private const string ExampleInput2 = """
+        7-F7-
+        .FJ|7
+        SJLL7
+        |F--J
+        LJ.LJ
         """;
 
     [Test]
@@ -17,7 +29,17 @@ public class Day10SolverTests
         var part1ExampleResult = _sut.SolvePart1(ExampleInput);
 
         // ASSERT
-        part1ExampleResult.Should().Be(null);
+        part1ExampleResult.Should().Be(4);
+    }
+
+    [Test]
+    public void Part1Example2()
+    {
+        // ACT
+        var part1Example2Result = _sut.SolvePart1(ExampleInput2);
+
+        // ASSERT
+        part1Example2Result.Should().Be(8);
     }
 
     [Test]
@@ -27,7 +49,7 @@ public class Day10SolverTests
         var part1Result = _sut.SolvePart1();
 
         // ASSERT
-        part1Result.Should().Be(null);
+        part1Result.Should().Be(6864);
     }
 
     [Test]
