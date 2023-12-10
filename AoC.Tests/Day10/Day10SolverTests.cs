@@ -106,7 +106,28 @@ public class Day10SolverTests
             """);
 
         // ASSERT
-        part2Example3Result.Should().Be(10);
+        part2Example3Result.Should().Be(8);
+    }
+
+    [Test]
+    public void Part2Example4()
+    {
+        // ACT
+        var part2Example4Result = _sut.SolvePart2("""
+            FF7FSF7F7F7F7F7F---7
+            L|LJ||||||||||||F--J
+            FL-7LJLJ||||||LJL-77
+            F--JF--7||LJLJ7F7FJ-
+            L---JF-JLJ.||-FJLJJ7
+            |F|F-JF---7F7-L7L|7|
+            |FFJF7L7F-JF7|JL---7
+            7-L-JL7||F7|L7F-7F7|
+            L.L7LFJ|||||FJL7||LJ
+            L7JLJL-JLJLJL--JLJ.L
+            """);
+
+        // ASSERT
+        part2Example4Result.Should().Be(10);
     }
 
     [Test]
