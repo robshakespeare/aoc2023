@@ -20,7 +20,7 @@ public class Day10Solver : ISolver
         var offset = new Vector2(loop.Min(i => i.Tile.Position.X) - padding, loop.Min(i => i.Tile.Position.Y) - padding);
         offset.ToString().Dump("OFFSET"); // debug
 
-        var loopGrid = loopMap.ToGrid((pos, chr) => new { Position = pos /*+ offset*/, Char = chr });
+        var loopGrid = loopMap.ToGrid((pos, chr) => new { Position = pos + offset, Char = chr });
             //.SelectMany(line => line)
             //.ToDictionary(x => x.Position);
 
@@ -35,14 +35,13 @@ public class Day10Solver : ISolver
 
         var explore = new Queue<Vector2>([loopGrid[0][0].Position]);
 
-        // Note -offset to go from loop\tile space to 'loopGrid' space! Yuk!
-        var pipeTileLookup = loop.ToFrozenDictionary(x => x.Tile.Position - offset);
+        var pipeTileLookup = loop.ToFrozenDictionary(x => x.Tile.Position);
 
         //bool InBounds(Vector2 position) => loopGrid.SafeGet(position) != null;
 
         var edgeNudges = GridUtils.DirectionsExcludingDiagonal.Select(x => x * 0.5f).ToArray();
 
-        edgeNudges.Select(x => x.ToString()).Dump("edgeNudges");
+        edgeNudges.Select(x => x.ToString()).Dump("edgeNudges"); // Debug
 
         while (explore.Count > 0)
         {
@@ -52,7 +51,7 @@ public class Day10Solver : ISolver
             var candidateLocations = GridUtils.DirectionsIncludingDiagonal.Select(dir => currentPosition + dir /*- offset*/)
                 .Where(candidatePosition => !visited.Contains(candidatePosition))
                 //.Where(InBounds)
-                .Select(candidatePosition => loopGrid.SafeGet(candidatePosition))
+                .Select(candidatePosition => loopGrid.SafeGet(candidatePosition - offset)) // Note -offset to go from world to grid space
                 .Where(candidateLocation => candidateLocation != null)
                 .Select(candidateLocation => candidateLocation!);
 
@@ -72,13 +71,37 @@ public class Day10Solver : ISolver
 
                     // We can squeeze through either of the pipe tile's 2 edges that join with our shared edge
                     // As long as the way through isn't blocked by a connection
+                    var sharedEdge = edgeNudges.Select(x => (Vector2?)currentPosition + x)
+                        .Intersect(edgeNudges.Select(x => (Vector2?)pipeTile.Tile.Position + x))
+                        .Cast<Vector2?>()
+                        .SingleOrDefault();
 
-                    var keh1 = edgeNudges.Select(x => currentPosition + x).ToArray();
-                    var keh2 = edgeNudges.Select(x => pipeTile.Tile.Position - offset + x).ToArray();
+                    if (sharedEdge != null)
+                    {
+                        var ourDir = Vector2.Normalize(sharedEdge.Value - currentPosition);
+                        var sharedEdgeDir = new Vector2(ourDir.Y, -ourDir.X);
 
-                    var sharedEdge = edgeNudges.Select(x => currentPosition + x)
-                        .Intersect(edgeNudges.Select(x => pipeTile.Tile.Position - offset + x))
-                        .Single();
+                        var candidateEdges = new[] { 0.5f, -0.5f }.Select(nudge => currentPosition + (sharedEdgeDir * nudge) + ourDir);
+
+                        var test = candidateEdges.Except(pipeTile.Tile.Connections);
+
+                        if (test.Any())
+                        {
+                        }
+                    }
+                    //else
+                    //{
+                    //}
+
+                    //var keh1 = edgeNudges.Select(x => currentPosition + x).ToArray();
+                    //var keh2 = edgeNudges.Select(x => pipeTile.Tile.Position + x).ToArray();
+
+                    //if (true)
+                    //{
+                    //}
+
+                    //var sharedEdge = edgeNudges.Select(x => (Vector2?)currentPosition + x)
+                    //    .Intersect(edgeNudges.Select(x => (Vector2?)pipeTile.Tile.Position + x))
 
                     //if (sharedEdge.Length > 1)
                     //{
@@ -101,7 +124,7 @@ public class Day10Solver : ISolver
         }
 
         var finalGrid = visited.Select(pos => new { pos, chr = 'O' })
-            .Concat(loop.Select(x => new { pos = x.Tile.Position - offset, chr = ' ' }))
+            .Concat(loop.Select(x => new { pos = x.Tile.Position, chr = ' ' }))
             .ToStringGrid(x => x.pos, x => x.chr, 'I')
             .RenderGridToString();
 
