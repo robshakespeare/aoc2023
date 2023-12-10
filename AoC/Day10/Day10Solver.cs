@@ -32,15 +32,19 @@ public class Day10Solver : ISolver
         directions[0].ToString().Dump();
         directions[1].ToString().Dump();
 
-        return explorers.Select(Explore).Max() / 2;
+        return explorers.Select(Explore).Select(path => path.Count).Max() / 2;
     }
 
-    static long Explore(Explorer explorer)
+    static List<Tile> Explore(Explorer explorer)
     {
-        long numOfSteps = 0;
+        //long numOfSteps = 0;
+
+        var path = new List<Tile>();
+
         do
         {
-            numOfSteps++;
+            //numOfSteps++;
+            path.Add(explorer.CurrentTile);
 
             var nextPos = explorer.CurrentTile.Position + explorer.Direction;
             var nextTile = explorer.Grid.Get(nextPos);
@@ -60,7 +64,7 @@ public class Day10Solver : ISolver
         }
         while (explorer.CurrentTile.Char != 'S');
 
-        return numOfSteps;
+        return path;
     }
 
     public long? SolvePart2(string input)
