@@ -56,6 +56,8 @@ public class Day11Solver : ISolver
     {
         var expandedUniverse = ParseUniverse(unexpanded);
 
+        expansionAmount = Math.Max(expansionAmount - 1, 1);
+
         // Expand the rows:
         {
             var rowsToExpand = unexpanded

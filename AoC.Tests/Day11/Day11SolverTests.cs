@@ -97,8 +97,6 @@ public class Day11SolverTests
         var part2Result = _sut.SolvePart2();
 
         // ASSERT
-        part2Result.Should().BeLessThan(483845200392);
-        part2Result.Should().BeGreaterThan(483845200310);
-        part2Result.Should().Be(null);
+        part2Result.Should().Be(483844716556);
     }
 }
