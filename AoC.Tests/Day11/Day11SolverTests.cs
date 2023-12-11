@@ -23,7 +23,8 @@ public class Day11SolverTests
     public void Part1ExampleWalkthrough()
     {
         // ACT & ASSERT - Expand
-        var expandedUniverse = Day11Solver.ParseAndExpandInput(ExampleInput);
+        var universe = Day11Solver.ParseAndExpandUniverse(ExampleInput);
+        var expandedUniverse = universe.Galaxies.ToStringGrid(g => g.Position, _ => '#', '.');
         expandedUniverse.Should().BeEquivalentTo("""
             ....#........
             .........#...
@@ -40,16 +41,15 @@ public class Day11SolverTests
             """.ReadLines(), opts => opts.WithStrictOrdering());
 
         // ACT & ASSERT - Galaxy IDs
-        var universe = Day11Solver.ParseUniverse(expandedUniverse);
-
         universe.Galaxies.Select(g => g.Id).Min().Should().Be(1);
         universe.Galaxies.Select(g => g.Id).Max().Should().Be(9);
 
         // ACT & ASSERT - Galaxy Pairs
-        universe.GalaxyPairs.Should().HaveCount(36);
+        var galaxyPairs = universe.GetGalaxyPairs();
+        galaxyPairs.Should().HaveCount(36);
 
         // ACT & ASSERT - Distances
-        Day11Solver.GalaxyPair GetGalaxyPair(int idA, int idB) => universe.GalaxyPairs.First(p => p.GalaxyA.Id == idA && p.GalaxyB.Id == idB);
+        Day11Solver.GalaxyPair GetGalaxyPair(int idA, int idB) => galaxyPairs.First(p => p.GalaxyA.Id == idA && p.GalaxyB.Id == idB);
 
         GetGalaxyPair(5, 9).Distance.Should().Be(9);
         GetGalaxyPair(1, 7).Distance.Should().Be(15);
@@ -82,11 +82,9 @@ public class Day11SolverTests
     [Test]
     public void Part2Example()
     {
-        // ACT
-        var part2ExampleResult = _sut.SolvePart2(ExampleInput);
-
-        // ASSERT
-        part2ExampleResult.Should().Be(null);
+        Day11Solver.ParseExpandAndSumDistances(ExampleInput).Should().Be(374);
+        Day11Solver.ParseExpandAndSumDistances(ExampleInput, 10).Should().Be(1030);
+        Day11Solver.ParseExpandAndSumDistances(ExampleInput, 100).Should().Be(8410);
     }
 
     [Test]
@@ -96,6 +94,7 @@ public class Day11SolverTests
         var part2Result = _sut.SolvePart2();
 
         // ASSERT
+        part2Result.Should().BeLessThan(483845200392);
         part2Result.Should().Be(null);
     }
 }
