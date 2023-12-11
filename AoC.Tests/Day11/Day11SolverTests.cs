@@ -75,7 +75,8 @@ public class Day11SolverTests
 
         // ASSERT
         part1Result.Should().BeGreaterThan(9606388);
-        part1Result.Should().Be(null);
+        part1Result.Should().BeGreaterThan(9067847);
+        part1Result.Should().Be(9684228);
     }
 
     [Test]

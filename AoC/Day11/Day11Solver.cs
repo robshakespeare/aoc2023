@@ -20,7 +20,7 @@ public class Day11Solver : ISolver
 
         static GalaxyPair[] GetGalaxyPairs(Galaxy[] galaxies) =>
             galaxies.SelectMany(a => galaxies.Where(b => a != b).Select(b => new GalaxyPair(a, b)))
-                .DistinctBy(item => string.Concat(new[] { item.GalaxyA.Id, item.GalaxyB.Id }.Order()))
+                .DistinctBy(item => string.Join("-", new[] { item.GalaxyA.Id, item.GalaxyB.Id }.Order()))
                 .ToArray();
     }
 
@@ -44,6 +44,9 @@ public class Day11Solver : ISolver
             (line, y) => line.Select((chr, x) => (chr, x))
                 .Where(item => item.chr == GalaxyChar)
                 .Select(item => new Galaxy(++nextId, new Vector2(item.x, y))).ToArray()).ToArray();
+
+        galaxies.Length.Dump("Num Galaxies");
+
         return new Universe(expandedUniverse, galaxies);
     }
 
@@ -71,8 +74,6 @@ public class Day11Solver : ISolver
                 ExpandColumn(x);
             }
         }
-
-        //string.Join(Environment.NewLine, unexpanded).Dump();
 
         return unexpanded.Select(line => line.ToString()).ToArray();
     }
