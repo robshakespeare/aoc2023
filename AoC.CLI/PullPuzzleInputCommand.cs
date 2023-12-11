@@ -21,7 +21,7 @@ internal partial class PullPuzzleInputCommand(IInputCrypto crypto)
             var repoRootPath = FindRepoRootPath(AppContext.BaseDirectory);
             var day = args.ElementAtOrDefault(1) ?? SolverFactory.Instance.DefaultDay;
             var year = Year.ToString();
-            var keyVaultUri = args.ElementAtOrDefault(3) ?? "https://rws-aoc.vault.azure.net/";
+            var keyVaultUri = args.ElementAtOrDefault(2) ?? "https://rws-aoc.vault.azure.net/";
 
             var dayName = "";
 
