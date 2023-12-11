@@ -7,8 +7,55 @@ public class Day11SolverTests
     private readonly Day11Solver _sut = new();
 
     private const string ExampleInput = """
-
+        ...#......
+        .......#..
+        #.........
+        ..........
+        ......#...
+        .#........
+        .........#
+        ..........
+        .......#..
+        #...#.....
         """;
+
+    [Test]
+    public void Part1ExampleWalkthrough()
+    {
+        // ACT & ASSERT - Expand
+        var expandedUniverse = Day11Solver.ParseAndExpandInput(ExampleInput);
+        expandedUniverse.Should().BeEquivalentTo("""
+            ....#........
+            .........#...
+            #............
+            .............
+            .............
+            ........#....
+            .#...........
+            ............#
+            .............
+            .............
+            .........#...
+            #....#.......
+            """.ReadLines(), opts => opts.WithStrictOrdering());
+
+        // ACT & ASSERT - Galaxy IDs
+        var universe = Day11Solver.ParseUniverse(expandedUniverse);
+
+        universe.Galaxies.Select(g => g.Id).Min().Should().Be(1);
+        universe.Galaxies.Select(g => g.Id).Max().Should().Be(9);
+
+        // ACT & ASSERT - Galaxy Pairs
+        universe.GalaxyPairs.Should().HaveCount(36);
+
+        // ACT & ASSERT - Distances
+        Day11Solver.GalaxyPair GetGalaxyPair(int idA, int idB) => universe.GalaxyPairs.First(p => p.GalaxyA.Id == idA && p.GalaxyB.Id == idB);
+
+        GetGalaxyPair(5, 9).Distance.Should().Be(9);
+        GetGalaxyPair(1, 7).Distance.Should().Be(15);
+        GetGalaxyPair(3, 6).Distance.Should().Be(17);
+        GetGalaxyPair(8, 9).Distance.Should().Be(5);
+    }
 
     [Test]
     public void Part1Example()
@@ -17,7 +64,7 @@ public class Day11SolverTests
         var part1ExampleResult = _sut.SolvePart1(ExampleInput);
 
         // ASSERT
-        part1ExampleResult.Should().Be(null);
+        part1ExampleResult.Should().Be(374);
     }
 
     [Test]
@@ -27,6 +74,7 @@ public class Day11SolverTests
         var part1Result = _sut.SolvePart1();
 
         // ASSERT
+        part1Result.Should().BeGreaterThan(9606388);
         part1Result.Should().Be(null);
     }
 
