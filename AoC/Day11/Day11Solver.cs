@@ -1,5 +1,3 @@
-using Spectre.Console;
-
 namespace AoC.Day11;
 
 public class Day11Solver : ISolver
@@ -54,51 +52,41 @@ public class Day11Solver : ISolver
         var expandedUniverse = ParseUniverse(unexpanded);
         expansionAmount -= 1;
 
-        // Expand the rows:
+        void ExpandAxis(int[] indexesToExpand, int component)
         {
-            var rowsToExpand = unexpanded
+            for (var idx = 0; idx < indexesToExpand.Length; idx++)
+            {
+                var value = indexesToExpand[idx];
+
+                expandedUniverse = new Universe(
+                    expandedUniverse.Galaxies.Select(galaxy =>
+                    {
+                        var newPosition = galaxy.Position;
+                        newPosition[component] += galaxy.Position[component] < value ? 0 : expansionAmount;
+                        return galaxy with { Position = newPosition };
+                    }).ToArray());
+
+                indexesToExpand = indexesToExpand.Select(n => n + expansionAmount).ToArray();
+            }
+        }
+
+        // Expand the rows:
+        var rowsToExpand = unexpanded
                 .Select((row, rowIndex) => (row, rowIndex))
                 .Where(item => item.row.All(c => c == Space))
                 .Select(item => item.rowIndex)
                 .ToArray();
 
-            for (var row = 0; row < rowsToExpand.Length; row++)
-            {
-                var y = rowsToExpand[row];
-
-                expandedUniverse = new Universe(
-                    expandedUniverse.Galaxies.Select(galaxy =>
-                    {
-                        var newPosition = galaxy.Position with { Y = galaxy.Position.Y + (galaxy.Position.Y < y ? 0 : expansionAmount) };
-                        return galaxy with { Position = newPosition };
-                    }).ToArray());
-
-                rowsToExpand = rowsToExpand.Select(n => n + expansionAmount).ToArray();
-            }
-        }
+        ExpandAxis(rowsToExpand, 1);
 
         // Expand the columns:
-        {
-            IEnumerable<char> GetColumn(int x) => unexpanded.Select(line => line[x]);
-            var columnsToExpand = unexpanded
-                .Select((_, columnIndex) => columnIndex)
-                .Where(columnIndex => GetColumn(columnIndex).All(c => c == Space))
-                .ToArray();
+        IEnumerable<char> GetColumn(int x) => unexpanded.Select(line => line[x]);
+        var columnsToExpand = unexpanded
+            .Select((_, columnIndex) => columnIndex)
+            .Where(columnIndex => GetColumn(columnIndex).All(c => c == Space))
+            .ToArray();
 
-            for (var column = 0; column < columnsToExpand.Length; column++)
-            {
-                var x = columnsToExpand[column];
-
-                expandedUniverse = new Universe(
-                    expandedUniverse.Galaxies.Select(galaxy =>
-                    {
-                        var newPosition = galaxy.Position with { X = galaxy.Position.X + (galaxy.Position.X < x ? 0 : expansionAmount) };
-                        return galaxy with { Position = newPosition };
-                    }).ToArray());
-
-                columnsToExpand = columnsToExpand.Select(n => n + expansionAmount).ToArray();
-            }
-        }
+        ExpandAxis(columnsToExpand, 0);
 
         return expandedUniverse;
     }
