@@ -1,4 +1,3 @@
-using System.Net.Http.Headers;
 using AoC.Day11;
 
 namespace AoC.Tests.Day11;
@@ -25,7 +24,7 @@ public class Day11SolverTests
     {
         // ACT & ASSERT - Expand
         var universe = Day11Solver.ParseAndExpandUniverse(ExampleInput);
-        var expandedUniverse = universe.Galaxies.ToStringGrid(g => new Vector2(g.Position.X, g.Position.Y), _ => '#', '.'); // rs-todo: if Vector2L not needed, fix here
+        var expandedUniverse = universe.Galaxies.ToStringGrid(g => g.Position, _ => '#', '.');
         expandedUniverse.Should().BeEquivalentTo("""
             ....#........
             .........#...

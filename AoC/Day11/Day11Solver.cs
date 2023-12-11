@@ -8,6 +8,7 @@ public class Day11Solver : ISolver
 
     const char Space = '.';
     const char GalaxyChar = '#';
+    const int DefaultExpansionAmount = 2;
 
     public long? SolvePart1(string input) => ParseExpandAndSumDistances(input);
 
@@ -21,21 +22,17 @@ public class Day11Solver : ISolver
                 .ToArray();
     }
 
-    public record struct Vector2L(long X, long Y);
-
-    public record Galaxy(int Id, Vector2L Position);
+    public record Galaxy(int Id, Vector2 Position);
 
     public record GalaxyPair(Galaxy GalaxyA, Galaxy GalaxyB)
     {
-        public long Distance { get; } = ManhattanDistance(GalaxyA.Position, GalaxyB.Position);
-
-        static long ManhattanDistance(Vector2L a, Vector2L b) => Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y);
+        public long Distance { get; } = MathUtils.ManhattanDistance(GalaxyA.Position, GalaxyB.Position);
     }
 
-    public static long ParseExpandAndSumDistances(string input, int expansionAmount = 1) =>
+    public static long ParseExpandAndSumDistances(string input, int expansionAmount = DefaultExpansionAmount) =>
         ParseAndExpandUniverse(input, expansionAmount).GetGalaxyPairs().Sum(pair => pair.Distance);
 
-    public static Universe ParseAndExpandUniverse(string input, int expansionAmount = 1)
+    public static Universe ParseAndExpandUniverse(string input, int expansionAmount = DefaultExpansionAmount)
     {
         var unexpanded = input.ReadLines().Select(line => line).ToArray();
         return ExpandUniverse(unexpanded, expansionAmount);
@@ -47,7 +44,7 @@ public class Day11Solver : ISolver
         var galaxies = input.SelectMany(
             (line, y) => line.Select((chr, x) => (chr, x))
                 .Where(item => item.chr == GalaxyChar)
-                .Select(item => new Galaxy(++nextId, new Vector2L(item.x, y))).ToArray()).ToArray();
+                .Select(item => new Galaxy(++nextId, new Vector2(item.x, y))).ToArray()).ToArray();
 
         return new Universe(galaxies);
     }
@@ -55,8 +52,7 @@ public class Day11Solver : ISolver
     static Universe ExpandUniverse(string[] unexpanded, int expansionAmount)
     {
         var expandedUniverse = ParseUniverse(unexpanded);
-
-        expansionAmount = Math.Max(expansionAmount - 1, 1);
+        expansionAmount -= 1;
 
         // Expand the rows:
         {
@@ -103,7 +99,6 @@ public class Day11Solver : ISolver
                 columnsToExpand = columnsToExpand.Select(n => n + expansionAmount).ToArray();
             }
         }
-        
 
         return expandedUniverse;
     }
