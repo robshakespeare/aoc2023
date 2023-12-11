@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using AoC.Day11;
 
 namespace AoC.Tests.Day11;
@@ -24,7 +25,7 @@ public class Day11SolverTests
     {
         // ACT & ASSERT - Expand
         var universe = Day11Solver.ParseAndExpandUniverse(ExampleInput);
-        var expandedUniverse = universe.Galaxies.ToStringGrid(g => g.Position, _ => '#', '.');
+        var expandedUniverse = universe.Galaxies.ToStringGrid(g => new Vector2(g.Position.X, g.Position.Y), _ => '#', '.'); // rs-todo: if Vector2L not needed, fix here
         expandedUniverse.Should().BeEquivalentTo("""
             ....#........
             .........#...
@@ -82,6 +83,8 @@ public class Day11SolverTests
     [Test]
     public void Part2Example()
     {
+        using var _ = new AssertionScope();
+
         Day11Solver.ParseExpandAndSumDistances(ExampleInput).Should().Be(374);
         Day11Solver.ParseExpandAndSumDistances(ExampleInput, 10).Should().Be(1030);
         Day11Solver.ParseExpandAndSumDistances(ExampleInput, 100).Should().Be(8410);
@@ -95,6 +98,7 @@ public class Day11SolverTests
 
         // ASSERT
         part2Result.Should().BeLessThan(483845200392);
+        part2Result.Should().BeGreaterThan(483845200310);
         part2Result.Should().Be(null);
     }
 }

@@ -21,11 +21,15 @@ public class Day11Solver : ISolver
                 .ToArray();
     }
 
-    public record Galaxy(int Id, Vector2 Position);
+    public record struct Vector2L(long X, long Y);
+
+    public record Galaxy(int Id, Vector2L Position);
 
     public record GalaxyPair(Galaxy GalaxyA, Galaxy GalaxyB)
     {
-        public long Distance { get; } = MathUtils.ManhattanDistance(GalaxyA.Position, GalaxyB.Position);
+        public long Distance { get; } = ManhattanDistance(GalaxyA.Position, GalaxyB.Position);
+
+        static long ManhattanDistance(Vector2L a, Vector2L b) => Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y);
     }
 
     public static long ParseExpandAndSumDistances(string input, int expansionAmount = 1) =>
@@ -43,7 +47,7 @@ public class Day11Solver : ISolver
         var galaxies = input.SelectMany(
             (line, y) => line.Select((chr, x) => (chr, x))
                 .Where(item => item.chr == GalaxyChar)
-                .Select(item => new Galaxy(++nextId, new Vector2(item.x, y))).ToArray()).ToArray();
+                .Select(item => new Galaxy(++nextId, new Vector2L(item.x, y))).ToArray()).ToArray();
 
         return new Universe(galaxies);
     }
@@ -51,9 +55,6 @@ public class Day11Solver : ISolver
     static Universe ExpandUniverse(string[] unexpanded, int expansionAmount)
     {
         var expandedUniverse = ParseUniverse(unexpanded);
-
-        //var universeHeight = unexpanded.Length;
-        //var universeWidth = unexpanded[0].Length;
 
         // Expand the rows:
         {
@@ -67,29 +68,16 @@ public class Day11Solver : ISolver
             {
                 var y = rowsToExpand[row];
 
-                //for (int y = 0; y < universeHeight; y += expansionAmount)
-                //{
-
-                //var line = unexpanded[y].ToString();
-                //if (line.ToString().All(c => c == Space))
-                //{
-
                 expandedUniverse = new Universe(
                     expandedUniverse.Galaxies.Select(galaxy =>
                     {
-                        //var newPosition = g.Position.Y < y ? g.Position : new Vector2(g.Position.X, g.Position.Y + expansionAmount);
                         var newPosition = galaxy.Position with { Y = galaxy.Position.Y + (galaxy.Position.Y < y ? 0 : expansionAmount) };
                         return galaxy with { Position = newPosition };
                     }).ToArray());
 
-                //y += expansionAmount;
-                //universeHeight += expansionAmount;
                 rowsToExpand = rowsToExpand.Select(n => n + expansionAmount).ToArray();
-
-                //}
             }
         }
-
 
         // Expand the columns:
         {
@@ -106,20 +94,11 @@ public class Day11Solver : ISolver
                 expandedUniverse = new Universe(
                     expandedUniverse.Galaxies.Select(galaxy =>
                     {
-                        //var newPosition = g.Position.Y < y ? g.Position : new Vector2(g.Position.X, g.Position.Y + expansionAmount);
                         var newPosition = galaxy.Position with { X = galaxy.Position.X + (galaxy.Position.X < x ? 0 : expansionAmount) };
                         return galaxy with { Position = newPosition };
                     }).ToArray());
 
-                //y += expansionAmount;
-                //universeHeight += expansionAmount;
                 columnsToExpand = columnsToExpand.Select(n => n + expansionAmount).ToArray();
-
-                //if (GetColumn(x).All(c => c == Space))
-                //{
-                //    x += expansionAmount;
-                //    ExpandColumn(x);
-                //}
             }
         }
         
