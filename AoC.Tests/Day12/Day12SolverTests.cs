@@ -20,6 +20,11 @@ public class Day12SolverTests
     public void Part1IndividualExamples()
     {
         ConditionReport.Parse("???.### 1,1,3").GetPossibleArrangements().Should().HaveCount(1);
+        ConditionReport.Parse(".??..??...?##. 1,1,3").GetPossibleArrangements().Should().HaveCount(4);
+        ConditionReport.Parse("?#?#?#?#?#?#?#? 1,3,1,6").GetPossibleArrangements().Should().HaveCount(1);
+        ConditionReport.Parse("????.#...#... 4,1,1").GetPossibleArrangements().Should().HaveCount(1);
+        ConditionReport.Parse("????.######..#####. 1,6,5").GetPossibleArrangements().Should().HaveCount(4);
+        ConditionReport.Parse("?###???????? 3,2,1").GetPossibleArrangements().Should().HaveCount(10);
     }
 
     [Test]
@@ -39,7 +44,7 @@ public class Day12SolverTests
         var part1Result = _sut.SolvePart1();
 
         // ASSERT
-        part1Result.Should().Be(null);
+        part1Result.Should().Be(7118);
     }
 
     [Test]

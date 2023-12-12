@@ -80,7 +80,7 @@ public static class GeneralExtensions
         {
             TKey nextKey = keySelector(item);
 
-            if (Equals(nextKey, currentKey))
+            if (!Equals(nextKey, currentKey))
             {
                 yield return new ContiguousGroup<TKey, TSource>(currentKey, items);
                 items = [];

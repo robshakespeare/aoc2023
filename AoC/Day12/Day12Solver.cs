@@ -6,25 +6,25 @@ public class Day12Solver : ISolver
 
     public long? SolvePart1(string input)
     {
-        var rawInput = ParseInput(input).Select(item =>
-        {
-            var permutationsOfConditionRecords = EnumeratePermutationsOfConditionRecords(item.RawConditionRecords);
-            var expectedCounts = item.SizeOfEachContiguousGroupOfDamagedSprings;
-            var arrangements = permutationsOfConditionRecords
-                .Select(records => records.ContiguousGroupBy(c => c).Where(group => group.Key == '#').Select(group => group.Count()))
-                .Where(actualCounts => Enumerable.SequenceEqual(expectedCounts, actualCounts))
-                .ToArray();
+        //var rawInput = ParseInput(input).Select(item =>
+        //{
+        //    var permutationsOfConditionRecords = EnumeratePermutationsOfConditionRecords(item.RawConditionRecords);
+        //    var expectedCounts = item.SizeOfEachContiguousGroupOfDamagedSprings;
+        //    var arrangements = permutationsOfConditionRecords
+        //        .Select(records => records.ContiguousGroupBy(c => c).Where(group => group.Key == '#').Select(group => group.Count()))
+        //        .Where(actualCounts => Enumerable.SequenceEqual(expectedCounts, actualCounts))
+        //        .ToArray();
 
-            return new
-            {
-                item.RawConditionRecords,
-                item.SizeOfEachContiguousGroupOfDamagedSprings,
-                permutationsOfConditionRecords,
+        //    return new
+        //    {
+        //        item.RawConditionRecords,
+        //        item.SizeOfEachContiguousGroupOfDamagedSprings,
+        //        permutationsOfConditionRecords,
 
-            };
-        });
+        //    };
+        //});
 
-        return null;
+        return ParseInput(input).Sum(x => x.GetPossibleArrangements().Length);
     }
 
     public long? SolvePart2(string input)
@@ -71,10 +71,7 @@ public class Day12Solver : ISolver
         }
     }
 
-    static IEnumerable<(string RawConditionRecords, int[] SizeOfEachContiguousGroupOfDamagedSprings)> ParseInput(string input) =>
-        input.ReadLines()
-            .Select(line => line.Split(' '))
-            .Select(split => (split[0], split[1].Split(',').Select(int.Parse).ToArray()));
+    static IEnumerable<ConditionReport> ParseInput(string input) => input.ReadLines().Select(ConditionReport.Parse);
 
     //static IEnumerable<(string RawConditionRecords, int[] SizeOfEachContiguousGroupOfDamagedSprings)> ParseInput(string input) =>
     //    input.ReadLines()
