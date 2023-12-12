@@ -20,8 +20,11 @@ public class Day12Solver : ISolver
 
     static long SumCountOfPossibleArrangements(RowState[] rows)
     {
+        ArrangementsCountsCache.Clear();
         return rows.Sum(row => row.CountPossibleArrangements());
     }
+
+    static readonly Dictionary<string, long> ArrangementsCountsCache = [];
 
     public record RowState(string Springs, int[] ExpectedCounts, string Path, int ContiguousDamagedSpringsCount)
     {
@@ -39,7 +42,12 @@ public class Day12Solver : ISolver
                 return ExpectedCounts.Length == 0 ? 1 : 0;
             }
 
-            // rs-todo: caching!
+            var cacheKey = $"{Springs}_{string.Join(',', ExpectedCounts)}_{ContiguousDamagedSpringsCount}";
+
+            if (ArrangementsCountsCache.TryGetValue(cacheKey, out var cachedCount))
+            {
+                return cachedCount;
+            }
 
             var count = Springs[0] switch
             {
@@ -60,6 +68,8 @@ public class Day12Solver : ISolver
                 var spring =>
                     throw new InvalidOperationException($"Unexpected spring: {spring}")
             };
+
+            ArrangementsCountsCache[cacheKey] = count;
 
             return count;
         }
