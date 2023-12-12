@@ -60,6 +60,7 @@ public class Day12SolverTests
     }
 
     [Test]
+    [LongRunningTest("~6.5 seconds")]
     public void Part2ReTest()
     {
         // ACT
@@ -67,6 +68,6 @@ public class Day12SolverTests
 
         // ASSERT
         part2Result.Should().BeLessThan(9509310871382);
-        part2Result.Should().Be(null);
+        part2Result.Should().Be(7030194981795);
     }
 }

@@ -19,7 +19,7 @@ public class Day12Solver : ISolver
         {
             rows = rows.Select(row => row with
             {
-                Springs = string.Join('?', Enumerable.Repeat(row.Springs, 5)),
+                Springs = string.Join('?', Enumerable.Repeat(row.Springs[..^1], 5)) + '.',
                 ExpectedCounts = Enumerable.Repeat(row.ExpectedCounts, 5).SelectMany(x => x).ToArray()
             }).ToArray();
         }
