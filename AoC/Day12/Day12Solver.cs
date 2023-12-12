@@ -8,8 +8,6 @@ public class Day12Solver : ISolver
     {
         var rows = input.ReadLines()
             .Select(RowState.Parse)
-            //.Select(line => line.Split(' '))
-            //.Select(split => new Row(split[0], split[1].Split(',').Select(int.Parse).ToArray()))
             .ToArray();
 
         return SumCountOfPossibleArrangements(rows);
@@ -25,9 +23,8 @@ public class Day12Solver : ISolver
         return rows.Sum(row => row.CountPossibleArrangements());
     }
 
-    public class RowState //(string SpringConditions, int[] SizeOfEachContiguousGroupOfDamagedSprings, string Path = "")
+    public class RowState
     {
-        //private readonly bool isValid;
         private readonly string springs;
         private readonly int[] expectedCounts;
         private readonly string path;
@@ -35,35 +32,6 @@ public class Day12Solver : ISolver
 
         private RowState(string springs, int[] expectedCounts, string path, int contiguousDamagedSpringsCount)
         {
-            //isValid = true;
-
-            //if (path.Length > 0)
-            //{
-            //    var currentSpring = path[^1];
-
-            //    if (currentSpring == '#')
-            //    {
-            //        contiguousDamagedSpringsCount++; // we are part (start, middle or end) of a group of damaged springs, so increment group count
-            //    }
-            //    else if (currentSpring == '.')
-            //    {
-            //        // we may have just finished a group, so check
-            //        if (contiguousDamagedSpringsCount > 0)
-            //        {
-            //            // we have finished a group, so check its size is valid
-            //            isValid = expectedCounts.Length > 0 && expectedCounts[0] == contiguousDamagedSpringsCount;
-            //            if (isValid)
-            //            {
-            //                expectedCounts = expectedCounts[1..];
-            //                contiguousDamagedSpringsCount = 0;
-            //            }
-            //            else
-            //            {
-            //            }
-            //        }
-            //    }
-            //}
-
             this.springs = springs;
             this.expectedCounts = expectedCounts;
             this.path = path;
@@ -84,73 +52,64 @@ public class Day12Solver : ISolver
                 return expectedCounts.Length == 0 ? 1 : 0;
             }
 
-            //if (!isValid)
-            //{
-            //    return 0;
-            //}
-
             // rs-todo: caching!
 
-            var spring = springs[0];
-            if (spring == '?')
+            var count = springs[0] switch
             {
-                return
+                '?' =>
+                    // at this point, the arrangement splits in to 2 possibilities, either an undamaged spring '.', or a damaged spring '#'
                     new RowState('.' + springs[1..], expectedCounts, path, contiguousDamagedSpringsCount).CountPossibleArrangements() +
-                    new RowState('#' + springs[1..], expectedCounts, path, contiguousDamagedSpringsCount).CountPossibleArrangements();
-            }
-            else if (spring == '#')
-            {
-                // we are part (start, middle or end) of a group of damaged springs, so increment group count
-                return new RowState(springs[1..], expectedCounts, path + spring, contiguousDamagedSpringsCount + 1).CountPossibleArrangements();
-            }
-            else if (spring == '.')
-            {
-                // if we have just finished a group, check its size is valid
-                if (contiguousDamagedSpringsCount > 0)
-                {
-                    var isValid = expectedCounts.Length > 0 && expectedCounts[0] == contiguousDamagedSpringsCount;
-                    if (isValid)
-                    {
-                        return new RowState(springs[1..], expectedCounts[1..], path + spring, 0).CountPossibleArrangements();
-                    }
-                    else
-                    {
-                        return 0;
-                    }
-                }
+                    new RowState('#' + springs[1..], expectedCounts, path, contiguousDamagedSpringsCount).CountPossibleArrangements(),
+                '#' =>
+                    // we are part (start, middle or end) of a group of damaged springs, so increment group count
+                    new RowState(springs[1..], expectedCounts, path + '#', contiguousDamagedSpringsCount + 1).CountPossibleArrangements(),
+                '.' when contiguousDamagedSpringsCount > 0 =>
+                    // we have just finished a group, check its size is valid
+                    expectedCounts.Length > 0 && expectedCounts[0] == contiguousDamagedSpringsCount
+                        ? new RowState(springs[1..], expectedCounts[1..], path + '.', 0).CountPossibleArrangements()
+                        : 0, // this arrangement isn't valid, so don't continue, drop out, and don't count it
+                '.' =>
+                    new RowState(springs[1..], expectedCounts, path + '.', 0).CountPossibleArrangements(),
+                var spring =>
+                    throw new InvalidOperationException($"Unexpected spring: {spring}")
+            };
 
-                return new RowState(springs[1..], expectedCounts, path + spring, 0).CountPossibleArrangements();
-            }
-            //else if (spring is '.' or '#')
+            return count;
+
+            //var spring = springs[0];
+            //if (spring == '?')
             //{
-            //    if (spring == '#')
+            //    return
+            //        new RowState('.' + springs[1..], expectedCounts, path, contiguousDamagedSpringsCount).CountPossibleArrangements() +
+            //        new RowState('#' + springs[1..], expectedCounts, path, contiguousDamagedSpringsCount).CountPossibleArrangements();
+            //}
+            //else if (spring == '#')
+            //{
+            //    // we are part (start, middle or end) of a group of damaged springs, so increment group count
+            //    return new RowState(springs[1..], expectedCounts, path + spring, contiguousDamagedSpringsCount + 1).CountPossibleArrangements();
+            //}
+            //else if (spring == '.')
+            //{
+            //    // if we have just finished a group, check its size is valid
+            //    if (contiguousDamagedSpringsCount > 0)
             //    {
-            //        contiguousDamagedSpringsCount++; 
-            //    }
-            //    else if (currentSpring == '.')
-            //    {
-            //        // we may have just finished a group, so check
-            //        if (contiguousDamagedSpringsCount > 0)
+            //        var isValid = expectedCounts.Length > 0 && expectedCounts[0] == contiguousDamagedSpringsCount;
+            //        if (isValid)
             //        {
-            //            // we have finished a group, so check its size is valid
-            //            isValid = expectedCounts.Length > 0 && expectedCounts[0] == contiguousDamagedSpringsCount;
-            //            if (isValid)
-            //            {
-            //                expectedCounts = expectedCounts[1..];
-            //                contiguousDamagedSpringsCount = 0;
-            //            }
-            //            else
-            //            {
-            //            }
+            //            return new RowState(springs[1..], expectedCounts[1..], path + spring, 0).CountPossibleArrangements();
+            //        }
+            //        else
+            //        {
+            //            return 0; // this arrangement isn't valid, so don't continue, drop out, and don't count it
             //        }
             //    }
 
-            //    //return new RowState(springs[1..], expectedCounts, path + spring, contiguousDamagedSpringsCount).CountPossibleArrangements();
+            //    return new RowState(springs[1..], expectedCounts, path + spring, 0).CountPossibleArrangements();
             //}
-            else
-            {
-                throw new InvalidOperationException($"Unexpected spring: {spring}");
-            }
+            //else
+            //{
+            //    throw new InvalidOperationException($"Unexpected spring: {spring}");
+            //}
         }
     }
 }
