@@ -19,12 +19,14 @@ public class Day12SolverTests
     [Test]
     public void Part1IndividualExamples()
     {
-        ConditionReport.Parse("???.### 1,1,3").GetPossibleArrangements().Should().HaveCount(1);
-        ConditionReport.Parse(".??..??...?##. 1,1,3").GetPossibleArrangements().Should().HaveCount(4);
-        ConditionReport.Parse("?#?#?#?#?#?#?#? 1,3,1,6").GetPossibleArrangements().Should().HaveCount(1);
-        ConditionReport.Parse("????.#...#... 4,1,1").GetPossibleArrangements().Should().HaveCount(1);
-        ConditionReport.Parse("????.######..#####. 1,6,5").GetPossibleArrangements().Should().HaveCount(4);
-        ConditionReport.Parse("?###???????? 3,2,1").GetPossibleArrangements().Should().HaveCount(10);
+        using var _ = new AssertionScope();
+
+        ConditionReport.Parse("???.### 1,1,3").CountPossibleArrangements().Should().Be(1);
+        ConditionReport.Parse(".??..??...?##. 1,1,3").CountPossibleArrangements().Should().Be(4);
+        ConditionReport.Parse("?#?#?#?#?#?#?#? 1,3,1,6").CountPossibleArrangements().Should().Be(1);
+        ConditionReport.Parse("????.#...#... 4,1,1").CountPossibleArrangements().Should().Be(1);
+        ConditionReport.Parse("????.######..#####. 1,6,5").CountPossibleArrangements().Should().Be(4);
+        ConditionReport.Parse("?###???????? 3,2,1").CountPossibleArrangements().Should().Be(10);
     }
 
     [Test]
@@ -54,7 +56,7 @@ public class Day12SolverTests
         var part2ExampleResult = _sut.SolvePart2(ExampleInput);
 
         // ASSERT
-        part2ExampleResult.Should().Be(null);
+        part2ExampleResult.Should().Be(525152);
     }
 
     [Test]
