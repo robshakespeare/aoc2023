@@ -83,7 +83,7 @@ public class Day12Solver : ISolver
 
     static string[] EnumeratePermutationsOfConditionRecords(string rawConditionRecords)
     {
-        var results = new List<StringBuilder>([new StringBuilder()]);
+        var results = new List<string>([""]);
 
         foreach (var sourceChar in rawConditionRecords)
         {
@@ -94,24 +94,36 @@ public class Day12Solver : ISolver
                 _ => throw new Exception("Unexpected char: " + sourceChar)
             };
 
-            foreach (var (appendChar, createNew) in appendChars.Select((appendChar, i) => (appendChar, CreateNew: i > 0)))
+            var nextResults = new List<string>();
+
+            foreach (var result in results)
             {
-                var additionalResults = new List<StringBuilder>();
-                foreach (var result in results)
+                foreach (var appendChar in appendChars)
                 {
-                    if (createNew)
-                    {
-                        var additionalResult = new StringBuilder(result.ToString());
-                        additionalResult.Append(appendChar);
-                        additionalResults.Add(additionalResult);
-                    }
-                    else
-                    {
-                        result.Append(appendChar);
-                    }
+                    nextResults.Add(result + appendChar);
                 }
-                results.AddRange(additionalResults);
             }
+
+            results = nextResults;
+
+            //foreach (var (appendChar, createNew) in appendChars.Select((appendChar, i) => (appendChar, CreateNew: i > 0)))
+            //{
+            //    var additionalResults = new List<StringBuilder>();
+            //    foreach (var result in results)
+            //    {
+            //        if (createNew)
+            //        {
+            //            var additionalResult = new StringBuilder(result.ToString());
+            //            additionalResult.Append(appendChar);
+            //            additionalResults.Add(additionalResult);
+            //        }
+            //        else
+            //        {
+            //            result.Append(appendChar);
+            //        }
+            //    }
+            //    results.AddRange(additionalResults);
+            //}
         }
 
         return results.Select(result => result.ToString()).ToArray();
