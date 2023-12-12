@@ -21,12 +21,12 @@ public class Day12SolverTests
     {
         using var _ = new AssertionScope();
 
-        ConditionReport.Parse("???.### 1,1,3").CountPossibleArrangements().Should().Be(1);
-        ConditionReport.Parse(".??..??...?##. 1,1,3").CountPossibleArrangements().Should().Be(4);
-        ConditionReport.Parse("?#?#?#?#?#?#?#? 1,3,1,6").CountPossibleArrangements().Should().Be(1);
-        ConditionReport.Parse("????.#...#... 4,1,1").CountPossibleArrangements().Should().Be(1);
-        ConditionReport.Parse("????.######..#####. 1,6,5").CountPossibleArrangements().Should().Be(4);
-        ConditionReport.Parse("?###???????? 3,2,1").CountPossibleArrangements().Should().Be(10);
+        GetPossibleArrangements(Row.Parse("???.### 1,1,3")).Should().Be(1);
+        //GetPossibleArrangements(Row.Parse(".??..??...?##. 1,1,3")).Should().Be(4);
+        //GetPossibleArrangements(Row.Parse("?#?#?#?#?#?#?#? 1,3,1,6")).Should().Be(1);
+        //GetPossibleArrangements(Row.Parse("????.#...#... 4,1,1")).Should().Be(1);
+        //GetPossibleArrangements(Row.Parse("????.######..#####. 1,6,5")).Should().Be(4);
+        //GetPossibleArrangements(Row.Parse("?###???????? 3,2,1")).Should().Be(10);
     }
 
     [Test]

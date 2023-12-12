@@ -1,7 +1,3 @@
-using System.Linq;
-using System.Text.RegularExpressions;
-using Spectre.Console;
-
 namespace AoC.Day12;
 
 public class Day12Solver : ISolver
@@ -10,293 +6,96 @@ public class Day12Solver : ISolver
 
     public long? SolvePart1(string input)
     {
-        return Solve(input);
+        var rows = input.ReadLines()
+            .Select(Row.Parse)
+            //.Select(line => line.Split(' '))
+            //.Select(split => new Row(split[0], split[1].Split(',').Select(int.Parse).ToArray()))
+            .ToArray();
 
-        //HashSet<string>? validArrangementsCache = new();
-        //return ParseInput(input).Sum(x => x.CountPossibleArrangements(null));
+        return Solve(rows);
     }
 
     public long? SolvePart2(string input)
     {
-        return Solve(input, true);
+        return null;
     }
 
-    private long? Solve(string input, bool fold = false)
+    public record Row(string SpringConditions, int[] SizeOfEachContiguousGroupOfDamagedSprings, string Path = "")
     {
-        var conditionReports = ParseInput(input);
-
-        if (fold)
-        {
-            conditionReports = conditionReports
-            .Select(conditionReport => new ConditionReport(
-                string.Join('?', Enumerable.Repeat(conditionReport.RawConditionRecords, 5)),
-                Enumerable.Repeat(conditionReport.SizeOfEachContiguousGroupOfDamagedSprings, 5).SelectMany(x => x).ToArray()))
-            .ToArray();
-        }
-
-        HashSet<string>? validArrangementsCache = null; // new(); // rs-todo: doesn't look like this speeds things up!
-        Dictionary<string, int>? countPossibleArrangementsCache = new();
-
-        var totalPossibleArrangements = 0;
-        foreach (var conditionReport in conditionReports)
-        {
-            //int possibleArrangements;
-
-            if (!countPossibleArrangementsCache.TryGetValue(conditionReport.CacheKey, out var possibleArrangements))
-            {
-                possibleArrangements = conditionReport.CountPossibleArrangements(validArrangementsCache);
-                countPossibleArrangementsCache.Add(conditionReport.CacheKey, possibleArrangements);
-            }
-
-            totalPossibleArrangements += possibleArrangements;
-
-            
-        }
-
-        return totalPossibleArrangements;
-    }
-
-    public record ConditionReport(string RawConditionRecords, int[] SizeOfEachContiguousGroupOfDamagedSprings)
-    {
-        public string CacheKey { get; } = $"{RawConditionRecords}_{string.Join(",", SizeOfEachContiguousGroupOfDamagedSprings)}";
-
-        public static ConditionReport Parse(string line)
+        public static Row Parse(string line)
         {
             var split = line.Split(' ');
             return new(split[0], split[1].Split(',').Select(int.Parse).ToArray());
         }
+    }
 
-        public int CountPossibleArrangements(HashSet<string>? validArrangementsCache = null)
+    static long Solve(Row[] rows)
+    {
+        return rows.Sum(GetPossibleArrangements);
+    }
+
+    public static long GetPossibleArrangements(Row row)
+    {
+        // rs-todo: caching!
+        return CountPossibleArrangements(row);
+    }
+
+    static long CountPossibleArrangements(Row row)
+    {
+        var (springs, sizes, pathSoFar) = row;
+
+        if (springs[0] == '?')
         {
-            //var start = new ConditionRecords(RawConditionRecords);
+            return
+                GetPossibleArrangements(row with { SpringConditions = '.' + springs[1..] }) +
+                GetPossibleArrangements(row with { SpringConditions = '#' + springs[1..] });
+        }
+        else
+        {
+            var linearSection = string.Concat(springs.TakeWhile(spring => spring != '?'));
+            var remainingSprings = springs[linearSection.Length..];
 
+            var ourSizes = linearSection.ContiguousGroupBy(spring => spring)
+                .Where(group => group.Key == '#')
+                .Select(group => group.Count());
 
+            // Our counts need to match
+            // If they don't match, we can exclude this branch
+            // When remaining becomes empty, that means we have a possible arrangement
+            // Otherwise, we can recurse
 
-            //return 0;
+            var matchedSizes = 0;
 
-            var (permutationsOfConditionRecords, endsReached) = EnumeratePermutationsOfConditionRecords(RawConditionRecords);
-
-            //var test = permutationsOfConditionRecords.ToArray();
-
-            //return test.Length;
-
-            ////// debug:
-            //////Console.WriteLine($"{RawConditionRecords} -- {permutationsOfConditionRecords.Count()}");
-
-            ////return 0;
-
-            var expectedCounts = SizeOfEachContiguousGroupOfDamagedSprings;
-
-            //var newArrangementsCount = 0;
-
-            //foreach (var records in permutationsOfConditionRecords)
-            //{
-            //    var groupIndex = 0;
-            //    var overflow = false;
-
-            //    foreach (var grouping in records.ContiguousGroupBy(c => c).Where(group => group.Key == '#'))
-            //    {
-            //        if (groupIndex >= expectedCounts.Length)
-            //        {
-            //            overflow = true;
-            //            break;
-            //        }
-            //        if (grouping.Count() != expectedCounts[groupIndex])
-            //        {
-            //            break;
-            //        }
-            //        groupIndex++;
-            //    }
-
-            //    if (groupIndex == expectedCounts.Length && !overflow)
-            //    {
-            //        newArrangementsCount++;
-            //    }
-            //}
-
-            //return newArrangementsCount;
-
-            var counts = string.Join(",", SizeOfEachContiguousGroupOfDamagedSprings);
-
-            var arrangementsCount = 0;
-
-            foreach (var permutationsOfConditionRecord in permutationsOfConditionRecords)
+            foreach (var (ourSize, idx) in ourSizes.Select((ourSize, idx) => (ourSize, idx)))
             {
-                var cacheKey = string.Concat(permutationsOfConditionRecord) + counts;
-
-                if (validArrangementsCache != null && validArrangementsCache.Contains(cacheKey))
+                if (idx >= sizes.Length)
                 {
-                    arrangementsCount++;
+                    return 0;
                 }
-                else
+
+                var expectedSize = sizes[idx];
+                if (expectedSize != ourSize)
                 {
-                    var actualCounts = permutationsOfConditionRecord.ContiguousGroupBy(c => c)
-                        .Where(group => group.Key == '#')
-                        .Select(group => group.Count());
-
-                    var valid = Enumerable.SequenceEqual(expectedCounts, actualCounts);
-
-                    if (valid)
-                    {
-                        arrangementsCount++;
-                        validArrangementsCache?.Add(cacheKey);
-                    }
+                    return 0;
                 }
+
+                matchedSizes++;
             }
 
-            //var arrangementsCount = permutationsOfConditionRecords
-            //    .Select(records => records
-            //        .ContiguousGroupBy(c => c)
-            //        .Where(group => group.Key == '#')
-            //        .Select(group => group.Count()))
-            //    .Where(actualCounts => Enumerable.SequenceEqual(expectedCounts, actualCounts))
-            //    .Count();
+            var remainingSizes = sizes[matchedSizes..];
+            var path = pathSoFar + linearSection;
 
-            //var endsReachedCount = endsReached.Count;
-
-            //var expectedCounts = SizeOfEachContiguousGroupOfDamagedSprings;
-            //var arrangements = permutationsOfConditionRecords
-            //    .Select(records => new
-            //    {
-            //        records,
-            //        ActualSizeOfEachContiguousGroupOfDamagedSprings = records
-            //            .ContiguousGroupBy(c => c)
-            //            .Where(group => group.Key == '#')
-            //            .Select(group => group.Count())
-            //    })
-            //    .Where(x => Enumerable.SequenceEqual(expectedCounts, x.ActualSizeOfEachContiguousGroupOfDamagedSprings))
-            //    .Select(x => x.records)
-            //    .ToArray();
-
-            // debug:
-            //Console.WriteLine($"{RawConditionRecords} -- {permutationsOfConditionRecords.Count()} -- {arrangementsCount} -- {endsReachedCount}");
-
-            return arrangementsCount;
-        }
-    }
-
-    static ConditionReport[] ParseInput(string input) => input.ReadLines().Select(ConditionReport.Parse).ToArray();
-
-    record ConditionRecords(string RawRecords, string Path = "") //, int Pointer = 0)
-    {
-        public int Pointer { get; } = Path.Length;
-
-        public ConditionRecords[] GetSuccessors()
-        {
-            if (Pointer >= RawRecords.Length)
+            if (remainingSprings == "" || remainingSprings.All(spring => spring == '.'))
             {
-                return [];
+                if (remainingSizes.Length == 0)
+                {
+                    return 1;
+                }
+
+                return 0;
             }
 
-            var record = RawRecords[Pointer];
-
-            return record switch
-            {
-                '.' or '#' => [Append(record)],
-                '?' => [Append('.'), Append('#')],
-                _ => throw new Exception("Unexpected char: " + record)
-            };
+            return GetPossibleArrangements(new Row(remainingSprings, remainingSizes, path));
         }
-
-        ConditionRecords Append(char next) => new ConditionRecords(RawRecords, Path + next);
-    }
-
-    public class EndsReached
-    {
-        public int Count { get; set; }
-    }
-
-    static (IEnumerable<IEnumerable<char>>, EndsReached) EnumeratePermutationsOfConditionRecords(string rawConditionRecords)
-    {
-        /*
-            Good:
-            var possibleChars = new[] { '.', '#' };
-
-            return rawConditionRecords.Aggregate(
-                (IEnumerable<IEnumerable<char>>)new[] { Enumerable.Empty<char>() },
-                (current, record) =>
-                {
-                    return record switch
-                    {
-                        '.' or '#' => current.Select(records => records.Append(record)),
-                        '?' => current.SelectMany(records => possibleChars.Select(c => records.Append(c))),
-                        _ => throw new Exception("Unexpected char: " + record)
-                    };
-                });
-         */
-
-        var possibleChars = new[] { '.', '#' };
-
-        var result = rawConditionRecords.Aggregate(
-            (IEnumerable<IEnumerable<char>>)new[] { Enumerable.Empty<char>() },
-            (current, record) =>
-            {
-                return record switch
-                {
-                    '.' or '#' => current.Select(records => records.Append(record)),
-                    '?' => current.SelectMany(records => possibleChars.Select(c => records.Append(c))),
-                    _ => throw new Exception("Unexpected char: " + record)
-                };
-            });
-
-
-        var endsReached = new EndsReached();
-        IEnumerable<char> End()
-        {
-            endsReached.Count++;
-            return Enumerable.Empty<char>();
-        }
-
-        result = result.Select(line => line.Concat(End()));
-
-        return (result, endsReached);
-
-        //return rawConditionRecords.Skip(1).Aggregate(
-        //    (IEnumerable<IEnumerable<char>>)new[] { new[] { rawConditionRecords[0] } },
-        //    (current, record) =>
-        //    {
-        //        return record switch
-        //        {
-        //            '.' or '#' => current.Select(records => records.Append(record)),
-        //            '?' => current.SelectMany(records => possibleChars.Select(c => records.Append(c))),
-        //            _ => throw new Exception("Unexpected char: " + record)
-        //        };
-        //    });
-
-        //return rawConditionRecords.Aggregate(Enumerable.Empty<IEnumerable<char>>(), (current, record) =>
-        //{
-        //    return record switch
-        //    {
-        //        '.' or '#' => current.Select(records => records.Append(record)),
-        //        '?' => current.SelectMany(records => possibleChars.Select(c => records.Append(c))),
-        //        _ => throw new Exception("Unexpected char: " + record)
-        //    };
-        //});
-
-        //var results = new List<string>([""]);
-
-        //foreach (var sourceChar in rawConditionRecords)
-        //{
-        //    char[] appendChars = sourceChar switch
-        //    {
-        //        '.' or '#' => [sourceChar],
-        //        '?' => ['.', '#'],
-        //        _ => throw new Exception("Unexpected char: " + sourceChar)
-        //    };
-
-        //    var nextResults = new List<string>();
-
-        //    foreach (var result in results)
-        //    {
-        //        foreach (var appendChar in appendChars)
-        //        {
-        //            nextResults.Add(result + appendChar);
-        //        }
-        //    }
-
-        //    results = nextResults;
-        //}
-
-        //return results.Select(result => result.ToString()).ToArray();
     }
 }
