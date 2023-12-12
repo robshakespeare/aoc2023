@@ -11,20 +11,10 @@ public class Day12Solver : ISolver
     static long SumCountOfPossibleArrangements(string input, bool fold)
     {
         Dictionary<string, long> arrangementsCountsCache = [];
-        var rows = input.ReadLines()
+        return input.ReadLines()
             .Select(line => RowState.Parse(line, arrangementsCountsCache))
-            .ToArray();
-
-        if (fold)
-        {
-            rows = rows.Select(row => row with
-            {
-                Springs = string.Join('?', Enumerable.Repeat(row.Springs[..^1], 5)) + '.',
-                ExpectedCounts = Enumerable.Repeat(row.ExpectedCounts, 5).SelectMany(x => x).ToArray()
-            }).ToArray();
-        }
-
-        return rows.Sum(row => row.CountPossibleArrangements());
+            .Select(row => fold ? row.Fold() : row)
+            .Sum(row => row.CountPossibleArrangements());
     }
 
     public record RowState(string Springs, int[] ExpectedCounts, int ContiguousDamagedSpringsCount, Dictionary<string, long>? Cache)
@@ -34,6 +24,12 @@ public class Day12Solver : ISolver
             var split = line.Split(' ');
             return new(split[0] + '.', split[1].Split(',').Select(int.Parse).ToArray(), 0, cache);
         }
+
+        public RowState Fold() => this with
+        {
+            Springs = string.Join('?', Enumerable.Repeat(Springs[..^1], 5)) + '.',
+            ExpectedCounts = Enumerable.Repeat(ExpectedCounts, 5).SelectMany(x => x).ToArray()
+        };
 
         public long CountPossibleArrangements()
         {
