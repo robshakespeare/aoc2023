@@ -1,3 +1,6 @@
+using System.Collections;
+using Spectre.Console;
+
 namespace AoC;
 
 public static class GeneralExtensions
@@ -58,4 +61,44 @@ public static class GeneralExtensions
     /// </summary>
     public static TValue GetOrAdd<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key, Func<TValue> buildValue)
         where TKey : notnull => dictionary.TryGetValue(key, out var value) ? value : dictionary[key] = buildValue();
+
+    /// <summary>
+    /// Groups the contiguous elements of a sequence according to a specified key selector function.
+    /// rs-todo: tests!
+    /// </summary>
+    public static IEnumerable<IGrouping<TKey, TSource>> ContiguousGroupBy<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
+    {
+        if (!source.Any())
+        {
+            yield break;
+        }
+
+        TKey currentKey = keySelector(source.First());
+        List<TSource> items = [source.First()];
+
+        foreach (var item in source.Skip(1))
+        {
+            TKey nextKey = keySelector(item);
+
+            if (Equals(nextKey, currentKey))
+            {
+                yield return new ContiguousGroup<TKey, TSource>(currentKey, items);
+                items = [];
+            }
+
+            currentKey = nextKey;
+            items.Add(item);
+        }
+
+        yield return new ContiguousGroup<TKey, TSource>(currentKey, items);
+    }
+
+    private class ContiguousGroup<TKey, TSource>(TKey key, List<TSource> items) : IGrouping<TKey, TSource>
+    {
+        public TKey Key => key;
+
+        public IEnumerator<TSource> GetEnumerator() => items.GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => items.GetEnumerator();
+    }
 }

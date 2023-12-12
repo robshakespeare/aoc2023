@@ -1,4 +1,5 @@
 using AoC.Day12;
+using static AoC.Day12.Day12Solver;
 
 namespace AoC.Tests.Day12;
 
@@ -7,8 +8,19 @@ public class Day12SolverTests
     private readonly Day12Solver _sut = new();
 
     private const string ExampleInput = """
-
+        #.#.### 1,1,3
+        .#...#....###. 1,1,3
+        .#.###.#.###### 1,3,1,6
+        ####.#...#... 4,1,1
+        #....######..#####. 1,6,5
+        .###.##....# 3,2,1
         """;
+
+    [Test]
+    public void Part1IndividualExamples()
+    {
+        ConditionReport.Parse("???.### 1,1,3").GetPossibleArrangements().Should().HaveCount(1);
+    }
 
     [Test]
     public void Part1Example()
@@ -17,7 +29,7 @@ public class Day12SolverTests
         var part1ExampleResult = _sut.SolvePart1(ExampleInput);
 
         // ASSERT
-        part1ExampleResult.Should().Be(null);
+        part1ExampleResult.Should().Be(21);
     }
 
     [Test]
