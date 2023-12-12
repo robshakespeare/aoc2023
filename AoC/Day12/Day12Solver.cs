@@ -18,19 +18,15 @@ public class Day12Solver : ISolver
             .Select(line => RowState.Parse(line, arrangementsCountsCache))
             .ToArray();
 
-        //ArrangementsCountsCache.Clear();
-        
         return rows.Sum(row => row.CountPossibleArrangements());
     }
 
-    //static readonly Dictionary<string, long> ArrangementsCountsCache = [];
-
-    public record RowState(string Springs, int[] ExpectedCounts, string Path, int ContiguousDamagedSpringsCount, Dictionary<string, long>? Cache)
+    public record RowState(string Springs, int[] ExpectedCounts, int ContiguousDamagedSpringsCount, Dictionary<string, long>? Cache)
     {
         public static RowState Parse(string line, Dictionary<string, long>? cache = null)
         {
             var split = line.Split(' ');
-            return new(split[0] + '.', split[1].Split(',').Select(int.Parse).ToArray(), "", 0, cache);
+            return new(split[0] + '.', split[1].Split(',').Select(int.Parse).ToArray(), 0, cache);
         }
 
         public long CountPossibleArrangements()
@@ -56,14 +52,14 @@ public class Day12Solver : ISolver
                     (this with { Springs = '#' + Springs[1..] }).CountPossibleArrangements(),
                 '#' =>
                     // we are part (start, middle or end) of a group of damaged springs, so increment group count
-                    new RowState(Springs[1..], ExpectedCounts, Path + '#', ContiguousDamagedSpringsCount + 1, Cache).CountPossibleArrangements(),
+                    new RowState(Springs[1..], ExpectedCounts, ContiguousDamagedSpringsCount + 1, Cache).CountPossibleArrangements(),
                 '.' when ContiguousDamagedSpringsCount > 0 =>
                     // we have just finished a group, check its size is valid
                     ExpectedCounts.Length > 0 && ExpectedCounts[0] == ContiguousDamagedSpringsCount
-                        ? new RowState(Springs[1..], ExpectedCounts[1..], Path + '.', 0, Cache).CountPossibleArrangements()
+                        ? new RowState(Springs[1..], ExpectedCounts[1..], 0, Cache).CountPossibleArrangements()
                         : 0, // this arrangement isn't valid, so don't continue, drop out, and don't count it
                 '.' =>
-                    new RowState(Springs[1..], ExpectedCounts, Path + '.', 0, Cache).CountPossibleArrangements(),
+                    new RowState(Springs[1..], ExpectedCounts, 0, Cache).CountPossibleArrangements(),
                 var spring =>
                     throw new InvalidOperationException($"Unexpected spring: {spring}")
             };
