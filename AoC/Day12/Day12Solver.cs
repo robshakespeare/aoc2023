@@ -7,12 +7,12 @@ public class Day12Solver : ISolver
     public long? SolvePart1(string input)
     {
         var rows = input.ReadLines()
-            .Select(Row.Parse)
+            .Select(RowState.Parse)
             //.Select(line => line.Split(' '))
             //.Select(split => new Row(split[0], split[1].Split(',').Select(int.Parse).ToArray()))
             .ToArray();
 
-        return Solve(rows);
+        return SumCountOfPossibleArrangements(rows);
     }
 
     public long? SolvePart2(string input)
@@ -20,82 +20,137 @@ public class Day12Solver : ISolver
         return null;
     }
 
-    public record Row(string SpringConditions, int[] SizeOfEachContiguousGroupOfDamagedSprings, string Path = "")
+    static long SumCountOfPossibleArrangements(RowState[] rows)
     {
-        public static Row Parse(string line)
+        return rows.Sum(row => row.CountPossibleArrangements());
+    }
+
+    public class RowState //(string SpringConditions, int[] SizeOfEachContiguousGroupOfDamagedSprings, string Path = "")
+    {
+        //private readonly bool isValid;
+        private readonly string springs;
+        private readonly int[] expectedCounts;
+        private readonly string path;
+        private readonly int contiguousDamagedSpringsCount;
+
+        private RowState(string springs, int[] expectedCounts, string path, int contiguousDamagedSpringsCount)
+        {
+            //isValid = true;
+
+            //if (path.Length > 0)
+            //{
+            //    var currentSpring = path[^1];
+
+            //    if (currentSpring == '#')
+            //    {
+            //        contiguousDamagedSpringsCount++; // we are part (start, middle or end) of a group of damaged springs, so increment group count
+            //    }
+            //    else if (currentSpring == '.')
+            //    {
+            //        // we may have just finished a group, so check
+            //        if (contiguousDamagedSpringsCount > 0)
+            //        {
+            //            // we have finished a group, so check its size is valid
+            //            isValid = expectedCounts.Length > 0 && expectedCounts[0] == contiguousDamagedSpringsCount;
+            //            if (isValid)
+            //            {
+            //                expectedCounts = expectedCounts[1..];
+            //                contiguousDamagedSpringsCount = 0;
+            //            }
+            //            else
+            //            {
+            //            }
+            //        }
+            //    }
+            //}
+
+            this.springs = springs;
+            this.expectedCounts = expectedCounts;
+            this.path = path;
+            this.contiguousDamagedSpringsCount = contiguousDamagedSpringsCount;
+        }
+
+        public static RowState Parse(string line)
         {
             var split = line.Split(' ');
-            return new(split[0], split[1].Split(',').Select(int.Parse).ToArray());
+            return new(split[0] + '.', split[1].Split(',').Select(int.Parse).ToArray(), "", 0);
         }
-    }
 
-    static long Solve(Row[] rows)
-    {
-        return rows.Sum(GetPossibleArrangements);
-    }
-
-    public static long GetPossibleArrangements(Row row)
-    {
-        // rs-todo: caching!
-        return CountPossibleArrangements(row);
-    }
-
-    static long CountPossibleArrangements(Row row)
-    {
-        var (springs, sizes, pathSoFar) = row;
-
-        if (springs[0] == '?')
+        public long CountPossibleArrangements()
         {
-            return
-                GetPossibleArrangements(row with { SpringConditions = '.' + springs[1..] }) +
-                GetPossibleArrangements(row with { SpringConditions = '#' + springs[1..] });
-        }
-        else
-        {
-            var linearSection = string.Concat(springs.TakeWhile(spring => spring != '?'));
-            var remainingSprings = springs[linearSection.Length..];
-
-            var ourSizes = linearSection.ContiguousGroupBy(spring => spring)
-                .Where(group => group.Key == '#')
-                .Select(group => group.Count());
-
-            // Our counts need to match
-            // If they don't match, we can exclude this branch
-            // When remaining becomes empty, that means we have a possible arrangement
-            // Otherwise, we can recurse
-
-            var matchedSizes = 0;
-
-            foreach (var (ourSize, idx) in ourSizes.Select((ourSize, idx) => (ourSize, idx)))
+            if (springs.Length == 0)
             {
-                if (idx >= sizes.Length)
-                {
-                    return 0;
-                }
-
-                var expectedSize = sizes[idx];
-                if (expectedSize != ourSize)
-                {
-                    return 0;
-                }
-
-                matchedSizes++;
+                // We've reached the end of this arrangement, so count it if we've consumed all of the group counts
+                return expectedCounts.Length == 0 ? 1 : 0;
             }
 
-            var remainingSizes = sizes[matchedSizes..];
-            var path = pathSoFar + linearSection;
+            //if (!isValid)
+            //{
+            //    return 0;
+            //}
 
-            if (remainingSprings == "" || remainingSprings.All(spring => spring == '.'))
+            // rs-todo: caching!
+
+            var spring = springs[0];
+            if (spring == '?')
             {
-                if (remainingSizes.Length == 0)
+                return
+                    new RowState('.' + springs[1..], expectedCounts, path, contiguousDamagedSpringsCount).CountPossibleArrangements() +
+                    new RowState('#' + springs[1..], expectedCounts, path, contiguousDamagedSpringsCount).CountPossibleArrangements();
+            }
+            else if (spring == '#')
+            {
+                // we are part (start, middle or end) of a group of damaged springs, so increment group count
+                return new RowState(springs[1..], expectedCounts, path + spring, contiguousDamagedSpringsCount + 1).CountPossibleArrangements();
+            }
+            else if (spring == '.')
+            {
+                // if we have just finished a group, check its size is valid
+                if (contiguousDamagedSpringsCount > 0)
                 {
-                    return 1;
+                    var isValid = expectedCounts.Length > 0 && expectedCounts[0] == contiguousDamagedSpringsCount;
+                    if (isValid)
+                    {
+                        return new RowState(springs[1..], expectedCounts[1..], path + spring, 0).CountPossibleArrangements();
+                    }
+                    else
+                    {
+                        return 0;
+                    }
                 }
 
-                return 0;
+                return new RowState(springs[1..], expectedCounts, path + spring, 0).CountPossibleArrangements();
             }
+            //else if (spring is '.' or '#')
+            //{
+            //    if (spring == '#')
+            //    {
+            //        contiguousDamagedSpringsCount++; 
+            //    }
+            //    else if (currentSpring == '.')
+            //    {
+            //        // we may have just finished a group, so check
+            //        if (contiguousDamagedSpringsCount > 0)
+            //        {
+            //            // we have finished a group, so check its size is valid
+            //            isValid = expectedCounts.Length > 0 && expectedCounts[0] == contiguousDamagedSpringsCount;
+            //            if (isValid)
+            //            {
+            //                expectedCounts = expectedCounts[1..];
+            //                contiguousDamagedSpringsCount = 0;
+            //            }
+            //            else
+            //            {
+            //            }
+            //        }
+            //    }
 
-            return GetPossibleArrangements(new Row(remainingSprings, remainingSizes, path));
+            //    //return new RowState(springs[1..], expectedCounts, path + spring, contiguousDamagedSpringsCount).CountPossibleArrangements();
+            //}
+            else
+            {
+                throw new InvalidOperationException($"Unexpected spring: {spring}");
+            }
         }
     }
 }
