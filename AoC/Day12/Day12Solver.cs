@@ -4,19 +4,25 @@ public class Day12Solver : ISolver
 {
     public string DayName => "Hot Springs";
 
-    public long? SolvePart1(string input) => SumCountOfPossibleArrangements(input);
+    public long? SolvePart1(string input) => SumCountOfPossibleArrangements(input, fold: false);
 
-    public long? SolvePart2(string input)
-    {
-        return null;
-    }
+    public long? SolvePart2(string input) => SumCountOfPossibleArrangements(input, fold: true);
 
-    static long SumCountOfPossibleArrangements(string input)
+    static long SumCountOfPossibleArrangements(string input, bool fold)
     {
         Dictionary<string, long> arrangementsCountsCache = [];
         var rows = input.ReadLines()
             .Select(line => RowState.Parse(line, arrangementsCountsCache))
             .ToArray();
+
+        if (fold)
+        {
+            rows = rows.Select(row => row with
+            {
+                Springs = string.Join('?', Enumerable.Repeat(row.Springs, 5)),
+                ExpectedCounts = Enumerable.Repeat(row.ExpectedCounts, 5).SelectMany(x => x).ToArray()
+            }).ToArray();
+        }
 
         return rows.Sum(row => row.CountPossibleArrangements());
     }
