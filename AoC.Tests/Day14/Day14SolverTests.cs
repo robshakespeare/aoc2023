@@ -7,7 +7,16 @@ public class Day14SolverTests
     private readonly Day14Solver _sut = new();
 
     private const string ExampleInput = """
-
+        O....#....
+        O.OO#....#
+        .....##...
+        OO.#O....O
+        .O.....O#.
+        O.#..O.#.#
+        ..O..#O..O
+        .......O..
+        #....###..
+        #OO..#....
         """;
 
     [Test]
@@ -17,7 +26,7 @@ public class Day14SolverTests
         var part1ExampleResult = _sut.SolvePart1(ExampleInput);
 
         // ASSERT
-        part1ExampleResult.Should().Be(null);
+        part1ExampleResult.Should().Be(136);
     }
 
     [Test]
