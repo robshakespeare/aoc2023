@@ -6,9 +6,19 @@ public class Day15SolverTests
 {
     private readonly Day15Solver _sut = new();
 
-    private const string ExampleInput = """
+    private const string ExampleInput = "rn=1,cm-,qp=3,cm=2,qp-,pc=4,ot=9,ab=5,pc-,pc=6,ot=7";
 
-        """;
+    [TestCase("HASH", 52)]
+    [TestCase("rn=1", 30)]
+    [TestCase("cm-", 253)]
+    public void Part1IndividualExamples(string input, long expectedResult)
+    {
+        // ACT
+        var result = Day15Solver.HASH(input);
+
+        // ASSERT
+        result.Should().Be(expectedResult);
+    }
 
     [Test]
     public void Part1Example()
@@ -17,7 +27,7 @@ public class Day15SolverTests
         var part1ExampleResult = _sut.SolvePart1(ExampleInput);
 
         // ASSERT
-        part1ExampleResult.Should().Be(null);
+        part1ExampleResult.Should().Be(1320);
     }
 
     [Test]
