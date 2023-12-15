@@ -11,6 +11,8 @@ public class Day15SolverTests
     [TestCase("HASH", 52)]
     [TestCase("rn=1", 30)]
     [TestCase("cm-", 253)]
+    [TestCase("rn", 0)]
+    [TestCase("qp", 1)]
     public void Part1IndividualExamples(string input, long expectedResult)
     {
         // ACT
@@ -37,7 +39,7 @@ public class Day15SolverTests
         var part1Result = _sut.SolvePart1();
 
         // ASSERT
-        part1Result.Should().Be(null);
+        part1Result.Should().Be(506869);
     }
 
     [Test]
@@ -47,7 +49,7 @@ public class Day15SolverTests
         var part2ExampleResult = _sut.SolvePart2(ExampleInput);
 
         // ASSERT
-        part2ExampleResult.Should().Be(null);
+        part2ExampleResult.Should().Be(145);
     }
 
     [Test]
@@ -57,6 +59,6 @@ public class Day15SolverTests
         var part2Result = _sut.SolvePart2();
 
         // ASSERT
-        part2Result.Should().Be(null);
+        part2Result.Should().Be(271384);
     }
 }
