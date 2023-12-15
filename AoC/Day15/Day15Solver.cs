@@ -8,20 +8,16 @@ public partial class Day15Solver : ISolver
 
     public long? SolvePart2(string input)
     {
-        var boxes = Enumerable.Range(0, 256).Select(_ => new List<Lens>()).ToArray(); // new List<Lens>[256];
+        var boxes = Enumerable.Range(0, 256).Select(_ => new List<Lens>()).ToArray();
         var steps = ParseStepsRegex().Matches(input)
             .Select(m => new Step(
                 m.Groups["label"].Value,
                 m.Groups["op"].Value.Single(),
-                m.Groups["focalLength"].Value.Length > 0 ? int.Parse(m.Groups["focalLength"].Value) : 0));
-
-        //var steps = input.Split(',').Select(x => ParseStepsRegex().Matches(x)
-        //    .Select(m => new Step(m.Groups["label"].Value, m.Groups["op"].Value.Single(), int.Parse(m.Groups["focalLength"].Value)));
+                int.Parse('0' + m.Groups["focalLength"].Value)));
 
         foreach (var step in steps)
         {
             var index = boxes[step.Hash].FindIndex(lens => lens.Label == step.Label);
-            //indexToRemove
 
             if (step.Operation == '-')
             {
@@ -32,8 +28,6 @@ public partial class Day15Solver : ISolver
             }
             else if (step.Operation == '=')
             {
-                //var indexToReplace = boxes[step.Hash].FindIndex(lens => lens.Label == step.Label);
-
                 var lens = new Lens(step.Label, step.FocalLength);
 
                 if (index >= 0)
@@ -52,7 +46,6 @@ public partial class Day15Solver : ISolver
             }
         }
 
-        // (1 + boxIdx) * 
         return boxes.SelectMany((box, boxNum) => box.Select((lens, slotIdx) => lens.FocusingPower(boxNum, slotIdx + 1))).Sum();
     }
 
