@@ -44,8 +44,8 @@ public class Day17Solver : ISolver
             node => MathUtils.ManhattanDistance(node.Position, goalPosition));
 
         var path = search.FindShortestPath(
-            start: new CrucibleNode(new Vector2(0, 0), default, default, default, default),
-            goal: new CrucibleNode(goalPosition, default, default, default, default));
+            starts: [new CrucibleNode(new Vector2(0, 0), default, default, default, default)],
+            isGoal: node => node.Position == goalPosition);
 
         return path.TotalCost;
     }
@@ -65,7 +65,7 @@ public sealed record CrucibleNode(Vector2 Position, int HeatLoss, Vector2 Dir, V
 {
     public int Cost => HeatLoss;
 
-    public bool Equals(CrucibleNode? other) => other != null && other.Position == Position;
+    //public bool Equals(CrucibleNode? other) => other != null && other.Position == Position;
 
-    public override int GetHashCode() => Position.GetHashCode();
+    //public override int GetHashCode() => Position.GetHashCode();
 }
