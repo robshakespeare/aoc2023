@@ -12,7 +12,7 @@ public class Day17Solver : ISolver
         var search = new AStarSearch<CrucibleNode>(
             getSuccessors: node =>
             {
-                var mustTurn = node.Dir == node.Dir1 && node.Dir == node.Dir2;
+                var mustTurn = node.DirCount == 3;
                 var prevPos = node.Position + (node.Dir * -1);
 
                 return GridUtils.DirectionsExcludingDiagonal // rule: can go any non-diagonal direction
@@ -21,11 +21,11 @@ public class Day17Solver : ISolver
                     .Where(x => x.pos != prevPos) // rule: can't go backwards
                     .Select(x => (x.pos, x.dir, heatLoss: grid.TryGet(x.pos, out var c) ? (c - '0') : -1))
                     .Where(x => x.heatLoss > -1)
-                    .Select(x => new CrucibleNode(x.pos, x.heatLoss, x.dir, node.Dir, node.Dir1));
+                    .Select(x => new CrucibleNode(x.pos, x.heatLoss, x.dir, x.dir == node.Dir ? node.DirCount + 1 : 1));
             });
 
         return search.FindShortestPath(
-            starts: [new CrucibleNode(new Vector2(0, 0), default, default, default, default)],
+            starts: [new CrucibleNode(new Vector2(0, 0), default, default, default)],
             isGoal: node => node.Position == goalPosition).TotalCost;
     }
 
@@ -35,4 +35,4 @@ public class Day17Solver : ISolver
     }
 }
 
-public sealed record CrucibleNode(Vector2 Position, int Cost, Vector2 Dir, Vector2 Dir1, Vector2 Dir2) : IAStarSearchNode;
+public sealed record CrucibleNode(Vector2 Position, int Cost, Vector2 Dir, int DirCount) : IAStarSearchNode;

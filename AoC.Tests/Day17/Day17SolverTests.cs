@@ -33,7 +33,7 @@ public class Day17SolverTests
     }
 
     [Test]
-    [LongRunningTest("~3 seconds")]
+    [LongRunningTest("~1 second")]
     public void Part1ReTest()
     {
         // ACT
