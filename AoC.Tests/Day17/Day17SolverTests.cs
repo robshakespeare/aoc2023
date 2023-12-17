@@ -50,7 +50,23 @@ public class Day17SolverTests
         var part2ExampleResult = _sut.SolvePart2(ExampleInput);
 
         // ASSERT
-        part2ExampleResult.Should().Be(null);
+        part2ExampleResult.Should().Be(94);
+    }
+
+    [Test]
+    public void Part2Example2()
+    {
+        // ACT
+        var part2ExampleResult = _sut.SolvePart2("""
+            111111111111
+            999999999991
+            999999999991
+            999999999991
+            999999999991
+            """);
+
+        // ASSERT
+        part2ExampleResult.Should().Be(71);
     }
 
     [Test]
