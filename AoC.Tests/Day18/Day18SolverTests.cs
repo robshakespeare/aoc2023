@@ -30,7 +30,7 @@ public class Day18SolverTests
         var part1ExampleResult = _sut.SolvePart1(ExampleInput);
 
         // ASSERT
-        part1ExampleResult.Should().Be(null);
+        part1ExampleResult.Should().Be(62);
     }
 
     [Test]
@@ -40,7 +40,7 @@ public class Day18SolverTests
         var part1Result = _sut.SolvePart1();
 
         // ASSERT
-        part1Result.Should().Be(null);
+        part1Result.Should().Be(108909);
     }
 
     [Test]
