@@ -23,57 +23,42 @@ public class Day14Solver : ISolver
             new EastTilternator(grid)
         ];
 
-        void Cycle() => tilternators.ForEach(tilternator => tilternator.Tilt());
-
-        string GridToString() => string.Join(Environment.NewLine, grid.Select(line => line.ToString()));
-
         const int totalCycles = 1000000000;
-
-        // Find the cycle size
         Dictionary<string, int> gridCycleNums = [];
+        var warped = false;
 
-        var cycleSize = 0;
-        var cycleNum = 0;
-
-        while (cycleSize == 0)
-        //for (int cycleNum = 1; cycleNum <= 1000; cycleNum++)
+        for (var cycleNum = 1; cycleNum <= totalCycles; cycleNum++)
         {
-            Cycle();
-            cycleNum++;
+            tilternators.ForEach(tilternator => tilternator.Tilt()); // Cycle (tilt N, W, S, E)
 
-            var gridString = GridToString();
-
-            if (gridCycleNums.TryGetValue(gridString, out var prevMatchingCycleNum))
+            if (!warped)
             {
-                cycleSize = cycleNum - prevMatchingCycleNum;
-            }
-            else
-            {
-                gridCycleNums[gridString] = cycleNum;
-            }
-        }
+                var gridString = string.Join(Environment.NewLine, grid.Select(line => line));
 
-        // Engage Warp Speed, Captain!
-        cycleNum += (totalCycles - cycleNum) / cycleSize * cycleSize;
-
-        // Finish the run!
-        for (; cycleNum < totalCycles; cycleNum++)
-        {
-            Cycle();
+                if (gridCycleNums.TryGetValue(gridString, out var prevMatchingCycleNum))
+                {
+                    // Engage Warp Speed, Captain!
+                    var cycleSize = cycleNum - prevMatchingCycleNum;
+                    cycleNum += (totalCycles - cycleNum) / cycleSize * cycleSize;
+                    warped = true;
+                }
+                else
+                {
+                    gridCycleNums[gridString] = cycleNum;
+                }
+            }
         }
 
         return CalculateNorthSupportBeamLoad(grid);
     }
 
-    static StringBuilder[] ParseInput(string input) => input.ReadLines().ToArray()
-        .Select(line => new StringBuilder(line))
-        .ToArray();
+    static StringBuilder[] ParseInput(string input) => input.ReadLines().Select(line => new StringBuilder(line)).ToArray();
 
     static long CalculateNorthSupportBeamLoad(StringBuilder[] grid) => Enumerable.Range(0, grid.Length).Sum(y =>
-        {
-            long loadPerRock = grid.Length - y;
-            return grid[y].ToString().LongCount(c => c == 'O') * loadPerRock;
-        });
+    {
+        long loadPerRock = grid.Length - y;
+        return grid[y].ToString().Count(c => c == 'O') * loadPerRock;
+    });
 }
 
 public interface ITilternator
@@ -91,17 +76,10 @@ public interface ITilternator
             {
                 if (this[pos, axis] == 'O')
                 {
-                    for (var idx = pos - 1; idx >= 0; idx--)
+                    for (var idx = pos - 1; idx >= 0 && this[idx, axis] == '.'; idx--)
                     {
-                        if (this[idx, axis] == '.')
-                        {
-                            this[idx, axis] = 'O';
-                            this[idx + 1, axis] = '.';
-                        }
-                        else
-                        {
-                            break;
-                        }
+                        this[idx, axis] = 'O';
+                        this[idx + 1, axis] = '.';
                     }
                 }
             }
@@ -115,23 +93,10 @@ public class NorthTilternator(StringBuilder[] grid) : ITilternator
 
     public int OperableLength { get; } = grid.Length;
 
-    public char this[int operableIndex, int axisIndex /* axis = columns/X for North */]
+    public char this[int operableIndex, int axisIndex]
     {
         get => grid[operableIndex][axisIndex];
         set => grid[operableIndex][axisIndex] = value;
-    }
-}
-
-public class WestTilternator(StringBuilder[] grid) : ITilternator
-{
-    public int AxisLength { get; } = grid.Length;
-
-    public int OperableLength { get; } = grid[0].Length;
-
-    public char this[int operableIndex, int axisIndex /* axis = rows/Y for West */]
-    {
-        get => grid[axisIndex][operableIndex];
-        set => grid[axisIndex][operableIndex] = value;
     }
 }
 
@@ -141,10 +106,23 @@ public class SouthTilternator(StringBuilder[] grid) : ITilternator
 
     public int OperableLength { get; } = grid.Length;
 
-    public char this[int operableIndex, int axisIndex /* axis = columns/X for South */]
+    public char this[int operableIndex, int axisIndex]
     {
         get => grid[OperableLength - 1 - operableIndex][axisIndex];
         set => grid[OperableLength - 1 - operableIndex][axisIndex] = value;
+    }
+}
+
+public class WestTilternator(StringBuilder[] grid) : ITilternator
+{
+    public int AxisLength { get; } = grid.Length;
+
+    public int OperableLength { get; } = grid[0].Length;
+
+    public char this[int operableIndex, int axisIndex]
+    {
+        get => grid[axisIndex][operableIndex];
+        set => grid[axisIndex][operableIndex] = value;
     }
 }
 
@@ -154,7 +132,7 @@ public class EastTilternator(StringBuilder[] grid) : ITilternator
 
     public int OperableLength { get; } = grid[0].Length;
 
-    public char this[int operableIndex, int axisIndex /* axis = rows/Y for East */]
+    public char this[int operableIndex, int axisIndex]
     {
         get => grid[axisIndex][OperableLength - 1 - operableIndex];
         set => grid[axisIndex][OperableLength - 1 - operableIndex] = value;
