@@ -7,25 +7,9 @@ public class Day14Solver : ISolver
     public long? SolvePart1(string input)
     {
         var grid = ParseInput(input);
-
         ITilternator northTilternator = new NorthTilternator(grid);
-
-        //Console.WriteLine();
-        //Console.WriteLine(string.Join(Environment.NewLine, grid.Select(line => line.ToString())));
-
         northTilternator.Tilt();
-        //Tilt(northTilternator);
-
-        //Console.WriteLine();
-        //Console.WriteLine(string.Join(Environment.NewLine, grid.Select(line => line.ToString())));
-
         return CalculateNorthSupportBeamLoad(grid);
-
-        //var tilted = TransposeRowsToColumns(input.ReadLines().ToArray())
-        //    .Select(line => TiltLine(new StringBuilder(line)))
-        //    .ToArray();
-
-        //return tilted.SelectMany(line => line.Select((c, i) => c == 'O' ? line.Length - i : 0)).Sum();
     }
 
     public long? SolvePart2(string input)
@@ -41,14 +25,6 @@ public class Day14Solver : ISolver
 
         void Cycle() => tilternators.ForEach(tilternator => tilternator.Tilt());
 
-        //void Cycle()
-        //{
-        //    foreach (var tilternator in tilternators)
-        //    {
-        //        tilternator.Tilt();
-        //    }
-        //}
-
         string GridToString() => string.Join(Environment.NewLine, grid.Select(line => line.ToString()));
 
         const int totalCycles = 1000000000;
@@ -57,7 +33,6 @@ public class Day14Solver : ISolver
         Dictionary<string, int> gridCycleNums = [];
 
         var cycleSize = 0;
-        //var prevMatchingCycleNum = 0;
         var cycleNum = 0;
 
         while (cycleSize == 0)
@@ -71,22 +46,14 @@ public class Day14Solver : ISolver
             if (gridCycleNums.TryGetValue(gridString, out var prevMatchingCycleNum))
             {
                 cycleSize = cycleNum - prevMatchingCycleNum;
-
-                //Console.WriteLine($"Matching cycle {prevCycleNum} and {cycleNum} (delta: {cycleNum - prevCycleNum}):");
-                //Console.WriteLine(GridToString());
-                //Console.WriteLine();
             }
             else
             {
                 gridCycleNums[gridString] = cycleNum;
             }
-
-            //Console.WriteLine($"After {cycleNum} cycle:");
-            //Console.WriteLine(GridToString());
-            //Console.WriteLine();
         }
 
-        // Time warp!
+        // Engage Warp Speed, Captain!
         cycleNum += (totalCycles - cycleNum) / cycleSize * cycleSize;
 
         // Finish the run!
@@ -98,33 +65,6 @@ public class Day14Solver : ISolver
         return CalculateNorthSupportBeamLoad(grid);
     }
 
-    // Good:
-    //static void Tilt(ITilternator tilternator)
-    //{
-    //    for (var axis = 0; axis < tilternator.AxisLength; axis++)
-    //    {
-    //        // Working from Beginning to End, move each rounded rock O to Beginning, while there is space or it reaches Beginning
-    //        for (var pos = 0; pos < tilternator.OperableLength; pos++)
-    //        {
-    //            if (tilternator[pos, axis] == 'O')
-    //            {
-    //                for (var idx = pos - 1; idx >= 0; idx--)
-    //                {
-    //                    if (tilternator[idx, axis] == '.')
-    //                    {
-    //                        tilternator[idx, axis] = 'O';
-    //                        tilternator[idx + 1, axis] = '.';
-    //                    }
-    //                    else
-    //                    {
-    //                        break;
-    //                    }
-    //                }
-    //            }
-    //        }
-    //    }
-    //}
-
     static StringBuilder[] ParseInput(string input) => input.ReadLines().ToArray()
         .Select(line => new StringBuilder(line))
         .ToArray();
@@ -134,38 +74,6 @@ public class Day14Solver : ISolver
             long loadPerRock = grid.Length - y;
             return grid[y].ToString().LongCount(c => c == 'O') * loadPerRock;
         });
-
-    //static string[] TransposeRowsToColumns(string[] Rows)
-    //{
-    //    string GetColumn(int x) => string.Concat(Rows.Select(line => line[x]));
-    //    return Enumerable.Range(0, Rows[0].Length).Select(GetColumn).ToArray();
-    //}
-
-    //static string TiltLine(StringBuilder line)
-    //{
-    //    // Working from Beginning to End, move each rounded rock O to Beginning, while there is space or it reaches Beginning
-
-    //    for (var pos = 0; pos < line.Length; pos++)
-    //    {
-    //        if (line[pos] == 'O')
-    //        {
-    //            for (var idx = pos - 1; idx >= 0; idx--)
-    //            {
-    //                if (line[idx] == '.')
-    //                {
-    //                    line[idx] = 'O';
-    //                    line[idx + 1] = '.';
-    //                }
-    //                else
-    //                {
-    //                    break;
-    //                }
-    //            }
-    //        }
-    //    }
-
-    //    return line.ToString();
-    //}
 }
 
 public interface ITilternator
