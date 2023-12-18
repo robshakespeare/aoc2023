@@ -54,9 +54,9 @@ public class Day14Solver : ISolver
 
     static StringBuilder[] ParseInput(string input) => input.ReadLines().Select(line => new StringBuilder(line)).ToArray();
 
-    static long CalculateNorthSupportBeamLoad(StringBuilder[] grid) => Enumerable.Range(0, grid.Length).Sum(y =>
+    static int CalculateNorthSupportBeamLoad(StringBuilder[] grid) => Enumerable.Range(0, grid.Length).Sum(y =>
     {
-        long loadPerRock = grid.Length - y;
+        var loadPerRock = grid.Length - y;
         return grid[y].ToString().Count(c => c == 'O') * loadPerRock;
     });
 }
