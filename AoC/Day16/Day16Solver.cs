@@ -8,6 +8,8 @@ public class Day16Solver : ISolver
     {
         List<Beam> beams = [new Beam(new Vector2(-1, 0), GridUtils.East)];
         HashSet<Vector2> energizedTiles = [];
+        HashSet<(Vector2, Vector2)> visited = [];
+        //var visited = new HashSet<Beam>(new BeamComparer());
         var grid = input.Split(Environment.NewLine);
 
         List<int> energizedTilesCountByFrame = [];
@@ -16,6 +18,15 @@ public class Day16Solver : ISolver
         {
             foreach (var beam in beams.ToArray())
             {
+                var beamKey = (beam.Position, beam.Direction);
+                if (visited.Contains(beamKey))
+                {
+                    beams.Remove(beam);
+                    continue;
+                }
+
+                visited.Add(beamKey);
+
                 beam.Position += beam.Direction;
 
                 if (grid.TryGet(beam.Position, out var tile))
@@ -47,11 +58,13 @@ public class Day16Solver : ISolver
                 }
             }
 
+            //Console.WriteLine("#beams: " + beams.Count + ", #visited: " + visited.Count);
+
             energizedTilesCountByFrame.Add(energizedTiles.Count);
         }
         while (energizedTilesCountByFrame.Count < 3 || energizedTilesCountByFrame[^3..].Any(x => x != energizedTilesCountByFrame[^1]));
 
-        energizedTiles.ToStringGrid(p => p, _ => '#', '.').RenderGridToConsole();
+        //energizedTiles.ToStringGrid(p => p, _ => '#', '.').RenderGridToConsole();
 
         return energizedTiles.Count;
     }
@@ -67,4 +80,11 @@ public class Day16Solver : ISolver
 
         public Vector2 Direction { get; set; } = direction;
     }
+
+    //class BeamComparer : IEqualityComparer<Beam>
+    //{
+    //    public bool Equals(Beam? x, Beam? y) => x?.Position == y?.Position && x?.Direction == y?.Direction;
+
+    //    public int GetHashCode([DisallowNull] Beam beam) => HashCode.Combine(beam.Position, beam.Direction);
+    //}
 }
