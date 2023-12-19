@@ -1,9 +1,18 @@
-using System.Drawing;
-
 namespace AoC.Day18;
 
 /// <summary>
-/// Solution is essentially the area of polygon given the coordinates of the vertices, in order.
+/// After realising that the solution must be something to do with working out square floor space of an irregular building floor by tracing edges,
+/// I searched and came across https://forums.anandtech.com/threads/quirky-problem-calculating-the-area-of-an-irregular-shape-programmatically.317692/
+/// Afetr attempting to implemenet that, and realising potential issues, with more searching I came across Phil Scovis' Quora answer
+/// here: https://www.quora.com/How-do-you-calculate-the-area-of-an-irregular-shape-and-how-do-you-divide-it-into-equal-parts
+/// Solution is essentially the area of polygon given the coordinates of the vertices, in order, but also needing to account for the inclusive bounds
+/// of the integer coordinate system.  More reading afterwards, I disoverred the names for these algorithms/theorems are:
+/// * Shoelace formula, also known as Gauss's area formula, for polygonal area;
+/// * and Pick's theorem, to cater for the need for inclusive bounds (down and left edges) because of integer coordinates.
+///
+/// After implementing the above, I spent far too long trying to work out why part 1 still worked, but part 2 didn't;
+/// until realising the implementation was fine except for it had just reached the end of single precision floating point accuracy!!
+/// Changed to `double` and it was fine!
 /// </summary>
 public partial class Day18Solver : ISolver
 {
@@ -17,108 +26,6 @@ public partial class Day18Solver : ISolver
             .ToArray();
 
         return CalculateTrenchDigOutArea(instructions);
-
-        ///////////// Hmmmm:
-        //var position = Vector2.Zero;
-        //List<Vector2> vertices = [position];
-        //HashSet<Vector2> perimeter = [position];
-
-        //foreach (var line in input.ReadLines())
-        //{
-        //    var split = line.Split(' ');
-        //    var dir = split[0] switch
-        //    {
-        //        "U" => GridUtils.North,
-        //        "D" => GridUtils.South,
-        //        "L" => GridUtils.West,
-        //        "R" => GridUtils.East,
-        //        _ => throw new Exception("Invalid dir: " + split[0])
-        //    };
-        //    var amount = int.Parse(split[1]);
-
-        //    //position += dir * amount;
-        //    //vertices.Add(position);
-
-        //    //position += dir * (amount + 1);
-        //    //Console.WriteLine(position);
-
-        //    for (var i = 0; i < amount; i++)
-        //    {
-        //        position += dir;
-        //        perimeter.Add(position);
-        //    }
-
-        //    vertices.Add(position);
-        //}
-
-        //var b = vertices
-        //    .Select((v, i) => (Current: v, Next: vertices[(i + 1) % vertices.Count]))
-        //    .Sum(pair => (pair.Current.X * pair.Next.Y) - (pair.Current.Y * pair.Next.X));
-
-        //var area = (long)Math.Abs(b / 2);
-
-        //return area + (perimeter.Count / 2) + 1;
-
-
-
-        // Plot, only works for example! Actual is too big!
-        //Console.WriteLine(string.Join(Environment.NewLine, vertices.ToStringGrid(
-        //    p => p,
-        //    p => (char)('A' + vertices.IndexOf(p)),
-        //    '.')));
-
-        ///////////// Hmmmm:
-
-        //var instructions = input.ReadLines()
-        //    .Select(line => line.Split(' '))
-        //    .Select(split => new Instruction(split[0].Single(), long.Parse(split[1])))
-        //    .ToArray();
-
-        //var instructionPairs = instructions
-        //    .Select((instruction, idx) => (instruction, idx))
-        //    .GroupBy(x => x.idx / 2)
-        //    .Select(grp =>
-        //    {
-        //        if (grp.Count() != 2)
-        //        {
-        //            throw new Exception("Invalid pairing");
-        //        }
-
-        //        return (Horizontal: grp.First().instruction, Vertical: grp.Last().instruction);
-        //    })
-        //    .ToArray();
-
-        //long u = 0;
-
-        //var (rSign, lSign) = instructionPairs[0].Horizontal.Direction switch
-        //{
-        //    'R' => (+1, -1),
-        //    'L' => (-1, +1),
-        //    var invalid => throw new FormatException("Invalid format, horizontal moves should be first in pair, but got: " + invalid)
-        //};
-
-        //var (uSign, dSign) = instructionPairs[0].Vertical.Direction switch
-        //{
-        //    'U' => (+1, -1),
-        //    'D' => (-1, +1),
-        //    var invalid => throw new FormatException("Invalid format, vertical moves should be second in pair, but got: " + invalid)
-        //};
-
-        //List<long> areas = [];
-
-        //foreach (var (horizontal, vertical) in instructionPairs)
-        //{
-        //    var verticalAmount = (vertical.Direction == 'U' ? uSign : dSign) * vertical.Amount;
-
-        //    u += verticalAmount;
-
-        //    var horizontalAmount = (horizontal.Direction == 'R' ? rSign : lSign) * horizontal.Amount;
-
-        //    var area = u * horizontalAmount;
-        //    areas.Add(area);
-        //}
-
-        //return areas.Sum();
     }
 
     public long? SolvePart2(string input)
@@ -141,33 +48,20 @@ public partial class Day18Solver : ISolver
 
     record Instruction(char Direction, long Amount);
 
-    static double ShoelaceArea(List<Vector2> v)
+    static long ShoelaceArea(IList<Vector2> vertices)
     {
-        int n = v.Count;
-        double a = 0.0;
-        for (int i = 0; i < n - 1; i++)
-        {
-            a += ((double)v[i].X) * ((double)v[i + 1].Y) - ((double)v[i + 1].X) * ((double)v[i].Y);
-        }
-        return Math.Abs(a + v[n - 1].X * v[0].Y - v[0].X * v[n - 1].Y) / 2.0;
+        var b = vertices
+            .Select((v, i) => (Current: v, Next: vertices[(i + 1) % vertices.Count]))
+            .Sum(pair => ((double)pair.Current.X * pair.Next.Y) - ((double)pair.Current.Y * pair.Next.X));
+
+        return (long)(Math.Abs(b) / 2);
     }
 
-
-    /// <summary>
-    /// Shoelace formula, also known as Gauss's area formula, for polygonal area;
-    /// and Pick's theorem, to cater for the polygon being in integer coordinates.
-    /// </summary>
     static long CalculateTrenchDigOutArea(Instruction[] instructions)
     {
         var position = Vector2.Zero;
         List<Vector2> vertices = [position];
-        //HashSet<Vector2> perimeter = [position];
-
         long perimeter = 0;
-
-        long exclusivePerimeter = 0;
-
-        long instructionCounter = 0;
 
         foreach (var instruction in instructions)
         {
@@ -185,47 +79,14 @@ public partial class Day18Solver : ISolver
             vertices.Add(position);
 
             perimeter += amount;
-
-            exclusivePerimeter += instruction.Direction is 'D' or 'L' ? amount : 0;
-
-
-            //position += dir * (amount + 1);
-            Console.WriteLine($"{++instructionCounter}: {position}");
-
-            //for (var i = 0; i < amount; i++)
-            //{
-            //    position += dir;
-            //    perimeter.Add(position);
-            //}
-
-            //vertices.Add(position);
         }
 
-        //perimeter += 4;
-
-        //var b = vertices
-        //    .Select((v, i) => (Current: v, Next: vertices[(i + 1) % vertices.Count]))
-        //    .Sum(pair => (pair.Current.X * pair.Next.Y) - (pair.Current.Y * pair.Next.X));
-
-        //var area = (long) Math.Abs(b) / 2;
-
-        var b = vertices
-            .Select((v, i) => (Current: v, Next: vertices[(i + 1) % vertices.Count]))
-            .Sum(pair => ((double)pair.Current.X * pair.Next.Y) - ((double)pair.Current.Y * pair.Next.X));
-
-        var shoelaceArea = (long)(Math.Abs(b) / 2);
-
-        //var shoelaceArea = (long) ShoelaceArea(vertices);
+        var shoelaceArea = ShoelaceArea(vertices);
 
         Console.WriteLine($"Shoelace Area: {shoelaceArea}");
         Console.WriteLine($"Perimeter / 2: {perimeter / 2}");
-        Console.WriteLine($"Exclusive Perimeter: {exclusivePerimeter}");
 
-        //return area + perimeter;
-
-        return shoelaceArea + exclusivePerimeter + 1;
-
-        //return shoelaceArea + perimeter / 2 + 1;
+        return shoelaceArea + perimeter / 2 + 1;
     }
 
     [GeneratedRegex(@"\w{6}")]
