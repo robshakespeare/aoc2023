@@ -50,7 +50,7 @@ public class Day18SolverTests
         var part2ExampleResult = _sut.SolvePart2(ExampleInput);
 
         // ASSERT
-        part2ExampleResult.Should().Be(null);
+        part2ExampleResult.Should().Be(952408144115);
     }
 
     [Test]
