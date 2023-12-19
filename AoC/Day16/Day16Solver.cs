@@ -43,21 +43,13 @@ public class Day16Solver : ISolver
                 }
                 else
                 {
-                    // Off-grid, so remove beam
-                    beams.Remove(beam);
+                    beams.Remove(beam); // Off-grid, so remove beam
                 }
             }
 
             energizedTilesCountByFrame.Add(energizedTiles.Count);
-
-            Console.WriteLine(energizedTiles.Count);
-
-            //if (energizedTilesCountByFrame.Count > 10 && energizedTilesCountByFrame[^10..].All(x => x == energizedTilesCountByFrame[^1]))
-            //{
-            //    break;
-            //}
         }
-        while (energizedTilesCountByFrame.Count < 10 || energizedTilesCountByFrame[^10..].Any(x => x != energizedTilesCountByFrame[^1]));
+        while (energizedTilesCountByFrame.Count < 3 || energizedTilesCountByFrame[^3..].Any(x => x != energizedTilesCountByFrame[^1]));
 
         energizedTiles.ToStringGrid(p => p, _ => '#', '.').RenderGridToConsole();
 

@@ -36,7 +36,7 @@ public class Day16SolverTests
         var part1Result = _sut.SolvePart1();
 
         // ASSERT
-        part1Result.Should().Be(null);
+        part1Result.Should().Be(7608);
     }
 
     [Test]
