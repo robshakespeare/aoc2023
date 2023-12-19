@@ -6,7 +6,7 @@ public class Day16Solver : ISolver
 
     public long? SolvePart1(string input)
     {
-        List<Beam> beams = [new Beam(new Vector2(-1, 0), GridUtils.East)];
+        HashSet<Beam> beams = [new Beam(new Vector2(-1, 0), GridUtils.East)];
         HashSet<Vector2> energizedTiles = [];
         var grid = input.Split(Environment.NewLine);
 
@@ -14,15 +14,21 @@ public class Day16Solver : ISolver
 
         do
         {
-            foreach (var beam in beams.ToArray())
+            HashSet<Beam> newBeams = [];
+
+            foreach (var (position, direction) in beams)
             {
-                beam.Position += beam.Direction;
+                var newPosition = position + direction;
 
-                if (grid.TryGet(beam.Position, out var tile))
+                //var newBeam = new Beam(position + direction, direction);
+
+                //beam.Position += beam.Direction;
+
+                if (grid.TryGet(newPosition, out var tile))
                 {
-                    energizedTiles.Add(beam.Position);
+                    energizedTiles.Add(newPosition);
 
-                    if (tile == '|' && (beam.Direction == GridUtils.East || beam.Direction == GridUtils.West))
+                    if (tile == '|' && (direction == GridUtils.East || direction == GridUtils.West))
                     {
                         beam.Direction = GridUtils.North;
                         beams.Add(new Beam(beam.Position, GridUtils.South));
@@ -40,12 +46,18 @@ public class Day16Solver : ISolver
                     {
                         beam.Direction = new Vector2(beam.Direction.Y, beam.Direction.X);
                     }
+                    else
+                    {
+
+                    }
                 }
-                else
-                {
-                    beams.Remove(beam); // Off-grid, so remove beam
-                }
+                //else
+                //{
+                //    beams.Remove(beam); // Off-grid, so remove beam
+                //}
             }
+
+            Console.WriteLine("#beams: " + beams.Count);
 
             energizedTilesCountByFrame.Add(energizedTiles.Count);
         }
@@ -61,10 +73,12 @@ public class Day16Solver : ISolver
         return null;
     }
 
-    class Beam(Vector2 position, Vector2 direction)
-    {
-        public Vector2 Position { get; set; } = position;
+    record Beam(Vector2 Position, Vector2 Direction);
 
-        public Vector2 Direction { get; set; } = direction;
-    }
+    //class Beam(Vector2 position, Vector2 direction)
+    //{
+    //    public Vector2 Position { get; set; } = position;
+
+    //    public Vector2 Direction { get; set; } = direction;
+    //}
 }
