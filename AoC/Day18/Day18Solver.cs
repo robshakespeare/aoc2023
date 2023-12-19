@@ -147,7 +147,7 @@ public partial class Day18Solver : ISolver
         double a = 0.0;
         for (int i = 0; i < n - 1; i++)
         {
-            a += v[i].X * v[i + 1].Y - v[i + 1].X * v[i].Y;
+            a += ((double)v[i].X) * ((double)v[i + 1].Y) - ((double)v[i + 1].X) * ((double)v[i].Y);
         }
         return Math.Abs(a + v[n - 1].X * v[0].Y - v[0].X * v[n - 1].Y) / 2.0;
     }
@@ -164,6 +164,10 @@ public partial class Day18Solver : ISolver
         //HashSet<Vector2> perimeter = [position];
 
         long perimeter = 0;
+
+        long exclusivePerimeter = 0;
+
+        long instructionCounter = 0;
 
         foreach (var instruction in instructions)
         {
@@ -182,9 +186,11 @@ public partial class Day18Solver : ISolver
 
             perimeter += amount;
 
+            exclusivePerimeter += instruction.Direction is 'D' or 'L' ? amount : 0;
+
 
             //position += dir * (amount + 1);
-            //Console.WriteLine(position);
+            Console.WriteLine($"{++instructionCounter}: {position}");
 
             //for (var i = 0; i < amount; i++)
             //{
@@ -203,11 +209,23 @@ public partial class Day18Solver : ISolver
 
         //var area = (long) Math.Abs(b) / 2;
 
-        var area = (long) ShoelaceArea(vertices);
+        var b = vertices
+            .Select((v, i) => (Current: v, Next: vertices[(i + 1) % vertices.Count]))
+            .Sum(pair => ((double)pair.Current.X * pair.Next.Y) - ((double)pair.Current.Y * pair.Next.X));
+
+        var shoelaceArea = (long)(Math.Abs(b) / 2);
+
+        //var shoelaceArea = (long) ShoelaceArea(vertices);
+
+        Console.WriteLine($"Shoelace Area: {shoelaceArea}");
+        Console.WriteLine($"Perimeter / 2: {perimeter / 2}");
+        Console.WriteLine($"Exclusive Perimeter: {exclusivePerimeter}");
 
         //return area + perimeter;
 
-        return area + perimeter / 2 + 1;
+        return shoelaceArea + exclusivePerimeter + 1;
+
+        //return shoelaceArea + perimeter / 2 + 1;
     }
 
     [GeneratedRegex(@"\w{6}")]

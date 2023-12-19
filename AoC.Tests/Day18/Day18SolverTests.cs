@@ -26,21 +26,129 @@ public class Day18SolverTests
     [Test]
     public void Part1Example()
     {
+        const int expectedResult = 62;
+
         // ACT
         var part1ExampleResult = _sut.SolvePart1(ExampleInput);
 
         // ASSERT
-        part1ExampleResult.Should().Be(62);
+        using var _ = new AssertionScope();
+        part1ExampleResult.Should().Be(expectedResult);
+        Day18SolverPart1Original.SolvePart1(ExampleInput).Should().Be(expectedResult);
+    }
+
+    [Test]
+    public void Part1MyExample1()
+    {
+        const string input = """
+            R 3
+            D 3
+            L 3
+            U 3
+            """;
+        const int expectedResult = 16;
+
+        // ACT
+        var part1ExampleResult = _sut.SolvePart1(input);
+
+        // ASSERT
+        using var _ = new AssertionScope();
+        part1ExampleResult.Should().Be(expectedResult);
+        Day18SolverPart1Original.SolvePart1(input).Should().Be(expectedResult);
+    }
+
+    [Test]
+    public void Part1MyExample2()
+    {
+        const string input = """
+            R 3
+            D 3
+            L 2
+            D 2
+            L 1
+            U 5
+            """;
+        const int expectedResult = 20;
+
+        // ACT
+        var part1ExampleResult = _sut.SolvePart1(input);
+
+        // ASSERT
+        using var _ = new AssertionScope();
+        part1ExampleResult.Should().Be(expectedResult);
+        Day18SolverPart1Original.SolvePart1(input).Should().Be(expectedResult);
+    }
+
+    [Test]
+    public void Part1MyExample3()
+    {
+        const string input = """
+            R 4
+            D 4
+            L 2
+            D 2
+            R 1
+            D 2
+            L 10
+            U 4
+            R 2
+            D 2
+            R 5
+            U 6
+            """;
+        const int expectedResult = 67;
+
+        // ACT
+        var part1ExampleResult = _sut.SolvePart1(input);
+
+        // ASSERT
+        using var _ = new AssertionScope();
+        part1ExampleResult.Should().Be(expectedResult);
+        Day18SolverPart1Original.SolvePart1(input).Should().Be(expectedResult);
+    }
+
+    [Test]
+    public void Part1MyExample4()
+    {
+        const string input = """
+            R 4
+            D 3
+            R 5
+            D 2
+            R 3
+            D 4
+            L 5
+            U 2
+            L 2
+            D 4
+            L 2
+            U 6
+            L 3
+            U 5
+            """;
+        const int expectedResult = 92;
+
+        // ACT
+        var part1ExampleResult = _sut.SolvePart1(input);
+
+        // ASSERT
+        using var _ = new AssertionScope();
+        part1ExampleResult.Should().Be(expectedResult);
+        Day18SolverPart1Original.SolvePart1(input).Should().Be(expectedResult);
     }
 
     [Test]
     public void Part1ReTest()
     {
+        const int expectedResult = 108909;
+
         // ACT
         var part1Result = _sut.SolvePart1();
 
         // ASSERT
-        part1Result.Should().Be(108909);
+        using var _ = new AssertionScope();
+        part1Result.Should().Be(expectedResult);
+        Day18SolverPart1Original.SolvePart1(_sut.GetInputLoader().PuzzleInputPart1).Should().Be(expectedResult);
     }
 
     [Test]
@@ -60,6 +168,6 @@ public class Day18SolverTests
         var part2Result = _sut.SolvePart2();
 
         // ASSERT
-        part2Result.Should().Be(null);
+        part2Result.Should().Be(133125706867777);
     }
 }

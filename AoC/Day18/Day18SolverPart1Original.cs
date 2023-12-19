@@ -1,8 +1,8 @@
 namespace AoC.Day18;
 
-public class Day18SolverPart1Original
+public static class Day18SolverPart1Original
 {
-    public long? SolvePart1(string input)
+    public static long? SolvePart1(string input)
     {
         HashSet<Vector2> trenchMap = [];
         List<Vector2> northEdge = [];
@@ -11,8 +11,10 @@ public class Day18SolverPart1Original
         trenchMap.Add(position);
         northEdge.Add(position);
 
+        var numLines = 0;
         foreach (var line in input.ReadLines())
         {
+            numLines++;
             var split = line.Split(' ');
             var dir = split[0] switch
             {
@@ -45,7 +47,7 @@ public class Day18SolverPart1Original
         // So, go down from any north edge, and if we reach space, then start digging out (filling out) from there
         var start = northEdge.Select(n => n + GridUtils.South).First(v => !trenchMap.Contains(v));
 
-        var digOut = new HashSet<Vector2>();
+        var digOut = new HashSet<Vector2>([start]);
         var explore = new Queue<Vector2>([start]);
 
         while (explore.Count > 0)
@@ -66,18 +68,24 @@ public class Day18SolverPart1Original
         }
 
         // Visualise:
-        // rs-todo: remove, if its slow:
-        Console.WriteLine(string.Join(Environment.NewLine, trenchMap.Concat(digOut).ToStringGrid(
-            p => p,
-            p => p == start
-                    ? 'S'
-                    : digOut.Contains(p)
-                        ? 'D'
-                        : northEdge.Contains(p)
-                            ? 'N'
-                            : '#',
-            '.')));
+        if (numLines < 50)
+        {
+            Console.WriteLine(string.Join(Environment.NewLine, trenchMap.Concat(digOut).ToStringGrid(
+                p => p,
+                p => p == start
+                        ? 'S'
+                        : digOut.Contains(p)
+                            ? 'D'
+                            : northEdge.Contains(p)
+                                ? 'N'
+                                : '#',
+                '.')));
+        }
 
-        return trenchMap.Count + digOut.Count;
+        var area = trenchMap.Count + digOut.Count;
+
+        Console.WriteLine($"Original calculation's area: {area}");
+
+        return area;
     }
 }
