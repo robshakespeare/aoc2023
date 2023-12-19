@@ -6,8 +6,8 @@ public class Day16Solver : ISolver
 
     public long? SolvePart1(string input)
     {
-        List<Beam> beams = [new Beam(Vector2.Zero, GridUtils.East)];
-        HashSet<Vector2> energizedTiles = [Vector2.Zero];
+        List<Beam> beams = [new Beam(new Vector2(-1, 0), GridUtils.East)];
+        HashSet<Vector2> energizedTiles = [];
         var grid = input.Split(Environment.NewLine);
 
         List<int> energizedTilesCountByFrame = [];
