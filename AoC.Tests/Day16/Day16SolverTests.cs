@@ -7,7 +7,16 @@ public class Day16SolverTests
     private readonly Day16Solver _sut = new();
 
     private const string ExampleInput = """
-
+        .|...\....
+        |.-.\.....
+        .....|-...
+        ........|.
+        ..........
+        .........\
+        ..../.\\..
+        .-.-/..|..
+        .|....-|.\
+        ..//.|....
         """;
 
     [Test]
@@ -17,7 +26,7 @@ public class Day16SolverTests
         var part1ExampleResult = _sut.SolvePart1(ExampleInput);
 
         // ASSERT
-        part1ExampleResult.Should().Be(null);
+        part1ExampleResult.Should().Be(46);
     }
 
     [Test]
