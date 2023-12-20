@@ -50,11 +50,56 @@ public partial class Day20Solver : ISolver
 
     public long? SolvePart2(string input)
     {
+        var modules = ParseModuleConfiguration(input);
+
+        // Display inputs:
+        foreach (var module in modules.Values.OrderBy(x => x.Name))
+        {
+            Console.WriteLine($"{module.FullName} has inputs: {string.Join(", ", module.InputNames)}");
+        }
+
+        Console.WriteLine();
+
+        // Work backwards from `rx`, building our "tree"
+        //var rx = modules["rx"];
+        //var paths = new List<List<Module>>();
+
+        List<Module[]> paths = [];
+
+        void Enumerate(string name, Module[] path)
+        {
+            var module = modules[name];
+            Module[] nextPath = [.. path, module];
+
+            if (name == Broadcaster)
+            {
+                Console.WriteLine($"Path to Broadcaster found: {string.Join(" > ", nextPath.Select(x => x.FullName))}");
+                paths.Add(path);
+            }
+            else
+            {
+                foreach (var input in module.InputNames)
+                {
+                    var alreadySeen = path.Any(x => x.Name == input);
+
+                    if (!alreadySeen)
+                    {
+                        Enumerate(input, nextPath);
+                    }
+                }
+            }
+        }
+
+        Enumerate("rx", []);
+
+        var distinctModulesNeeded = paths.SelectMany(p => p).Distinct().ToArray();
+
+        Console.WriteLine($"distinctModulesNeeded: {distinctModulesNeeded.Length}");
+        Console.WriteLine($"#modules: {modules.Count}");
+
         return null;
 
         throw new NotImplementedException("rs-todo: solve!");
-
-        var modules = ParseModuleConfiguration(input);
 
         const int numButtonPresses = int.MaxValue;
 
@@ -121,18 +166,24 @@ public partial class Day20Solver : ISolver
 
     record SendPulse(Pulse Pulse, string DestinationModuleName, string InputModuleName);
 
-    abstract record Module(string Name, string[] DestinationNames)
+    abstract record Module(string Name, string[] DestinationNames, string[] InputNames)
     {
+        public abstract string FullName { get; }
+
         public abstract IEnumerable<SendPulse> ReceivePulse(Pulse pulse, string InputModuleName);
     }
 
-    sealed record UntypedModule(string Name) : Module(Name, Array.Empty<string>())
+    sealed record UntypedModule(string Name, string[] InputNames) : Module(Name, Array.Empty<string>(), InputNames)
     {
+        public override string FullName { get; } = Name;
+
         public override IEnumerable<SendPulse> ReceivePulse(Pulse pulse, string InputModuleName) => Array.Empty<SendPulse>();
     }
 
-    sealed record FlipFlopModule(string Name, string[] DestinationNames) : Module(Name, DestinationNames)
+    sealed record FlipFlopModule(string Name, string[] DestinationNames, string[] InputNames) : Module(Name, DestinationNames, InputNames)
     {
+        public override string FullName { get; } = '%' + Name;
+
         public bool IsOn { get; private set; } = false;
 
         public override IEnumerable<SendPulse> ReceivePulse(Pulse pulse, string InputModuleName)
@@ -148,8 +199,10 @@ public partial class Day20Solver : ISolver
         }
     }
 
-    sealed record ConjunctionModule(string Name, string[] DestinationNames, string[] InputNames) : Module(Name, DestinationNames)
+    sealed record ConjunctionModule(string Name, string[] DestinationNames, string[] InputNames) : Module(Name, DestinationNames, InputNames)
     {
+        public override string FullName { get; } = '&' + Name;
+
         private readonly Dictionary<string, Pulse> memory = InputNames.ToDictionary(name => name, _ => Pulse.Low);
 
         public string MemoryAsString() => string.Join(", ", memory.Select(m => $"{m.Key}:{m.Value}"));
@@ -169,8 +222,10 @@ public partial class Day20Solver : ISolver
         }
     }
 
-    sealed record BroadcastModule(string Name, string[] DestinationNames) : Module(Name, DestinationNames)
+    sealed record BroadcastModule(string Name, string[] DestinationNames) : Module(Name, DestinationNames, Array.Empty<string>())
     {
+        public override string FullName { get; } = Name;
+
         public override IEnumerable<SendPulse> ReceivePulse(Pulse pulse, string InputModuleName) =>
             DestinationNames.Select(destinationName => new SendPulse(pulse, destinationName, Name));
     }
@@ -187,17 +242,18 @@ public partial class Day20Solver : ISolver
 
         var mainModuleNames = intermediates.Select(m => m.name);
         var destinationModuleNames = intermediates.SelectMany(m => m.destinations);
-        var extraModuleNames = destinationModuleNames.Except(mainModuleNames);
+        var untypedModuleNames = destinationModuleNames.Except(mainModuleNames);
+        var getInputNames = (string destinationName) => intermediates.Where(x => x.destinationsHash.Contains(destinationName)).Select(x => x.name).ToArray();
 
         var modules = intermediates
             .Select(item => item.type switch
             {
-                "%" => (Module)new FlipFlopModule(item.name, item.destinations),
-                "&" => new ConjunctionModule(item.name, item.destinations, intermediates.Where(x => x.destinationsHash.Contains(item.name)).Select(x => x.name).ToArray()),
+                "%" => (Module)new FlipFlopModule(item.name, item.destinations, getInputNames(item.name)),
+                "&" => new ConjunctionModule(item.name, item.destinations, getInputNames(item.name)),
                 _ when item.name == Broadcaster => new BroadcastModule(item.name, item.destinations),
                 var invalidType => throw new Exception("Invalid module type: " + invalidType)
             })
-            .Concat(extraModuleNames.Select(extraName => new UntypedModule(extraName)))
+            .Concat(untypedModuleNames.Select(untypedName => new UntypedModule(untypedName, getInputNames(untypedName))))
             .ToFrozenDictionary(module => module.Name, module => module);
 
         // Validate:
@@ -226,7 +282,7 @@ public partial class Day20Solver : ISolver
         var missingModules = string.Join(", ", modules.Values.SelectMany(m => m.DestinationNames).Except(modules.Keys));
         if (missingModules != "")
         {
-            throw new Exception($"Missing modules: {missingModules} - extra module names are: {string.Join(", ", extraModuleNames)}");
+            throw new Exception($"Missing modules: {missingModules} - untyped module names are: {string.Join(", ", untypedModuleNames)}");
         }
 
         return modules;
