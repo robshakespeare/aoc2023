@@ -6,13 +6,34 @@ public class Day16Solver : ISolver
 
     public long? SolvePart1(string input)
     {
-        List<Beam> beams = [new Beam(new Vector2(-1, 0), GridUtils.East)];
+        var grid = input.Split(Environment.NewLine);
+        var start = new Beam(new Vector2(-1, 0), GridUtils.East);
+        return GetEnergizedTilesCount(grid, start);
+    }
+
+    public long? SolvePart2(string input)
+    {
+        var grid = input.Split(Environment.NewLine);
+        var height = grid.Length;
+        var width = grid[0].Length;
+
+        // Get all the possible starts, and brute force it! Note the nudge back so we start off the grid and enter it.
+        var starts = Enumerable.Range(0, width).Select(x => new Beam(new Vector2(x, 0), GridUtils.South))
+            .Concat(Enumerable.Range(0, width).Select(x => new Beam(new Vector2(x, height - 1), GridUtils.North)))
+            .Concat(Enumerable.Range(0, height).Select(y => new Beam(new Vector2(0, y), GridUtils.East)))
+            .Concat(Enumerable.Range(0, height).Select(y => new Beam(new Vector2(width - 1, y), GridUtils.West)))
+            .Select(beam => new Beam(beam.Position + (beam.Direction * -1), beam.Direction));
+
+        return starts.Max(start => GetEnergizedTilesCount(grid, start));
+    }
+
+    static int GetEnergizedTilesCount(string[] grid, Beam start)
+    {
+        List<Beam> beams = [start];
         HashSet<Vector2> energizedTiles = [];
         HashSet<(Vector2, Vector2)> visited = [];
-        //var visited = new HashSet<Beam>(new BeamComparer());
-        var grid = input.Split(Environment.NewLine);
-
         List<int> energizedTilesCountByFrame = [];
+        const int compareBack = 10;
 
         do
         {
@@ -58,20 +79,11 @@ public class Day16Solver : ISolver
                 }
             }
 
-            //Console.WriteLine("#beams: " + beams.Count + ", #visited: " + visited.Count);
-
             energizedTilesCountByFrame.Add(energizedTiles.Count);
         }
-        while (energizedTilesCountByFrame.Count < 3 || energizedTilesCountByFrame[^3..].Any(x => x != energizedTilesCountByFrame[^1]));
-
-        //energizedTiles.ToStringGrid(p => p, _ => '#', '.').RenderGridToConsole();
+        while (energizedTilesCountByFrame.Count < compareBack || energizedTilesCountByFrame[^compareBack..].Any(x => x != energizedTilesCountByFrame[^1]));
 
         return energizedTiles.Count;
-    }
-
-    public long? SolvePart2(string input)
-    {
-        return null;
     }
 
     class Beam(Vector2 position, Vector2 direction)
@@ -80,11 +92,4 @@ public class Day16Solver : ISolver
 
         public Vector2 Direction { get; set; } = direction;
     }
-
-    //class BeamComparer : IEqualityComparer<Beam>
-    //{
-    //    public bool Equals(Beam? x, Beam? y) => x?.Position == y?.Position && x?.Direction == y?.Direction;
-
-    //    public int GetHashCode([DisallowNull] Beam beam) => HashCode.Combine(beam.Position, beam.Direction);
-    //}
 }
