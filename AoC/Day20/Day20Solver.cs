@@ -50,6 +50,8 @@ public partial class Day20Solver : ISolver
 
     public long? SolvePart2(string input)
     {
+        throw new NotImplementedException("rs-todo: solve!");
+
         var modules = ParseModuleConfiguration(input);
 
         const int numButtonPresses = int.MaxValue;
