@@ -17,7 +17,7 @@ public partial class Day20Solver : ISolver
         long numLowPulsesSent = 0;
         long numHighPulsesSent = 0;
 
-        for (var i = 1; i <= numButtonPresses; i++)
+        for (var buttonPress = 1; buttonPress <= numButtonPresses; buttonPress++)
         {
             List<SendPulse> sendPulses = [new SendPulse(Pulse.Low, Broadcaster, "button")];
 
@@ -50,6 +50,8 @@ public partial class Day20Solver : ISolver
 
     public long? SolvePart2(string input)
     {
+        return null;
+
         throw new NotImplementedException("rs-todo: solve!");
 
         var modules = ParseModuleConfiguration(input);
@@ -110,19 +112,6 @@ public partial class Day20Solver : ISolver
 
         return null;
     }
-
-    //enum ModuleType
-    //{
-    //    /// <summary>
-    //    /// Prefix: %
-    //    /// </summary>
-    //    FlipFlop,
-
-    //    /// <summary>
-    //    /// Prefix: &
-    //    /// </summary>
-    //    Conjunction,
-    //}
 
     enum Pulse
     {
@@ -211,6 +200,8 @@ public partial class Day20Solver : ISolver
             .Concat(extraModuleNames.Select(extraName => new UntypedModule(extraName)))
             .ToFrozenDictionary(module => module.Name, module => module);
 
+        // Validate:
+
         if (modules.Values.OfType<BroadcastModule>().Single().Name != Broadcaster)
         {
             throw new Exception("Broadcaster not valid");
@@ -239,19 +230,6 @@ public partial class Day20Solver : ISolver
         }
 
         return modules;
-
-        //foreach (var item in intermediates)
-        //{
-        //    Module module = item.type switch
-        //    {
-        //        "%" => new FlipFlopModule(item.name, item.destinations),
-        //        "&" => new ConjunctionModule(item.name, item.destinations, intermediates.Where(x => x.destinationsHash.Contains(item.name)).Select(x => x.name).ToArray()),
-        //        _ when item.name == "broadcaster" => new BroadcastModule(item.name, item.destinations),
-        //        var invalidType => throw new Exception("Invalid module type: " + invalidType)
-        //    };
-
-        //    modules.Add(module.Name, module);
-        //}
     }
 
     [GeneratedRegex("""((?<type>[%&])?(?<name>.+)) -> (?<destinations>.+)""", RegexOptions.Compiled)]
