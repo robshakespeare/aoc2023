@@ -7,8 +7,28 @@ public class Day20SolverTests
     private readonly Day20Solver _sut = new();
 
     private const string ExampleInput = """
-
+        broadcaster -> a
+        %a -> inv, con
+        &inv -> b
+        %b -> con
+        &con -> output
         """;
+
+    [Test]
+    public void Part1BasicExample()
+    {
+        // ACT
+        var part1ExampleResult = _sut.SolvePart1("""
+            broadcaster -> a, b, c
+            %a -> b
+            %b -> c
+            %c -> inv
+            &inv -> a
+            """);
+
+        // ASSERT
+        part1ExampleResult.Should().Be(32000000);
+    }
 
     [Test]
     public void Part1Example()
@@ -17,7 +37,7 @@ public class Day20SolverTests
         var part1ExampleResult = _sut.SolvePart1(ExampleInput);
 
         // ASSERT
-        part1ExampleResult.Should().Be(null);
+        part1ExampleResult.Should().Be(11687500);
     }
 
     [Test]
@@ -27,7 +47,7 @@ public class Day20SolverTests
         var part1Result = _sut.SolvePart1();
 
         // ASSERT
-        part1Result.Should().Be(null);
+        part1Result.Should().Be(807069600);
     }
 
     [Test]
