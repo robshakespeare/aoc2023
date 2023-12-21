@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Spectre.Console;
 
 namespace AoC.Day20;
 
@@ -73,7 +74,7 @@ public partial class Day20Solver : ISolver
 
             if (name == Broadcaster)
             {
-                Console.WriteLine($"Path to Broadcaster found: {string.Join(" > ", nextPath.Select(x => x.FullName))}");
+                Console.WriteLine($"Path to Broadcaster found: {string.Join(" > ", nextPath.Select(x => x.FullNameAndInfo))}");
                 paths.Add(path);
             }
             else
@@ -97,28 +98,29 @@ public partial class Day20Solver : ISolver
         Console.WriteLine($"distinctModulesNeeded: {distinctModulesNeeded.Length}");
         Console.WriteLine($"#modules: {modules.Count}");
 
-        return null;
+        Console.WriteLine($"======");
 
-        throw new NotImplementedException("rs-todo: solve!");
+        //return null;
+        //throw new NotImplementedException("rs-todo: solve!");
 
-        const int numButtonPresses = int.MaxValue;
+        const int numButtonPresses = 10; // int.MaxValue;
 
         long numLowPulsesSent = 0;
         long numHighPulsesSent = 0;
 
-        var stopwatch = Stopwatch.StartNew();
-        var reportInterval = TimeSpan.FromSeconds(5);
-        var nextReportAt = reportInterval;
-        var hf = (ConjunctionModule)modules["hf"];
+        //var stopwatch = Stopwatch.StartNew();
+        //var reportInterval = TimeSpan.FromSeconds(5);
+        //var nextReportAt = reportInterval;
+        //var hf = (ConjunctionModule)modules["hf"];
 
-        var report = (int buttonPress, int sendPulsesCount) =>
-        {
-            if (stopwatch.Elapsed > nextReportAt)
-            {
-                Console.WriteLine($"buttonPress: {buttonPress} -- sendPulsesCount: {sendPulsesCount} -- hf memory: {hf.MemoryAsString()}");
-                nextReportAt += reportInterval;
-            }
-        };
+        //var report = (int buttonPress, int sendPulsesCount) =>
+        //{
+        //    if (stopwatch.Elapsed > nextReportAt)
+        //    {
+        //        Console.WriteLine($"buttonPress: {buttonPress} -- sendPulsesCount: {sendPulsesCount} -- hf memory: {hf.MemoryAsString()}");
+        //        nextReportAt += reportInterval;
+        //    }
+        //};
 
         for (var buttonPress = 1; buttonPress <= numButtonPresses; buttonPress++)
         {
@@ -130,7 +132,7 @@ public partial class Day20Solver : ISolver
 
                 foreach (var sendPulse in sendPulses)
                 {
-                    report(buttonPress, sendPulses.Count);
+                    //report(buttonPress, sendPulses.Count);
 
                     if (sendPulse.Pulse == Pulse.Low && sendPulse.DestinationModuleName == "rx")
                     {
@@ -153,6 +155,15 @@ public partial class Day20Solver : ISolver
 
                 sendPulses = newSendPulses;
             }
+
+            Console.WriteLine("After button press " + buttonPress);
+
+            foreach (var path in paths)
+            {
+                Console.WriteLine(string.Join(" > ", path.Select(x => x.FullNameAndInfo)));
+            }
+
+            Console.WriteLine();
         }
 
         return null;
@@ -170,6 +181,8 @@ public partial class Day20Solver : ISolver
     {
         public abstract string FullName { get; }
 
+        public abstract string FullNameAndInfo { get; }
+
         public abstract IEnumerable<SendPulse> ReceivePulse(Pulse pulse, string InputModuleName);
     }
 
@@ -177,12 +190,22 @@ public partial class Day20Solver : ISolver
     {
         public override string FullName { get; } = Name;
 
-        public override IEnumerable<SendPulse> ReceivePulse(Pulse pulse, string InputModuleName) => Array.Empty<SendPulse>();
+        public override string FullNameAndInfo => LastPulseReceived == null ? FullName : $"{FullName}:{LastPulseReceived.Value.ToString()[0]}";
+
+        public Pulse? LastPulseReceived { get; private set; }
+
+        public override IEnumerable<SendPulse> ReceivePulse(Pulse pulse, string InputModuleName)
+        {
+            LastPulseReceived = pulse;
+            return Array.Empty<SendPulse>();
+        }
     }
 
     sealed record FlipFlopModule(string Name, string[] DestinationNames, string[] InputNames) : Module(Name, DestinationNames, InputNames)
     {
         public override string FullName { get; } = '%' + Name;
+
+        public override string FullNameAndInfo => $"{FullName}:{(IsOn ? '1' : '0')}";
 
         public bool IsOn { get; private set; } = false;
 
@@ -203,9 +226,11 @@ public partial class Day20Solver : ISolver
     {
         public override string FullName { get; } = '&' + Name;
 
+        public override string FullNameAndInfo => $"{FullName}({MemoryAsString()})";
+
         private readonly Dictionary<string, Pulse> memory = InputNames.ToDictionary(name => name, _ => Pulse.Low);
 
-        public string MemoryAsString() => string.Join(", ", memory.Select(m => $"{m.Key}:{m.Value}"));
+        public string MemoryAsString() => string.Join("|", memory.Select(m => $"{m.Key}:{m.Value.ToString()[0]}"));
 
         public override IEnumerable<SendPulse> ReceivePulse(Pulse pulse, string InputModuleName)
         {
@@ -225,6 +250,8 @@ public partial class Day20Solver : ISolver
     sealed record BroadcastModule(string Name, string[] DestinationNames) : Module(Name, DestinationNames, Array.Empty<string>())
     {
         public override string FullName { get; } = Name;
+
+        public override string FullNameAndInfo => FullName;
 
         public override IEnumerable<SendPulse> ReceivePulse(Pulse pulse, string InputModuleName) =>
             DestinationNames.Select(destinationName => new SendPulse(pulse, destinationName, Name));
