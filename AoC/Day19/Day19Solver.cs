@@ -9,16 +9,17 @@ public partial class Day19Solver : ISolver
         var accepted = new FinalWorkflow("A");
         var rejected = new FinalWorkflow("R");
 
-        var workflows = ParseWorkflowRegex().Matches(input).Select(match => new Workflow(
-            match.Groups["name"].Value,
-            match.Groups["rating"].Captures.Zip(match.Groups["op"].Captures, match.Groups["threshold"].Captures).Zip(match.Groups["destination"].Captures)
-                .Select(x => Rule.Create(
-                    rating: x.First.First.Value.Single(),
-                    op: x.First.Second.Value.Single(),
-                    threshold: int.Parse(x.First.Third.Value),
-                    destination: x.Second.Value))
-                .ToArray(),
-            match.Groups["defaultDestination"].Value))
+        var workflows = ParseWorkflowRegex().Matches(input)
+            .Select(match => new Workflow(
+                match.Groups["name"].Value,
+                match.Groups["rating"].Captures.Zip(match.Groups["op"].Captures, match.Groups["threshold"].Captures).Zip(match.Groups["destination"].Captures)
+                    .Select(x => Rule.Create(
+                        rating: x.First.First.Value.Single(),
+                        op: x.First.Second.Value.Single(),
+                        threshold: int.Parse(x.First.Third.Value),
+                        destination: x.Second.Value))
+                    .ToArray(),
+                match.Groups["defaultDestination"].Value))
             .Concat([accepted, rejected])
             .ToFrozenDictionary(x => x.Name, x => x);
 
@@ -31,9 +32,6 @@ public partial class Day19Solver : ISolver
         {
             inflow.Process(part, workflows);
         }
-
-        //workflows.Dump();
-        //parts.Dump();
 
         return accepted.Parts.Sum(part => part.GetTotalRating());
     }
@@ -72,9 +70,6 @@ public partial class Day19Solver : ISolver
     {
         public long GetTotalRating() => Ratings.Values.Sum();
     }
-
-    //[GeneratedRegex("""(?<name>\w+){(?<rule>\w(?<op>[<>])(?<threshold>\d+):(?<destination>\w+),)+(?<defaultDestination>\w+)}""", RegexOptions.Compiled)]
-    //private static partial Regex ParseWorkflowRegex();
 
     [GeneratedRegex("""(?<name>\w+){(?:(?<rating>\w)(?<op>[<>])(?<threshold>\d+):(?<destination>\w+),)+(?<defaultDestination>\w+)}""")]
     private static partial Regex ParseWorkflowRegex();
