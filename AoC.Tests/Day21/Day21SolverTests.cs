@@ -7,17 +7,30 @@ public class Day21SolverTests
     private readonly Day21Solver _sut = new();
 
     private const string ExampleInput = """
-
+        ...........
+        .....###.#.
+        .###.##..#.
+        ..#.#...#..
+        ....#.#....
+        .##..S####.
+        .##..#...#.
+        .......##..
+        .##.#.####.
+        .##..##.##.
+        ...........
         """;
 
     [Test]
     public void Part1Example()
     {
-        // ACT
-        var part1ExampleResult = _sut.SolvePart1(ExampleInput);
+        using var _ = new AssertionScope();
 
-        // ASSERT
-        part1ExampleResult.Should().Be(null);
+        // ACT & ASSERT
+        _sut.SolvePart1(ExampleInput, 0).Should().Be(1);
+        _sut.SolvePart1(ExampleInput, 1).Should().Be(2);
+        _sut.SolvePart1(ExampleInput, 2).Should().Be(4);
+        _sut.SolvePart1(ExampleInput, 3).Should().Be(6);
+        _sut.SolvePart1(ExampleInput, 6).Should().Be(16);
     }
 
     [Test]
@@ -27,7 +40,7 @@ public class Day21SolverTests
         var part1Result = _sut.SolvePart1();
 
         // ASSERT
-        part1Result.Should().Be(null);
+        part1Result.Should().Be(3748);
     }
 
     [Test]
