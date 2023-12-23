@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using static System.Environment;
 
 namespace AoC.Day22;
@@ -6,21 +7,59 @@ public class Day22Solver : ISolver
 {
     public string DayName => "Sand Slabs";
 
+    /// <summary>
+    /// "Find out which bricks can safely be disintegrated"
+    /// </summary>
     public long? SolvePart1(string input)
     {
         var bricks = ParseAndGroundBricks(input);
 
-        // "Find out which bricks can safely be disintegrated"
         // A brick can be disintegrated if all the bricks it supports would still be supported by somebody else
         return bricks.Count(brick => brick.Supports.All(s => s.SupportedBy.Count > 1));
     }
 
+    /// <summary>
+    /// "You'll need to figure out the best brick to disintegrate. For each brick, determine how many other bricks would fall if that brick were disintegrated."
+    /// "For each brick, determine how many other bricks would fall if that brick were disintegrated. What is the sum of the number of other bricks that would fall?"
+    /// </summary>
     public long? SolvePart2(string input)
     {
-        // "You'll need to figure out the best brick to disintegrate. For each brick, determine how many other bricks would fall if that brick were disintegrated."
-        // "For each brick, determine how many other bricks would fall if that brick were disintegrated. What is the sum of the number of other bricks that would fall?"
+        var bricks = ParseAndGroundBricks(input);
+        List<long> results = [];
 
-        return null;
+        foreach (var brick in bricks)
+        {
+            results.Add(CalculateNumberOfOtherBricksToFall(brick));
+        }
+
+        return results.Sum();
+    }
+
+    static int CalculateNumberOfOtherBricksToFall(Brick brick)
+    {
+        HashSet<Brick> fallenBricks = [brick];
+
+        List<Brick> explore = brick.Supports;
+
+        while (explore.Count > 0)
+        {
+            List<Brick> nextExplore = [];
+
+            foreach (var otherBrick in explore)
+            {
+                var remainingSupports = otherBrick.SupportedBy.Except(fallenBricks);
+
+                if (remainingSupports.Count() == 0)
+                {
+                    fallenBricks.Add(otherBrick);
+                    nextExplore.AddRange(otherBrick.Supports);
+                }
+            }
+
+            explore = nextExplore;
+        }
+
+        return fallenBricks.Count - 1; // Note -1 because shouldn't count self
     }
 
     static IReadOnlyCollection<Brick> ParseAndGroundBricks(string input)

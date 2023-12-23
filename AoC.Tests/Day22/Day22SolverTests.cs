@@ -48,12 +48,13 @@ public class Day22SolverTests
     }
 
     [Test]
+    [LongRunningTest("30 seconds!")]
     public void Part2ReTest()
     {
         // ACT
         var part2Result = _sut.SolvePart2();
 
         // ASSERT
-        part2Result.Should().Be(null);
+        part2Result.Should().Be(100376);
     }
 }
