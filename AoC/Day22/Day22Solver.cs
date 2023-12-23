@@ -8,6 +8,23 @@ public class Day22Solver : ISolver
 
     public long? SolvePart1(string input)
     {
+        var bricks = ParseAndGroundBricks(input);
+
+        // "Find out which bricks can safely be disintegrated"
+        // A brick can be disintegrated if all the bricks it supports would still be supported by somebody else
+        return bricks.Count(brick => brick.Supports.All(s => s.SupportedBy.Count > 1));
+    }
+
+    public long? SolvePart2(string input)
+    {
+        // "You'll need to figure out the best brick to disintegrate. For each brick, determine how many other bricks would fall if that brick were disintegrated."
+        // "For each brick, determine how many other bricks would fall if that brick were disintegrated. What is the sum of the number of other bricks that would fall?"
+
+        return null;
+    }
+
+    static IReadOnlyCollection<Brick> ParseAndGroundBricks(string input)
+    {
         var bricks = input.ReadLines()
             .Select(line => line.Split('~', ','))
             .Select(coords => coords.Select(float.Parse).ToArray())
@@ -23,7 +40,7 @@ public class Day22Solver : ISolver
         }
 
         // Ground the bricks
-        List <Brick> groundedBricks = [];
+        List<Brick> groundedBricks = [];
         const int groundLevel = 1;
         foreach (var brick in bricks.OrderBy(b => b.Min.Z))
         {
@@ -65,14 +82,7 @@ public class Day22Solver : ISolver
             Log(() => $"Brick {brick.Letter} is supported by {string.Join(", ", brick.SupportedBy.Select(s => s.Letter))}");
         }
 
-        // Find out which bricks can safely be disintegrated
-        // A brick can be disintegrated if all the bricks it supports would still be supported by somebody else
-        return groundedBricks.Count(brick => brick.Supports.All(s => s.SupportedBy.Count > 1));
-    }
-
-    public long? SolvePart2(string input)
-    {
-        return null;
+        return groundedBricks;
     }
 
     record Brick(int Id, char Letter, Vector3 Min, Vector3 Max)
