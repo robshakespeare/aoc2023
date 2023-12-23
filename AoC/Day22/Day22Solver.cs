@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using static System.Environment;
 
 namespace AoC.Day22;
@@ -10,36 +9,22 @@ public class Day22Solver : ISolver
     /// <summary>
     /// "Find out which bricks can safely be disintegrated"
     /// </summary>
-    public long? SolvePart1(string input)
-    {
-        var bricks = ParseAndGroundBricks(input);
-
-        // A brick can be disintegrated if all the bricks it supports would still be supported by somebody else
-        return bricks.Count(brick => brick.Supports.All(s => s.SupportedBy.Count > 1));
-    }
+    public long? SolvePart1(string input) => ParseAndGroundBricks(input).Count(CanBrickBeDisintegrated);
 
     /// <summary>
     /// "You'll need to figure out the best brick to disintegrate. For each brick, determine how many other bricks would fall if that brick were disintegrated."
     /// "For each brick, determine how many other bricks would fall if that brick were disintegrated. What is the sum of the number of other bricks that would fall?"
     /// </summary>
-    public long? SolvePart2(string input)
-    {
-        var bricks = ParseAndGroundBricks(input);
-        List<long> results = [];
+    public long? SolvePart2(string input) => ParseAndGroundBricks(input).Sum(CalculateNumberOfOtherBricksToFall);
 
-        foreach (var brick in bricks)
-        {
-            results.Add(CalculateNumberOfOtherBricksToFall(brick));
-        }
+    // A brick can be disintegrated if all the bricks it supports would still be supported by somebody else.
+    static bool CanBrickBeDisintegrated(Brick brick) => brick.Supports.All(s => s.SupportedBy.Count > 1);
 
-        return results.Sum();
-    }
-
+    // Chain reaction! Calculates how many other bricks would fall if specified brick were disintegrated.
     static int CalculateNumberOfOtherBricksToFall(Brick brick)
     {
         HashSet<Brick> fallenBricks = [brick];
-
-        List<Brick> explore = brick.Supports;
+        HashSet<Brick> explore = [.. brick.Supports];
 
         while (explore.Count > 0)
         {
@@ -49,14 +34,14 @@ public class Day22Solver : ISolver
             {
                 var remainingSupports = otherBrick.SupportedBy.Except(fallenBricks);
 
-                if (remainingSupports.Count() == 0)
+                if (!remainingSupports.Any())
                 {
                     fallenBricks.Add(otherBrick);
                     nextExplore.AddRange(otherBrick.Supports);
                 }
             }
 
-            explore = nextExplore;
+            explore = [.. nextExplore];
         }
 
         return fallenBricks.Count - 1; // Note -1 because shouldn't count self

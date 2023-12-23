@@ -27,7 +27,7 @@ public class Day22SolverTests
     }
 
     [Test]
-    [LongRunningTest("5 seconds")]
+    [LongRunningTest("~2 seconds")]
     public void Part1ReTest()
     {
         // ACT
@@ -48,7 +48,7 @@ public class Day22SolverTests
     }
 
     [Test]
-    [LongRunningTest("30 seconds!")]
+    [LongRunningTest("~2.2 seconds")]
     public void Part2ReTest()
     {
         // ACT
