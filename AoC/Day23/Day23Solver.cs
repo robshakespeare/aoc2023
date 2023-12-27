@@ -1,3 +1,5 @@
+using System.ComponentModel;
+
 namespace AoC.Day23;
 
 public class Day23Solver : ISolver
@@ -18,18 +20,32 @@ public class Day23Solver : ISolver
 
     public long? SolvePart2(string input)
     {
-        var (start, end, _) = ParseInputAndBuildGraph(input);
+        var (start, end, nodes) = ParseInputAndBuildGraph(input);
 
-        return null;
+        // Build our "return" edges, using the same Id, because it doesn't matter which way we travel the edge, we can only travel it once
+
+        foreach (var edge in nodes.SelectMany(node => node.Edges))
+        {
+            var newEdge = new Edge(edge.Id, edge.End, edge.Start, edge.Path.Reverse().ToArray());
+
+            newEdge.Start.Edges.Add(newEdge);
+            //edge.End.Edges.Add(newEdge);
+        }
+
+        var path = FindLongestPath(start, end);
+
+        return path.TotalCost;
     }
 
     static (Edge[], long TotalCost) FindLongestPath(Node start, Node end)
     {
         var explore = new PriorityQueue<(Node Node, Edge[] Path, long TotalCost), long>(new[] { ((start, Array.Empty<Edge>(), 0L), 0L) });
 
-        // rs-todo: try adding seen for the "path"
+        var seen = new HashSet<string>();
 
         List<(Edge[], long TotalCost)> paths = [];
+
+        var maxPath = 0L;
 
         while (explore.Count > 0)
         {
@@ -38,24 +54,34 @@ public class Day23Solver : ISolver
             if (node == end)
             {
                 paths.Add((edges, totalCost));
+                maxPath = Math.Max(totalCost, maxPath);
             }
             else
             {
-                foreach (var newEdge in node.Edges)
+                var pathId = string.Join(',', edges.Select(e => e.Id).OrderBy(id => id));
+
+                if (!seen.Contains(pathId))
                 {
-                    if (!edges.Contains(newEdge))
+                    foreach (var newEdge in node.Edges)
                     {
-                        var newTotalCost = totalCost + newEdge.Length;
-                        explore.Enqueue((newEdge.End, [.. edges, newEdge], newTotalCost), newTotalCost);
+                        if (!edges.Contains(newEdge))
+                        {
+                            var newTotalCost = totalCost + newEdge.Length;
+                            explore.Enqueue((newEdge.End, [.. edges, newEdge], newTotalCost), newTotalCost);
+                        }
                     }
+
+                    seen.Add(pathId);
                 }
             }
+
+            Console.WriteLine($"explorers: {explore.Count} // paths: {paths.Count} // maxPath: {maxPath}");
         }
 
         return paths.MaxBy(path => path.TotalCost);
     }
 
-    public static (Node Start, Node End, Node[] Nodes) ParseInputAndBuildGraph(string input)
+    public static Graph ParseInputAndBuildGraph(string input)
     {
         var grid = input.ReadLines().ToArray();
 
@@ -128,7 +154,7 @@ public class Day23Solver : ISolver
             explorers = newExplorers;
         }
 
-        return (start, end, nodes.Values.ToArray());
+        return new Graph(start, end, nodes.Values.ToArray());
     }
 
     static Vector2 SlopeToDir(char slope) => slope switch
@@ -152,6 +178,8 @@ public class Day23Solver : ISolver
         }
     }
 }
+
+public record Graph(Node Start, Node End, Node[] Nodes);
 
 public sealed record Node(Vector2 Position)
 {
