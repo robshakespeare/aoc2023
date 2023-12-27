@@ -35,11 +35,13 @@ public class Day23SolverTests
     [Test]
     public void Part1Example_ShouldHaveExpectedNumberOfNodesInGraph_and_ExpectedNumberOfEdges()
     {
+        // ACT
         var result = Day23Solver.ParseInputAndBuildGraph(ExampleInput);
 
+        // ASSERT
         using var _ = new AssertionScope();
         result.Nodes.Should().HaveCount(7 + 2);
-        result.Nodes.Select(x => x.EdgeCount).Should().BeEquivalentTo(new[]
+        result.Nodes.Select(x => x.Edges.Count).Should().BeEquivalentTo(new[]
         {
             1,
             2,

@@ -1,6 +1,3 @@
-using System.Diagnostics;
-using Spectre.Console;
-
 namespace AoC.Day23;
 
 public class Day23Solver : ISolver
@@ -12,24 +9,11 @@ public class Day23Solver : ISolver
 
     public long? SolvePart1(string input)
     {
-        var (start, end, nodes) = ParseInputAndBuildGraph(input);
-
-        //var search = new AStarSearch<Edge>(edge => edge.End.ChildEdges);
-
-        ////var found = 0;
-
-        //foreach (var node in nodes)
-        //{
-        //    Console.WriteLine(node);
-        //}
-
-        //Console.WriteLine();
-
-        //var path = search.FindShortestPath(start.ChildEdges, edge => edge.End == end);
+        var (start, end, _) = ParseInputAndBuildGraph(input);
 
         var path = FindLongestPath(start, end);
 
-        return path.Sum(x => x.Length);
+        return path.TotalCost;
     }
 
     public long? SolvePart2(string input)
@@ -37,11 +21,11 @@ public class Day23Solver : ISolver
         return null;
     }
 
-    static Edge[] FindLongestPath(Node start, Node end)
+    static (Edge[], long TotalCost) FindLongestPath(Node start, Node end)
     {
         var explore = new PriorityQueue<(Node Node, Edge[] Path, long TotalCost), long>(new[] { ((start, Array.Empty<Edge>(), 0L), 0L) });
 
-        List<Edge[]> paths = [];
+        List<(Edge[], long TotalCost)> paths = [];
 
         while (explore.Count > 0)
         {
@@ -49,41 +33,32 @@ public class Day23Solver : ISolver
 
             if (node == end)
             {
-                paths.Add(edges);
-                //return edges;
+                paths.Add((edges, totalCost));
             }
             else
             {
-                foreach (var newEdge in node.ChildEdges)
+                foreach (var newEdge in node.Edges)
                 {
-                    var newTotalCost = totalCost - newEdge.Length;
+                    var newTotalCost = totalCost + newEdge.Length;
                     explore.Enqueue((newEdge.End, [.. edges, newEdge], newTotalCost), newTotalCost);
                 }
             }
         }
 
-        return paths.MaxBy(path => path.Sum(x => x.Length));
+        return paths.MaxBy(path => path.TotalCost);
     }
 
     public static (Node Start, Node End, Node[] Nodes) ParseInputAndBuildGraph(string input)
     {
         var grid = input.ReadLines().ToArray();
-        //var height = grid.Length;
-        //var width = grid[0].Length;
 
-        //var start = new Node(new Vector2(grid[0].IndexOf(PathTile)));
-        //var end = new Node(new Vector2(grid[^1].IndexOf(PathTile)));
-
-        static void AddEdge(Explorer explorer, Node nextNode) => explorer.Node.ChildEdges.Add(new Edge(explorer.Node, nextNode, explorer.Path));
+        static void AddEdge(Explorer explorer, Node nextNode) => explorer.Node.Edges.Add(new Edge(explorer.Node, nextNode, explorer.Path));
 
         bool IsNodePosition(Vector2 position) => GridUtils.DirectionsExcludingDiagonal.Count(dir => grid.TryGet(position + dir, out var tile) && tile is '>' or '<' or 'v') > 1;
-
-        //var nodesList = new List<Node>();
 
         Dictionary<Vector2, Node> nodes = [];
         Node AddNode(Node node)
         {
-            //nodesList.Add(node);
             nodes.Add(node.Position, node);
             return node;
         }
@@ -91,11 +66,7 @@ public class Day23Solver : ISolver
         var start = AddNode(new Node(new Vector2(grid[0].IndexOf(PathTile), 0)));
         var end = AddNode(new Node(new Vector2(grid[^1].IndexOf(PathTile), grid.Length - 1)));
 
-        //HashSet<Vector2> visited = [start.Position];
-
         List<Explorer> explorers = [new Explorer(start.Position, GridUtils.South, [], start)];
-
-        var timeStarted = Stopwatch.StartNew();
 
         while (explorers.Count > 0)
         {
@@ -103,21 +74,6 @@ public class Day23Solver : ISolver
 
             foreach (var nextExplorer in explorers.Select(explorer => explorer.Next()))
             {
-                //var nextExplorer = explorer.Next();
-                //if (visited.Contains(nextExplorer.Position))
-                //{
-                //    continue;
-                //}
-
-                //visited.Add(nextExplorer.Position);
-
-                //Console.WriteLine(nextExplorer.Position);
-
-                //if (timeStarted.Elapsed > TimeSpan.FromSeconds(1))
-                //{
-                //    throw new Exception("wtf!");
-                //}
-
                 if (nextExplorer.Position == end.Position)
                 {
                     AddEdge(nextExplorer, end);
@@ -125,12 +81,10 @@ public class Day23Solver : ISolver
                 }
 
                 var nextPositions = GridUtils.DirectionsExcludingDiagonal.Select(dir => (dir, nextPos: nextExplorer.Position + dir))
-                    .Where(n => n.nextPos.Y > 0 && !nextExplorer.Path.Contains(n.nextPos)) //!visited.Contains(n.nextPos))
+                    .Where(n => n.nextPos.Y > 0 && !nextExplorer.Path.Contains(n.nextPos))
                     .Select(n => (n.nextPos, n.dir, tile: grid.Get(n.nextPos)))
                     .Where(n => n.tile == PathTile || (n.tile != ForestTile && SlopeToDir(n.tile) == n.dir))
                     .ToArray();
-
-                //var isNode = IsNodePosition(nextExplorer.Position);
 
                 if (nextPositions.Length == 0)
                 {
@@ -145,7 +99,6 @@ public class Day23Solver : ISolver
                     {
                         node = AddNode(new Node(nextExplorer.Position)); // i.e. new node
                         nodeAlreadySeen = false;
-                        //AddEdge(nextExplorer, node); // i.e. node already seen
                     }
 
                     AddEdge(nextExplorer, node);
@@ -158,87 +111,10 @@ public class Day23Solver : ISolver
                         }
                     }
                 }
-                ////else if (nodes.TryGetValue(nextExplorer.Position, out var nodeAlreadySeen))
-                ////{
-                ////    AddEdge(nextExplorer, nodeAlreadySeen);
-                ////}
-                //else if (nextPositions.Length == 1)
                 else
                 {
                     newExplorers.Add(nextExplorer with { Direction = nextPositions.Single().dir }); // Our explorer might need to change direction
                 }
-                //else
-                //{
-                    
-                //}
-
-                // Get next possible positions
-                // If there are more than one, then we have reached a "node"
-                // So record that node, and work out the next possible routes for new edges (not re-visiting, and going only the correct directions based on slopes)
-                // Otherwise, check whether we've reached the end
-                // Otherwise, continue on our way
-
-
-                //var nextPositions = GridUtils.DirectionsExcludingDiagonal.Select(dir => (dir, nextPos: explorer.Position + dir))
-                //    .Where(n => n.nextPos.Y > 0)
-                //    .Select(n => (n.nextPos, n.dir, tile: grid.Get(n.nextPos)))
-                //    // rs-todo: does all the advanced filtering etc... stuff!!
-                //    .Select(n => n.nextPos)
-                //    .ToArray();
-                ////var isNode = canidateNextPositions.Length > 2;
-
-                //if (nextPositions.Length == 0)
-                //{
-                //    throw new Exception("No next positions");
-                //}
-
-                //foreach (var nextPosition in nextPositions)
-                //{
-                //    if (nodes.TryGetValue(nextPosition, out var nextNode))
-                //    {
-                //        explorer.Node.ChildEdges.Add(new Edge(explorer.Node, nextNode, [.. explorer.Path, nextPosition]));
-
-                //        if (nextNode != end)
-                //        {
-                //            // rs-todo continue exploering!
-                //        }
-                //    }
-                //}
-
-                //if (isNode)
-                //{
-                //}
-                //else
-                //{
-                //    var nextPosition = canidateNextPositions.Single(n => !visited.Contains(n.nextPos)).nextPos;
-                //    var nextExplorer = new Explorer(nextPosition, [.. explorer.Path, nextPosition], explorer.Node);
-
-                //    if (nextPosition == end.Position)
-                //    {
-
-                //    }
-                //}
-
-
-                //var canidateNextPositions = GridUtils.DirectionsExcludingDiagonal.Select(dir => (dir, nextPos: explorer.Position + dir))
-                //    .Where(n => n.nextPos.Y > 0)
-                //    .Select(n => (n.nextPos, n.dir, tile: grid.Get(n.nextPos)))
-                //    .ToArray();
-                //var isNode = canidateNextPositions.Length > 2;
-
-                //if (isNode)
-                //{
-                //}
-                //else
-                //{
-                //    var nextPosition = canidateNextPositions.Single(n => !visited.Contains(n.nextPos)).nextPos;
-                //    var nextExplorer = new Explorer(nextPosition, [.. explorer.Path, nextPosition], explorer.Node);
-
-                //    if (nextPosition == end.Position)
-                //    {
-
-                //    }
-                //}
             }
 
             explorers = newExplorers;
@@ -267,32 +143,18 @@ public class Day23Solver : ISolver
             };
         }
     }
+}
 
-    public sealed record Node(Vector2 Position)
-    {
-        public bool Equals(Node? other) => other != null && other.Position == Position;
+public sealed record Node(Vector2 Position)
+{
+    public bool Equals(Node? other) => other != null && other.Position == Position;
 
-        public override int GetHashCode() => Position.GetHashCode();
+    public override int GetHashCode() => Position.GetHashCode();
 
-        public List<Edge> ChildEdges { get; } = [];
+    public List<Edge> Edges { get; } = [];
+}
 
-        public int EdgeCount => ChildEdges.Count;
-
-        public override string ToString() => $"{Position}, children: {ChildEdges.Count}{Environment.NewLine}Edges:{Environment.NewLine}{string.Join(Environment.NewLine, ChildEdges)}{Environment.NewLine}";
-    }
-
-    public sealed record Edge(Node Start, Node End, Vector2[] Path) /*: IAStarSearchNode*/
-    {
-        //public int Cost => -Path.Length;
-
-        public int Length => Path.Length;
-
-        public string Id { get; } = $"Len: {Path.Length} // {Start.Position}|{End.Position}__{string.Join(":", Path)}";
-
-        public bool Equals(Edge? other) => other != null && other.Id == Id;
-
-        public override int GetHashCode() => Id.GetHashCode();
-
-        public override string ToString() => Id;
-    }
+public sealed record Edge(Node Start, Node End, Vector2[] Path)
+{
+    public int Length => Path.Length;
 }
