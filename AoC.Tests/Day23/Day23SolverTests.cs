@@ -33,6 +33,27 @@ public class Day23SolverTests
         """;
 
     [Test]
+    public void Part1Example_ShouldHaveExpectedNumberOfNodesInGraph_and_ExpectedNumberOfEdges()
+    {
+        var result = Day23Solver.ParseInputAndBuildGraph(ExampleInput);
+
+        using var _ = new AssertionScope();
+        result.Nodes.Should().HaveCount(7 + 2);
+        result.Nodes.Select(x => x.EdgeCount).Should().BeEquivalentTo(new[]
+        {
+            1,
+            2,
+            2,
+            2,
+            2,
+            1,
+            1,
+            1,
+            0
+        });
+    }
+
+    [Test]
     public void Part1Example()
     {
         // ACT
@@ -49,7 +70,7 @@ public class Day23SolverTests
         var part1Result = _sut.SolvePart1();
 
         // ASSERT
-        part1Result.Should().Be(null);
+        part1Result.Should().Be(2306);
     }
 
     [Test]
