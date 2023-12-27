@@ -16,10 +16,61 @@ public class Day23Solver : ISolver
         return path.TotalCost;
     }
 
-    public long? SolvePart2(string input)
+    public long? SolvePart2(string input) => ParseInputAndFindLongestSteepHillHike(input).Count;
+
+    static IReadOnlyCollection<Vector2> ParseInputAndFindLongestSteepHillHike(string input)
     {
-        return null;
+        var grid = input.ReadLines().ToArray();
+        var start = new Vector2(grid[0].IndexOf(PathTile), 0);
+        var end = new Vector2(grid[^1].IndexOf(PathTile), grid.Length - 1);
+
+        var explorers = new List<SteepSlopeExplorer> { new(start, []) };
+
+        List<HashSet<Vector2>> paths = [];
+
+        var maxPath = 0;
+
+        while (explorers.Count > 0)
+        {
+            var newExplorers = new List<SteepSlopeExplorer>();
+
+            foreach (var (pos, visited) in explorers)
+            {
+                var isNew = visited.Add(pos);
+
+                if (isNew)
+                {
+                    if (pos == end)
+                    {
+                        paths.Add(visited);
+
+                        maxPath = Math.Max(visited.Count, maxPath);
+                    }
+                    else
+                    {
+                        var nextPositions = GridUtils.DirectionsExcludingDiagonal.Select(dir => (dir, nextPos: pos + dir))
+                            .Where(n => n.nextPos.Y > 0 && !visited.Contains(n.nextPos))
+                            .Select(n => (n.nextPos, n.dir, tile: grid.Get(n.nextPos)))
+                            .Where(n => n.tile != ForestTile)
+                            .Select(n => n.nextPos);
+
+                        foreach (var nextPosition in nextPositions)
+                        {
+                            newExplorers.Add(new SteepSlopeExplorer(nextPosition, [.. visited]));
+                        }
+                    }
+                }
+            }
+
+            explorers = newExplorers;
+
+            Console.WriteLine($"explorers: {explorers.Count} // paths: {paths.Count} // maxPath: {maxPath}");
+        }
+
+        return paths.MaxBy(path => path.Count) ?? throw new Exception("No paths found");
     }
+
+    record SteepSlopeExplorer(Vector2 Pos, HashSet<Vector2> Visited);
 
     static (Edge[], long TotalCost) FindLongestPath(Node start, Node end)
     {
