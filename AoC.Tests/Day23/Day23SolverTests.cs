@@ -53,6 +53,12 @@ public class Day23SolverTests
             1,
             0
         });
+        result.Nodes.SelectMany(node => node.Edges).Should().HaveCount(12);
+
+        static string EdgeTextId(Edge edge) => $"Len: {edge.Length} // {edge.Start.Position}|{edge.End.Position} // {string.Join(":", edge.Path)}";
+        result.Nodes.SelectMany(node => node.Edges).DistinctBy(EdgeTextId).Should().HaveCount(12);
+
+        result.Nodes.SelectMany(node => node.Edges).DistinctBy(edge => edge.Id).Should().HaveCount(12);
     }
 
     [Test]

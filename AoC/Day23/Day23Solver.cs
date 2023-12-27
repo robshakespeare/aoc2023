@@ -16,65 +16,18 @@ public class Day23Solver : ISolver
         return path.TotalCost;
     }
 
-    public long? SolvePart2(string input) => ParseInputAndFindLongestSteepHillHike(input).Count;
-
-    static IReadOnlyCollection<Vector2> ParseInputAndFindLongestSteepHillHike(string input)
+    public long? SolvePart2(string input)
     {
-        var grid = input.ReadLines().ToArray();
-        var start = new Vector2(grid[0].IndexOf(PathTile), 0);
-        var end = new Vector2(grid[^1].IndexOf(PathTile), grid.Length - 1);
+        var (start, end, _) = ParseInputAndBuildGraph(input);
 
-        var explorers = new List<SteepSlopeExplorer> { new(start, []) };
-
-        List<HashSet<Vector2>> paths = [];
-
-        var maxPath = 0;
-
-        while (explorers.Count > 0)
-        {
-            var newExplorers = new List<SteepSlopeExplorer>();
-
-            foreach (var (pos, visited) in explorers)
-            {
-                var isNew = visited.Add(pos);
-
-                if (isNew)
-                {
-                    if (pos == end)
-                    {
-                        paths.Add(visited);
-
-                        maxPath = Math.Max(visited.Count, maxPath);
-                    }
-                    else
-                    {
-                        var nextPositions = GridUtils.DirectionsExcludingDiagonal.Select(dir => (dir, nextPos: pos + dir))
-                            .Where(n => n.nextPos.Y > 0 && !visited.Contains(n.nextPos))
-                            .Select(n => (n.nextPos, n.dir, tile: grid.Get(n.nextPos)))
-                            .Where(n => n.tile != ForestTile)
-                            .Select(n => n.nextPos);
-
-                        foreach (var nextPosition in nextPositions)
-                        {
-                            newExplorers.Add(new SteepSlopeExplorer(nextPosition, [.. visited]));
-                        }
-                    }
-                }
-            }
-
-            explorers = newExplorers;
-
-            Console.WriteLine($"explorers: {explorers.Count} // paths: {paths.Count} // maxPath: {maxPath}");
-        }
-
-        return paths.MaxBy(path => path.Count) ?? throw new Exception("No paths found");
+        return null;
     }
-
-    record SteepSlopeExplorer(Vector2 Pos, HashSet<Vector2> Visited);
 
     static (Edge[], long TotalCost) FindLongestPath(Node start, Node end)
     {
         var explore = new PriorityQueue<(Node Node, Edge[] Path, long TotalCost), long>(new[] { ((start, Array.Empty<Edge>(), 0L), 0L) });
+
+        // rs-todo: try adding seen for the "path"
 
         List<(Edge[], long TotalCost)> paths = [];
 
@@ -90,8 +43,11 @@ public class Day23Solver : ISolver
             {
                 foreach (var newEdge in node.Edges)
                 {
-                    var newTotalCost = totalCost + newEdge.Length;
-                    explore.Enqueue((newEdge.End, [.. edges, newEdge], newTotalCost), newTotalCost);
+                    if (!edges.Contains(newEdge))
+                    {
+                        var newTotalCost = totalCost + newEdge.Length;
+                        explore.Enqueue((newEdge.End, [.. edges, newEdge], newTotalCost), newTotalCost);
+                    }
                 }
             }
         }
@@ -103,7 +59,8 @@ public class Day23Solver : ISolver
     {
         var grid = input.ReadLines().ToArray();
 
-        static void AddEdge(Explorer explorer, Node nextNode) => explorer.Node.Edges.Add(new Edge(explorer.Node, nextNode, explorer.Path));
+        var nextEdgeId = 0;
+        void AddEdge(Explorer explorer, Node nextNode) => explorer.Node.Edges.Add(new Edge(nextEdgeId++, explorer.Node, nextNode, explorer.Path));
 
         bool IsNodePosition(Vector2 position) => GridUtils.DirectionsExcludingDiagonal.Count(dir => grid.TryGet(position + dir, out var tile) && tile is '>' or '<' or 'v') > 1;
 
@@ -202,10 +159,14 @@ public sealed record Node(Vector2 Position)
 
     public override int GetHashCode() => Position.GetHashCode();
 
-    public List<Edge> Edges { get; } = [];
+    public HashSet<Edge> Edges { get; } = [];
 }
 
-public sealed record Edge(Node Start, Node End, Vector2[] Path)
+public sealed record Edge(int Id, Node Start, Node End, Vector2[] Path)
 {
+    public bool Equals(Edge? other) => other != null && other.Id == Id;
+
+    public override int GetHashCode() => Id.GetHashCode();
+
     public int Length => Path.Length;
 }
