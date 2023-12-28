@@ -19,10 +19,9 @@ public class Day23Solver : ISolver
         var (start, end, nodes) = ParseInputAndBuildGraph(input);
 
         // Build our "return" edges
-        var nextEdgeId = nodes.SelectMany(node => node.Edges).Max(edge => edge.EdgeId) + 1000;
         foreach (var edge in nodes.SelectMany(node => node.Edges))
         {
-            var newEdge = new Edge(nextEdgeId++, edge.End, edge.Start, edge.Path.Reverse().ToArray());
+            var newEdge = new Edge(edge.EdgeId, edge.End, edge.Start, edge.Path.Reverse().ToArray());
             newEdge.Start.Edges.Add(newEdge);
         }
 
@@ -32,15 +31,14 @@ public class Day23Solver : ISolver
     static long FindLongestPath(Node start, Node end)
     {
         var explore = new PriorityQueue<(Node Node, int[] Path, int PathHash, long TotalCost), long>(new[] { ((start, Array.Empty<int>(), 0, 0L), 0L) });
-
         var seen = new HashSet<int>();
-
-        var numPaths = 0L;
         var maxPath = 0L;
+        var numPaths = 0L;
 
         var interval = TimeSpan.FromSeconds(5);
         var nextTickTime = DateTime.Now + interval;
         var startTime = DateTime.Now;
+        string Status() => $"explorers: {explore.Count} // paths: {numPaths} // maxPath: {maxPath} // elapsed: {DateTime.Now - startTime}";
 
         while (explore.Count > 0)
         {
@@ -52,7 +50,7 @@ public class Day23Solver : ISolver
                 if (totalCost > maxPath)
                 {
                     maxPath = totalCost;
-                    Console.WriteLine($"NEW MAX PATH // explorers: {explore.Count} // paths: {numPaths} // maxPath: {maxPath} // elapsed: {DateTime.Now - startTime}");
+                    Console.WriteLine($"NEW MAX PATH ** {Status()}");
                 }
             }
             else
@@ -74,7 +72,7 @@ public class Day23Solver : ISolver
 
             if (DateTime.Now > nextTickTime)
             {
-                Console.WriteLine($"explorers: {explore.Count} // paths: {numPaths} // maxPath: {maxPath} // elapsed: {DateTime.Now - startTime}");
+                Console.WriteLine(Status());
                 nextTickTime = DateTime.Now + interval;
             }
         }
@@ -185,9 +183,9 @@ public record Graph(Node Start, Node End, Node[] Nodes);
 
 public sealed record Node(int NodeId, Vector2 Position)
 {
-    public bool Equals(Node? other) => other != null && other.Position == Position;
+    public bool Equals(Node? other) => other != null && other.NodeId == NodeId;
 
-    public override int GetHashCode() => Position.GetHashCode();
+    public override int GetHashCode() => NodeId.GetHashCode();
 
     public HashSet<Edge> Edges { get; } = [];
 }
