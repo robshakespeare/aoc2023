@@ -94,7 +94,7 @@ public class Day23SolverTests
     }
 
     [Test]
-    [Ignore("Very long running (~16 seconds)")]
+    [LongRunningTest("~1.5 seconds")]
     public void Part2ReTest()
     {
         // ACT
