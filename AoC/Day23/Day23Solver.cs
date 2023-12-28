@@ -31,9 +31,9 @@ public class Day23Solver : ISolver
 
     static long FindLongestPath(Node start, Node end)
     {
-        var explore = new PriorityQueue<(Node Node, int[] Path, /*string PathId,*/ long TotalCost), long>(new[] { ((start, Array.Empty<int>(), 0L), 0L) });
+        var explore = new PriorityQueue<(Node Node, int[] Path, int PathHash, long TotalCost), long>(new[] { ((start, Array.Empty<int>(), 0, 0L), 0L) });
 
-        //var seen = new HashSet<string>();
+        var seen = new HashSet<int>();
 
         var numPaths = 0L;
         var maxPath = 0L;
@@ -44,7 +44,7 @@ public class Day23Solver : ISolver
 
         while (explore.Count > 0)
         {
-            var (node, path, /*pathId,*/ totalCost) = explore.Dequeue();
+            var (node, path, pathHash, totalCost) = explore.Dequeue();
 
             if (node == end)
             {
@@ -57,19 +57,19 @@ public class Day23Solver : ISolver
             }
             else
             {
-                //if (!seen.Contains(pathId))
-                //{
+                if (!seen.Contains(pathHash))
+                {
                     foreach (var newEdge in node.Edges)
                     {
                         if (!path.Contains(newEdge.End.NodeId))
                         {
                             var newTotalCost = totalCost + newEdge.Length;
-                            explore.Enqueue((newEdge.End, [.. path, newEdge.End.NodeId], /*pathId + ',' + newEdge.Id,*/ newTotalCost), -newTotalCost);
+                            explore.Enqueue((newEdge.End, [.. path, newEdge.End.NodeId], HashCode.Combine(pathHash, newEdge.End.NodeId) , newTotalCost), -newTotalCost);
                         }
                     }
 
-                //    seen.Add(pathId);
-                //}
+                    seen.Add(pathHash);
+                }
             }
 
             if (DateTime.Now > nextTickTime)
