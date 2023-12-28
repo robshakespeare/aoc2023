@@ -1,5 +1,3 @@
-using System.ComponentModel;
-
 namespace AoC.Day23;
 
 public class Day23Solver : ISolver
@@ -13,9 +11,7 @@ public class Day23Solver : ISolver
     {
         var (start, end, _) = ParseInputAndBuildGraph(input);
 
-        var path = FindLongestPath(start, end);
-
-        return path.TotalCost;
+        return FindLongestPath(start, end);
     }
 
     public long? SolvePart2(string input)
@@ -23,62 +19,66 @@ public class Day23Solver : ISolver
         var (start, end, nodes) = ParseInputAndBuildGraph(input);
 
         // Build our "return" edges, using the same Id, because it doesn't matter which way we travel the edge, we can only travel it once
-
         foreach (var edge in nodes.SelectMany(node => node.Edges))
         {
             var newEdge = new Edge(edge.Id, edge.End, edge.Start, edge.Path.Reverse().ToArray());
-
             newEdge.Start.Edges.Add(newEdge);
-            //edge.End.Edges.Add(newEdge);
         }
 
-        var path = FindLongestPath(start, end);
-
-        return path.TotalCost;
+        return FindLongestPath(start, end);
     }
 
-    static (Edge[], long TotalCost) FindLongestPath(Node start, Node end)
+    static long FindLongestPath(Node start, Node end)
     {
-        var explore = new PriorityQueue<(Node Node, Edge[] Path, long TotalCost), long>(new[] { ((start, Array.Empty<Edge>(), 0L), 0L) });
+        var explore = new PriorityQueue<(Node Node, int[] Path, /*string PathId,*/ long TotalCost), long>(new[] { ((start, Array.Empty<int>(), 0L), 0L) });
 
-        var seen = new HashSet<string>();
+        //var seen = new HashSet<string>();
 
-        List<(Edge[], long TotalCost)> paths = [];
-
+        var numPaths = 0L;
         var maxPath = 0L;
+
+        var interval = TimeSpan.FromSeconds(5);
+        var nextTickTime = DateTime.Now + interval;
+        var startTime = DateTime.Now;
 
         while (explore.Count > 0)
         {
-            var (node, edges, totalCost) = explore.Dequeue();
+            var (node, edges, /*pathId,*/ totalCost) = explore.Dequeue();
 
             if (node == end)
             {
-                paths.Add((edges, totalCost));
-                maxPath = Math.Max(totalCost, maxPath);
+                numPaths++;
+                if (totalCost > maxPath)
+                {
+                    maxPath = totalCost;
+                    Console.WriteLine($"NEW MAX PATH // explorers: {explore.Count} // paths: {numPaths} // maxPath: {maxPath} // elapsed: {DateTime.Now - startTime}");
+                }
             }
             else
             {
-                var pathId = string.Join(',', edges.Select(e => e.Id).OrderBy(id => id));
-
-                if (!seen.Contains(pathId))
-                {
+                //if (!seen.Contains(pathId))
+                //{
                     foreach (var newEdge in node.Edges)
                     {
-                        if (!edges.Contains(newEdge))
+                        if (!edges.Contains(newEdge.Id))
                         {
                             var newTotalCost = totalCost + newEdge.Length;
-                            explore.Enqueue((newEdge.End, [.. edges, newEdge], newTotalCost), newTotalCost);
+                            explore.Enqueue((newEdge.End, [.. edges, newEdge.Id], /*pathId + ',' + newEdge.Id,*/ newTotalCost), -newTotalCost);
                         }
                     }
 
-                    seen.Add(pathId);
-                }
+                //    seen.Add(pathId);
+                //}
             }
 
-            Console.WriteLine($"explorers: {explore.Count} // paths: {paths.Count} // maxPath: {maxPath}");
+            if (DateTime.Now > nextTickTime)
+            {
+                Console.WriteLine($"explorers: {explore.Count} // paths: {numPaths} // maxPath: {maxPath} // elapsed: {DateTime.Now - startTime}");
+                nextTickTime = DateTime.Now + interval;
+            }
         }
 
-        return paths.MaxBy(path => path.TotalCost);
+        return maxPath;
     }
 
     public static Graph ParseInputAndBuildGraph(string input)
