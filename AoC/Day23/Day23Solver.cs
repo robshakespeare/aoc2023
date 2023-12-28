@@ -18,10 +18,11 @@ public class Day23Solver : ISolver
     {
         var (start, end, nodes) = ParseInputAndBuildGraph(input);
 
-        // Build our "return" edges, using the same Id, because it doesn't matter which way we travel the edge, we can only travel it once
+        // Build our "return" edges
+        var nextEdgeId = nodes.SelectMany(node => node.Edges).Max(edge => edge.EdgeId) + 1000;
         foreach (var edge in nodes.SelectMany(node => node.Edges))
         {
-            var newEdge = new Edge(edge.Id, edge.End, edge.Start, edge.Path.Reverse().ToArray());
+            var newEdge = new Edge(nextEdgeId++, edge.End, edge.Start, edge.Path.Reverse().ToArray());
             newEdge.Start.Edges.Add(newEdge);
         }
 
@@ -43,7 +44,7 @@ public class Day23Solver : ISolver
 
         while (explore.Count > 0)
         {
-            var (node, edges, /*pathId,*/ totalCost) = explore.Dequeue();
+            var (node, path, /*pathId,*/ totalCost) = explore.Dequeue();
 
             if (node == end)
             {
@@ -60,10 +61,10 @@ public class Day23Solver : ISolver
                 //{
                     foreach (var newEdge in node.Edges)
                     {
-                        if (!edges.Contains(newEdge.Id))
+                        if (!path.Contains(newEdge.End.NodeId))
                         {
                             var newTotalCost = totalCost + newEdge.Length;
-                            explore.Enqueue((newEdge.End, [.. edges, newEdge.Id], /*pathId + ',' + newEdge.Id,*/ newTotalCost), -newTotalCost);
+                            explore.Enqueue((newEdge.End, [.. path, newEdge.End.NodeId], /*pathId + ',' + newEdge.Id,*/ newTotalCost), -newTotalCost);
                         }
                     }
 
@@ -97,8 +98,9 @@ public class Day23Solver : ISolver
             return node;
         }
 
-        var start = AddNode(new Node(new Vector2(grid[0].IndexOf(PathTile), 0)));
-        var end = AddNode(new Node(new Vector2(grid[^1].IndexOf(PathTile), grid.Length - 1)));
+        var nextNodeId = 0;
+        var start = AddNode(new Node(nextNodeId++, new Vector2(grid[0].IndexOf(PathTile), 0)));
+        var end = AddNode(new Node(nextNodeId++, new Vector2(grid[^1].IndexOf(PathTile), grid.Length - 1)));
 
         List<Explorer> explorers = [new Explorer(start.Position, GridUtils.South, [], start)];
 
@@ -131,7 +133,7 @@ public class Day23Solver : ISolver
 
                     if (!nodes.TryGetValue(nextExplorer.Position, out var node))
                     {
-                        node = AddNode(new Node(nextExplorer.Position)); // i.e. new node
+                        node = AddNode(new Node(nextNodeId++, nextExplorer.Position)); // i.e. new node
                         nodeAlreadySeen = false;
                     }
 
@@ -181,7 +183,7 @@ public class Day23Solver : ISolver
 
 public record Graph(Node Start, Node End, Node[] Nodes);
 
-public sealed record Node(Vector2 Position)
+public sealed record Node(int NodeId, Vector2 Position)
 {
     public bool Equals(Node? other) => other != null && other.Position == Position;
 
@@ -190,11 +192,11 @@ public sealed record Node(Vector2 Position)
     public HashSet<Edge> Edges { get; } = [];
 }
 
-public sealed record Edge(int Id, Node Start, Node End, Vector2[] Path)
+public sealed record Edge(int EdgeId, Node Start, Node End, Vector2[] Path)
 {
-    public bool Equals(Edge? other) => other != null && other.Id == Id;
+    public bool Equals(Edge? other) => other != null && other.EdgeId == EdgeId;
 
-    public override int GetHashCode() => Id.GetHashCode();
+    public override int GetHashCode() => EdgeId.GetHashCode();
 
     public int Length => Path.Length;
 }

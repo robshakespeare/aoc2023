@@ -41,6 +41,8 @@ public class Day23SolverTests
         // ASSERT
         using var _ = new AssertionScope();
         result.Nodes.Should().HaveCount(7 + 2);
+        result.Nodes.DistinctBy(node => node.NodeId).Should().HaveCount(7 + 2);
+
         result.Nodes.Select(x => x.Edges.Count).Should().BeEquivalentTo(new[]
         {
             1,
@@ -58,7 +60,7 @@ public class Day23SolverTests
         static string EdgeTextId(Edge edge) => $"Len: {edge.Length} // {edge.Start.Position}|{edge.End.Position} // {string.Join(":", edge.Path)}";
         result.Nodes.SelectMany(node => node.Edges).DistinctBy(EdgeTextId).Should().HaveCount(12);
 
-        result.Nodes.SelectMany(node => node.Edges).DistinctBy(edge => edge.Id).Should().HaveCount(12);
+        result.Nodes.SelectMany(node => node.Edges).DistinctBy(edge => edge.EdgeId).Should().HaveCount(12);
     }
 
     [Test]
@@ -99,6 +101,6 @@ public class Day23SolverTests
         var part2Result = _sut.SolvePart2();
 
         // ASSERT
-        part2Result.Should().Be(null);
+        part2Result.Should().Be(6718);
     }
 }
