@@ -31,7 +31,7 @@ public class Day23Solver : ISolver
     static long FindLongestPath(Node start, Node end)
     {
         var explore = new PriorityQueue<(Node Node, int[] Path, int PathHash, long TotalCost), long>(new[] { ((start, Array.Empty<int>(), 0, 0L), 0L) });
-        var seen = new HashSet<int>();
+        var seen = new HashSet<int>(); // Note each `int` is the hash of the path seen
         var maxPath = 0L;
         var numPaths = 0L;
 
@@ -52,6 +52,10 @@ public class Day23Solver : ISolver
                     maxPath = totalCost;
                     Console.WriteLine($"NEW MAX PATH ** {Status()}");
                 }
+                else if ((float)totalCost / maxPath < 0.25)
+                {
+                    return maxPath; // Early exit optimisation, because of the priority queue, if we're starting to see paths which are 25% or less of the current max path, then we've seen our longest path and there's no need to continue searching
+                }
             }
             else
             {
@@ -62,7 +66,7 @@ public class Day23Solver : ISolver
                         if (!path.Contains(newEdge.End.NodeId))
                         {
                             var newTotalCost = totalCost + newEdge.Length;
-                            explore.Enqueue((newEdge.End, [.. path, newEdge.End.NodeId], HashCode.Combine(pathHash, newEdge.End.NodeId) , newTotalCost), -newTotalCost);
+                            explore.Enqueue((newEdge.End, [.. path, newEdge.End.NodeId], HashCode.Combine(pathHash, newEdge.End.NodeId), newTotalCost), -newTotalCost);
                         }
                     }
 
