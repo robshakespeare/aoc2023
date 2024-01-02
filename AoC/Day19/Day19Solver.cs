@@ -42,11 +42,6 @@ public partial class Day19Solver : ISolver
 
         pipeline.In.Process(initialPartRatingRange, pipeline.Workflows);
 
-        //foreach (var partRatingRange in pipeline.Accepted.PartRatingRanges)
-        //{
-        //    Console.WriteLine($"{partRatingRange.Ratings} :: {partRatingRange.GetNumOfCombinations()}");
-        //}
-
         return pipeline.Accepted.PartRatingRanges.Sum(x => x.GetNumOfCombinations());
     }
 
@@ -149,7 +144,7 @@ public partial class Day19Solver : ISolver
 
     record PartRatingRange(IReadOnlyDictionary<char, Range> Ratings)
     {
-        public long GetNumOfCombinations() => Ratings.Values.Select(x => x.Size).Aggregate((acc, cur) => acc * cur);
+        public long GetNumOfCombinations() => Ratings.Values.Aggregate(1L, (acc, rating) => acc * rating.Size);
     }
 
     record Range(int Start, int End)
