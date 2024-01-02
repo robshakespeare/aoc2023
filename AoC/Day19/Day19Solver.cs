@@ -30,12 +30,36 @@ public partial class Day19Solver : ISolver
         // Which would be 4000 * 4000 * 4000 * 4000 combinations
         // Then we pass it through the pipeline, working out each eventuality
 
+        var pipeline = Pipeline.Parse(input);
 
+        var initialPartRatingRange = new PartRatingRange(new Dictionary<char, Range>()
+        {
+            { 'x', new Range(1, 4000) },
+            { 'm', new Range(1, 4000) },
+            { 'a', new Range(1, 4000) },
+            { 's', new Range(1, 4000) }
+        });
+
+        pipeline.In.Process(initialPartRatingRange, pipeline.Workflows);
 
         return null;
     }
 
-    record Rule(char Rating, char Op, int Threshold, string Destination)
+    interface IRule
+    {
+        bool IsMatch(Part part);
+        (PartRatingRange? MatchedRange, PartRatingRange? RemainingRange) SplitRange(PartRatingRange partRatingRange);
+        string Destination { get; }
+    }
+
+    record DefaultRule(string Destination) : IRule
+    {
+        public bool IsMatch(Part part) => true;
+
+        public (PartRatingRange? MatchedRange, PartRatingRange? RemainingRange) SplitRange(PartRatingRange partRatingRange) => (partRatingRange, null);
+    }
+
+    record Rule(char Rating, char Op, int Threshold, string Destination) : IRule
     {
         public bool IsMatch(Part part)
         {
@@ -47,19 +71,48 @@ public partial class Day19Solver : ISolver
                 _ => throw new Exception("Invalid op: " + Op)
             };
         }
+
+        public (PartRatingRange? MatchedRange, PartRatingRange? RemainingRange) SplitRange(PartRatingRange partRatingRange)
+        {
+            throw new NotImplementedException("rs-todo!");
+        }
     }
 
-    record Workflow(string Name, Rule[] Rules, string DefaultDestination)
+    interface IWorkflow
     {
-        public virtual void Process(Part part, FrozenDictionary<string, Workflow> workflows) =>
-            workflows[Rules.FirstOrDefault(rule => rule.IsMatch(part))?.Destination ?? DefaultDestination].Process(part, workflows);
+        string Name { get; }
+        void Process(Part part, FrozenDictionary<string, IWorkflow> workflows);
+        void Process(PartRatingRange partRatingRange, FrozenDictionary<string, IWorkflow> workflows);
     }
 
-    sealed record FinalWorkflow(string Name) : Workflow(Name, [], "")
+    sealed record Workflow(string Name, IRule[] Rules/*, string DefaultDestination*/) : IWorkflow
+    {
+        public void Process(Part part, FrozenDictionary<string, IWorkflow> workflows) =>
+            workflows[Rules.First(rule => rule.IsMatch(part)).Destination].Process(part, workflows);
+
+        public void Process(PartRatingRange partRatingRange, FrozenDictionary<string, IWorkflow> workflows)
+        {
+            // Go thorugh each rule, "splitting" the "range" based on the rule, the remaining gets passed on to the next, and the final remainder gets passed on to the default
+
+            foreach (var rule in Rules)
+            {
+                var (matchedRange, remainingRange) = rule.SplitRange(partRatingRange);
+
+                //if (matchedRange.s)
+                throw new NotImplementedException("rs-todo!");
+            }
+        }
+    }
+
+    sealed record FinalWorkflow(string Name) : IWorkflow
     {
         public List<Part> Parts { get; } = [];
 
-        public override void Process(Part part, FrozenDictionary<string, Workflow> workflows) => Parts.Add(part);
+        public List<PartRatingRange> PartRatingRanges { get; } = [];
+
+        public void Process(Part part, FrozenDictionary<string, IWorkflow> workflows) => Parts.Add(part);
+
+        public void Process(PartRatingRange partRatingRange, FrozenDictionary<string, IWorkflow> workflows) => PartRatingRanges.Add(partRatingRange);
     }
 
     record Part(Dictionary<char, int> Ratings)
@@ -67,11 +120,16 @@ public partial class Day19Solver : ISolver
         public long GetTotalRating() => Ratings.Values.Sum();
     }
 
-    record Range(int Start, int End);
+    record PartRatingRange(Dictionary<char, Range> Ratings);
 
-    record Pipeline(FrozenDictionary<string, Workflow> Workflows, FinalWorkflow Accepted, FinalWorkflow Rejected)
+    record Range(int Start, int End)
     {
-        public Workflow In { get; } = Workflows["in"];
+        public int Size { get; } = End - (Start - 1);
+    }
+
+    record Pipeline(FrozenDictionary<string, IWorkflow> Workflows, FinalWorkflow Accepted, FinalWorkflow Rejected)
+    {
+        public IWorkflow In { get; } = Workflows["in"];
 
         public static Pipeline Parse(string input)
         {
@@ -87,9 +145,9 @@ public partial class Day19Solver : ISolver
                             Op: x.First.Second.Value.Single(),
                             Threshold: int.Parse(x.First.Third.Value),
                             Destination: x.Second.Value))
-                        .ToArray(),
-                    match.Groups["defaultDestination"].Value))
-                .Concat([accepted, rejected])
+                        .Append<IRule>(new DefaultRule(match.Groups["defaultDestination"].Value))
+                        .ToArray()))
+                .Concat<IWorkflow>([accepted, rejected])
                 .ToFrozenDictionary(x => x.Name, x => x);
 
             var inflow = workflows["in"];
