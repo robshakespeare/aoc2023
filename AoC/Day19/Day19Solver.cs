@@ -100,7 +100,7 @@ public partial class Day19Solver : ISolver
         void Process(PartRange partRange, FrozenDictionary<string, IWorkflow> workflows);
     }
 
-    sealed record Workflow(string Name, IRule[] Rules) : IWorkflow
+    record Workflow(string Name, IRule[] Rules) : IWorkflow
     {
         public void Process(Part part, FrozenDictionary<string, IWorkflow> workflows) =>
             workflows[Rules.First(rule => rule.IsMatch(part)).Destination].Process(part, workflows);
@@ -127,7 +127,7 @@ public partial class Day19Solver : ISolver
         }
     }
 
-    sealed record FinalWorkflow(string Name) : IWorkflow
+    record FinalWorkflow(string Name) : IWorkflow
     {
         public List<Part> Parts { get; } = [];
 
@@ -150,7 +150,7 @@ public partial class Day19Solver : ISolver
 
     record Range(int Start, int End)
     {
-        public long Size { get; } = End - (Start - 1L);
+        public long Size { get; } = End - (Start - 1L); // Note `Start` and `End` are inclusive
     }
 
     record Pipeline(FrozenDictionary<string, IWorkflow> Workflows, FinalWorkflow Accepted, FinalWorkflow Rejected)
