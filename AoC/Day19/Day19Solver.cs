@@ -21,7 +21,8 @@ public partial class Day19Solver : ISolver
 
     public long? SolvePart2(string input)
     {
-        // We only care about being accepted, so we run through with "ranges", ultimately creating slices of each of the 4 ratings that would get accepted.
+        // We only care about being accepted, so we run through with "ranges", ultimately creating slices of each of the 4 part ratings that would get accepted.
+        // Remember, here "part" means "machine part"!
         // So, initially we start with:
         // x: 1 to 4000
         // m: 1 to 4000
@@ -32,7 +33,7 @@ public partial class Day19Solver : ISolver
 
         var pipeline = Pipeline.Parse(input);
 
-        var initialPartRatingRange = new PartRatingRange(new Dictionary<char, Range>()
+        var initialPartRange = new PartRange(new Dictionary<char, Range>()
         {
             { 'x', new Range(1, 4000) },
             { 'm', new Range(1, 4000) },
@@ -40,15 +41,15 @@ public partial class Day19Solver : ISolver
             { 's', new Range(1, 4000) }
         });
 
-        pipeline.In.Process(initialPartRatingRange, pipeline.Workflows);
+        pipeline.In.Process(initialPartRange, pipeline.Workflows);
 
-        return pipeline.Accepted.PartRatingRanges.Sum(x => x.GetNumOfCombinations());
+        return pipeline.Accepted.PartRanges.Sum(partRange => partRange.GetNumOfCombinations());
     }
 
     interface IRule
     {
         bool IsMatch(Part part);
-        (PartRatingRange? MatchedRange, PartRatingRange? RemainingRange) SplitRange(PartRatingRange partRatingRange);
+        (PartRange? MatchedPartRange, PartRange? RemainingPartRange) SplitRange(PartRange partRange);
         string Destination { get; }
     }
 
@@ -56,7 +57,7 @@ public partial class Day19Solver : ISolver
     {
         public bool IsMatch(Part part) => true;
 
-        public (PartRatingRange? MatchedRange, PartRatingRange? RemainingRange) SplitRange(PartRatingRange partRatingRange) => (partRatingRange, null);
+        public (PartRange? MatchedPartRange, PartRange? RemainingPartRange) SplitRange(PartRange partRange) => (partRange, null);
     }
 
     record Rule(char Rating, char Op, int Threshold, string Destination) : IRule
@@ -72,9 +73,9 @@ public partial class Day19Solver : ISolver
             };
         }
 
-        public (PartRatingRange? MatchedRange, PartRatingRange? RemainingRange) SplitRange(PartRatingRange partRatingRange)
+        public (PartRange? MatchedPartRange, PartRange? RemainingPartRange) SplitRange(PartRange partRange)
         {
-            var range = partRatingRange.Ratings[Rating];
+            var range = partRange.Ratings[Rating];
 
             var (matchedRange, remainingRange) = Op switch
             {
@@ -83,12 +84,12 @@ public partial class Day19Solver : ISolver
                 _ => throw new Exception("Invalid op: " + Op)
             };
 
-            PartRatingRange? BuildPartRatingRange(Range newRange) =>
+            PartRange? BuildPartRange(Range newRange) =>
                 newRange.Size > 0
-                    ? new PartRatingRange(new Dictionary<char, Range>(partRatingRange.Ratings) { [Rating] = newRange })
+                    ? new PartRange(new Dictionary<char, Range>(partRange.Ratings) { [Rating] = newRange })
                     : null;
 
-            return (BuildPartRatingRange(matchedRange), BuildPartRatingRange(remainingRange));
+            return (BuildPartRange(matchedRange), BuildPartRange(remainingRange));
         }
     }
 
@@ -96,7 +97,7 @@ public partial class Day19Solver : ISolver
     {
         string Name { get; }
         void Process(Part part, FrozenDictionary<string, IWorkflow> workflows);
-        void Process(PartRatingRange partRatingRange, FrozenDictionary<string, IWorkflow> workflows);
+        void Process(PartRange partRange, FrozenDictionary<string, IWorkflow> workflows);
     }
 
     sealed record Workflow(string Name, IRule[] Rules) : IWorkflow
@@ -104,24 +105,24 @@ public partial class Day19Solver : ISolver
         public void Process(Part part, FrozenDictionary<string, IWorkflow> workflows) =>
             workflows[Rules.First(rule => rule.IsMatch(part)).Destination].Process(part, workflows);
 
-        public void Process(PartRatingRange partRatingRange, FrozenDictionary<string, IWorkflow> workflows)
+        public void Process(PartRange partRange, FrozenDictionary<string, IWorkflow> workflows)
         {
             // Go through each rule, "splitting" the "range" based on the rule, the remaining gets passed on to the next, and the final remainder gets passed on to the default
             foreach (var rule in Rules)
             {
-                var (matchedRange, remainingRange) = rule.SplitRange(partRatingRange);
+                var (matchedPartRange, remainingPartRange) = rule.SplitRange(partRange);
 
-                if (matchedRange != null)
+                if (matchedPartRange != null)
                 {
-                    workflows[rule.Destination].Process(matchedRange, workflows);
+                    workflows[rule.Destination].Process(matchedPartRange, workflows);
                 }
 
-                if (remainingRange == null)
+                if (remainingPartRange == null)
                 {
                     return;
                 }
 
-                partRatingRange = remainingRange;
+                partRange = remainingPartRange;
             }
         }
     }
@@ -130,11 +131,11 @@ public partial class Day19Solver : ISolver
     {
         public List<Part> Parts { get; } = [];
 
-        public List<PartRatingRange> PartRatingRanges { get; } = [];
+        public List<PartRange> PartRanges { get; } = [];
 
         public void Process(Part part, FrozenDictionary<string, IWorkflow> workflows) => Parts.Add(part);
 
-        public void Process(PartRatingRange partRatingRange, FrozenDictionary<string, IWorkflow> workflows) => PartRatingRanges.Add(partRatingRange);
+        public void Process(PartRange partRange, FrozenDictionary<string, IWorkflow> workflows) => PartRanges.Add(partRange);
     }
 
     record Part(IReadOnlyDictionary<char, int> Ratings)
@@ -142,7 +143,7 @@ public partial class Day19Solver : ISolver
         public long GetTotalRating() => Ratings.Values.Sum();
     }
 
-    record PartRatingRange(IReadOnlyDictionary<char, Range> Ratings)
+    record PartRange(IReadOnlyDictionary<char, Range> Ratings)
     {
         public long GetNumOfCombinations() => Ratings.Values.Aggregate(1L, (acc, rating) => acc * rating.Size);
     }
@@ -174,8 +175,6 @@ public partial class Day19Solver : ISolver
                         .ToArray()))
                 .Concat<IWorkflow>([accepted, rejected])
                 .ToFrozenDictionary(x => x.Name, x => x);
-
-            var inflow = workflows["in"];
 
             return new Pipeline(workflows, accepted, rejected);
         }
