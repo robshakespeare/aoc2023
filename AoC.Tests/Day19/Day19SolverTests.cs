@@ -53,7 +53,7 @@ public class Day19SolverTests
         var part2ExampleResult = _sut.SolvePart2(ExampleInput);
 
         // ASSERT
-        part2ExampleResult.Should().Be(null);
+        part2ExampleResult.Should().Be(167409079868000);
     }
 
     [Test]
@@ -63,6 +63,6 @@ public class Day19SolverTests
         var part2Result = _sut.SolvePart2();
 
         // ASSERT
-        part2Result.Should().Be(null);
+        part2Result.Should().Be(130303473508222);
     }
 }
